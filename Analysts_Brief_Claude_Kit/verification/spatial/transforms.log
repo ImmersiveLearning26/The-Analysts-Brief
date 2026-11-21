@@ -1,0 +1,6 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> analysts-brief-web@0.1.0 test:spatial
+> node ../verification/spatial.test.mjs
+
+SPATIAL_TRANSFORMS_PASSED: lift/open, straight extraction, page replacement, no idle motion, no tilt, return/close, reduced motion, cutaway

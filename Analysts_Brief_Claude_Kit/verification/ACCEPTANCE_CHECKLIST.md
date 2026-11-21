@@ -1,0 +1,28 @@
+# Production acceptance checklist
+
+- [ ] Open through normal Start, finish every stage without dev controls.
+- [ ] First person at all times; no external player view or cutaway room.
+- [ ] One orb only; numeric composer sizing overrides generative image scale.
+- [ ] Declaration, full situation briefing, original source transcript and source labels available.
+- [ ] All 18 evidence records accessible; changing tags does not lose text or create duplicate documents.
+- [ ] Folder retains tags and filters after save/reload; weak claims do not hard-fail the run.
+- [ ] All 7 case notes and factors work; confirmation accurately displays base/alternative.
+- [ ] 128 model tests and F7 invariance pass; all histories remain comparable at the same year.
+- [ ] No-live-AI path can complete every task; provider failure falls back to explicit options.
+- [ ] Findings max 3; reminder-only no-run route; exact rubric without hidden NLP grading.
+- [ ] Five levers, each three options; current choices survive reorder and revision.
+- [ ] All 243 configurations across 3 budgets pass; over-budget consequence, not dead end.
+- [ ] Submit recalculates the latest package, not a stale test; correct reaction shown.
+- [ ] Typed briefing complete without mic; consent before recording; delete/stop removes tracks.
+- [ ] Missing transcript says unavailable, not a negative assessment; audio can be sent unscored.
+- [ ] Debrief three strands/forward view correct; source why/record/reflection accessible.
+- [ ] No numeric score, pass/fail banner or leaderboard.
+- [ ] Animations skippable; reduced motion preserves state; pause includes audio and camera.
+- [ ] No page scroll at 1366×768; internal long text panels reachable; 390×844 usable.
+- [ ] 44px targets, high contrast, 18px voiced captions, proper labels and focus return.
+- [ ] Escape/back/cancel paths safe; repeat click guards; reload during transition recovers.
+- [ ] Asset failure allows text controls; WebGL unavailable falls back gracefully.
+- [ ] Final optimized asset load size and GPU memory measured; originals never shipped wholesale.
+- [ ] source attribution retained, unnecessary branded textures removed.
+- [ ] Official opening branding uses supplied assets only; no invented logo or school signage.
+- [ ] Test with actual learners before claiming a reduced duration.

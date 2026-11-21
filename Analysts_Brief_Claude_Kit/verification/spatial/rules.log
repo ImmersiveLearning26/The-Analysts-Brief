@@ -1,0 +1,32 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> analysts-brief-web@0.1.0 test:rules
+> node ../verification/rules.test.mjs
+
+{
+  "modelCombinations": 128,
+  "counts": {
+    "Coup": 76,
+    "Personalised rule": 32,
+    "Consolidation": 20
+  },
+  "responseChecks": 729,
+  "hallCounts": {
+    "Calm": {
+      "Strong": 108,
+      "Mixed": 70,
+      "Fragile": 65
+    },
+    "Strained": {
+      "Strong": 96,
+      "Mixed": 73,
+      "Fragile": 74
+    },
+    "Hostile": {
+      "Strong": 84,
+      "Mixed": 72,
+      "Fragile": 87
+    }
+  },
+  "sourceExampleMismatchHandled": true
+}

@@ -1,0 +1,1529 @@
+--- a/START_HERE.md
++++ b/START_HERE.md
+@@ -1,41 +1,42 @@
+-# The Analyst’s Brief — Claude design and replication handoff
++# The Analyst’s Brief — updated build and Claude handoff
+ 
+-Planning-stage package, 19 November 2026. This is a design specification, visual reference set, runnable interaction reference and Blender construction kit. It is not the finished photorealistic simulation and has not been deployed.
++20 November 2026. This is an incremental update to the uploaded `The_Analysts_Brief_build_2026-11-20.zip`. Actual application code has changed. It is a development handoff, not a visually approved release.
+ 
+-## Read first
+-1. `handoff/CLAUDE_BUILD_PROMPT.md`
+-2. `design/MASTER_PLAN.md`
+-3. `design/PAGE_SPECIFICATIONS.md`
+-4. `production/BLENDER_SCENE_GUIDE.md` and `blender/layout.json`
+-5. `production/MOTION_AND_ORB.md`
+-6. `production/CONTENT_AND_ASSESSMENT.md`
+-7. `verification/REPORT.md`
++**Start with `handoff/CONTINUE_IN_CLAUDE.md`.** It separates completed changes, checks, limitations and remaining work.
+ 
+-## Critical visual instruction
+-**All generated playthrough images are guides. They are not exact representations of true object positions, scale, UI dimensions, camera positions or character identity.** Use the numeric layout, named camera poses, source content and interaction contracts as the authority. Do not reproduce accidental duplicate orbs, oversized composers, school signs, flags, inconsistent furniture, or incidental map borders from the images. There is ONE orb. The learner is ALWAYS in first person. Isometric treatment belongs to inspected objects, not a detached camera looking at the learner.
++## Run the current app
+ 
+-## Contents
+-- `design/pages`: 15 separate 16:9 playthrough concept images, one per principal state.
+-- `design/orthographic`: 5 dimensioned construction plates in PNG and SVG. These are exact plotted guides derived from the included geometry specification.
+-- `design/PLAYTHROUGH_GALLERY.html`: browsable image guide with the interpretation warning on every page.
+-- `app`: editable HTML/CSS/JavaScript reference covering all states, local save, exact rule engine and orb motion. World geometry here is a simple stand-in; do not mistake it for final art.
+-- `blender`: numeric layout, procedural reference generator, and tested reference BLEND/GLB outputs for folder, map, office and hall.
+-- `production`: media plan, full content data, asset inspection, camera and interaction contracts.
+-- `assets/source`: six selected original model files, preserved for Claude to inspect and optimize; not loaded wholesale into the app.
+-- `source`: original SDD and supplied SharedLove design system.
++Use Node 22.12+ (tested with Node 24.22.3). From this folder:
+ 
+-## Open the reference
+-From the unpacked kit root:
+ ```sh
+-python3 -m http.server 8000
++cd web
++npm ci
++npm run dev
+ ```
+-Open `http://localhost:8000/app/` for the reference flow, or `http://localhost:8000/design/PLAYTHROUGH_GALLERY.html` for concepts. Use `app/?dev=1` only for development state navigation. There is no npm install for this reference. Node 18+ can run `node verification/rules.test.mjs`.
+ 
+-## Blender reference geometry
++Open http://127.0.0.1:5180/ . Append `?dev=1` only during development to jump between P00–P14.
++
+ ```sh
+-blender --background --python blender/make_reference_geometry.py -- --out blender/generated
++npm run build
++npm run test:rules
++npm run test:spatial
+ ```
+-Reference geometry was exercised in Blender 4.3.2. Claude should validate import/export in the user’s installed version. The supplied original GLBs have only been inspected structurally, not exhaustively rendered and cleaned.
+ 
+-## Source precedence
+-Latest explicit user decisions → measured design/camera/motion contracts → original SDD for facts and scoring → runnable reference behavior → generated concept images. See the discrepancy register before implementing. Read the source PDF for the complete evidence and debrief record.
++`app/` is the older reference UI and shared content/rules. **Continue the build in `web/`.** Do not mistake the old HTML reference or old screenshots for the updated app.
++
++## Read in this order
++
++1. `handoff/CONTINUE_IN_CLAUDE.md` — exact starting point and remaining work.
++2. `handoff/CURRENT_DESIGN_CONTRACT.md` — current UI, camera, document and motion rules.
++3. `verification/SPATIAL_UPDATE_REPORT.md` — current evidence and unverified items.
++4. `handoff/CHANGED_FILES.json` and `handoff/UPDATE.patch` — compare with the supplied ZIP.
++5. Original SDD and `app/content.mjs`, `app/engine.mjs` — authoritative educational content and rules.
++6. `design/current_references/README.md` — how to use the latest references.
++
++## Images are guides
++
++Generated images are NOT exact representations of camera positions, geometry, scale, document placement, character appearance or UI dimensions. Do not reproduce distortions, oversized panels, duplicate orbs or incidental text from those images. Current written rules take priority.
++
++The newer **isometric environment** direction supersedes the earlier first-person-only environment instruction. The learner stays offscreen. Reading surfaces remain upright and straight toward the learner. The current implementation uses a narrow perspective camera for an isometric-style view; it is not a true orthographic camera.
++
++Original GLBs, source content and assessment engine are preserved. The room cutaway is a runtime adaptation; Blender geometry cleanup and actual-browser visual acceptance remain outstanding.
+--- a/ZIP_README.md
++++ b/ZIP_README.md
+@@ -1,3 +1,5 @@
++> **Historical reference:** the 20 November spatial update supersedes older first-person-only environment, dark subtitle UI, bottom-centre globe and full-screen glow instructions. Read `handoff/CURRENT_DESIGN_CONTRACT.md` and `handoff/CONTINUE_IN_CLAUDE.md` from the kit root first. Generated images are approximate guides. Prior verification does not verify the updated `web/` build.
++
+ # The Analyst's Brief: build snapshot (20 Nov 2026)
+ 
+ A first-person 3D simulation for IRS 103 (Introduction to African Politics). Vite + Three.js 0.187, plain ES modules.
+--- a/design/MASTER_PLAN.md
++++ b/design/MASTER_PLAN.md
+@@ -1,3 +1,5 @@
++> **Historical reference:** the 20 November spatial update supersedes older first-person-only environment, dark subtitle UI, bottom-centre globe and full-screen glow instructions. Read `handoff/CURRENT_DESIGN_CONTRACT.md` and `handoff/CONTINUE_IN_CLAUDE.md` from the kit root first. Generated images are approximate guides. Prior verification does not verify the updated `web/` build.
++
+ # Experience and situation
+ 
+ Kalinda is a fictional African republic, not a place inside a document. The Commission office and Tamarind Crossing school hall are locations within that world. The miniature is a teaching model of Kalinda. A disputed election, clashes at the Crossing, rumours of an army mutiny and a corruption scandal put pressure on the National Dialogue, which opens Friday.
+--- a/design/PAGE_SPECIFICATIONS.md
++++ b/design/PAGE_SPECIFICATIONS.md
+@@ -1,3 +1,5 @@
++> **Historical reference:** the 20 November spatial update supersedes older first-person-only environment, dark subtitle UI, bottom-centre globe and full-screen glow instructions. Read `handoff/CURRENT_DESIGN_CONTRACT.md` and `handoff/CONTINUE_IN_CLAUDE.md` from the kit root first. Generated images are approximate guides. Prior verification does not verify the updated `web/` build.
++
+ # Page-by-page replication specification
+ 
+ **Every generated image is a guide only. Written dimensions, content and cameras take precedence.** Fifteen principal view states support four learning stages; they are not fifteen independent tasks. Exact content is in `app/content.mjs`; each state branch is in `app/app.mjs` render().
+--- /dev/null
++++ b/design/current_references/README.md
+@@ -0,0 +1,7 @@
++# Latest visual references
++
++- `george_railean_ssspin.io_1795180267.mp4`: newest spatial reference. Study the isolated cutaway model, controlled rotation, top-down tilt and reframing as contextual UI appears. The dark background and dense property labels are not requirements; the user requests white or a matching neutral and fewer interruptions.
++- `darkcodedeveloper_ssspin.io_1795177151.mp4`: earlier interaction reference. Useful for object selection and focus transitions, not authority to restore a large surrounding room/tabletop.
++- `Bino_MR_kids_07.webp`, `10`, `11`, `12`: user-supplied capsule/glass UI references. Borrow restraint and hierarchy, not their clocks, capture buttons or flower imagery.
++
++These are reference assets, not runtime backgrounds. Keep the learner offscreen. Read `handoff/CURRENT_DESIGN_CONTRACT.md` for exact intended behaviour. Older generated images are approximate guides and are not proof of actual placement or runtime output. No new generated mockups or screenshots were added in this update.
+--- a/handoff/CLAUDE_BUILD_PROMPT.md
++++ b/handoff/CLAUDE_BUILD_PROMPT.md
+@@ -1,3 +1,5 @@
++> **Historical reference:** the 20 November spatial update supersedes older first-person-only environment, dark subtitle UI, bottom-centre globe and full-screen glow instructions. Read `handoff/CURRENT_DESIGN_CONTRACT.md` and `handoff/CONTINUE_IN_CLAUDE.md` from the kit root first. Generated images are approximate guides. Prior verification does not verify the updated `web/` build.
++
+ # Build instruction for Claude
+ 
+ Build The Analyst’s Brief for first-year students from this package. The learner is a junior political analyst in fictional Kalinda; they evaluate sources, test explanations, design a response and brief the Chair. Deliver a simple, legible first-person experience, with one clear action at a time.
+--- /dev/null
++++ b/handoff/CONTINUE_IN_CLAUDE.md
+@@ -0,0 +1,77 @@
++# Continue here, Claude
++
++## Task and authority
++
++Continue this existing build. The user wants a clean, minimally interruptive spatial simulation: isometric room/model, white or complementary background, compact agentic input boxes and restrained Apple-like open/close motion. The goal is a short, understandable experience. Preserve the supplied narrative, source requirements and scoring.
++
++Read `CURRENT_DESIGN_CONTRACT.md` before changing the visual implementation. Its rules supersede older first-person-only environment instructions, dark-glass/subtitle layouts, screen-wide glow and bottom-centre globe instructions in this kit. The learner is never shown as an avatar. Documents still face the learner straight.
++
++**Generated images are visual guides, not accurate representations of true positions or scale.** The previous user explicitly rejected distorted open folders. Never trace an image’s folder perspective into the implementation.
++
++## What was actually changed
++
++| File | Implemented change |
++| --- | --- |
++| `web/src/spatial.js` | Bounds-based framing, constrained orbit/zoom, runtime room cutaway, near-isometric camera helper |
++| `web/src/world.js` | Light neutral background/lighting, no bloom/vignette, isolate Kalinda, fit named camera calls to models, quiet map, disable scene controls while reading, model shifts left for right-side UI |
++| `web/src/inspector.js` | Lift first, open cover, extract one sheet straight right; return old sheet before replacing it; return sheet, close, lower folder; prohibit reading tilt and remove idle teasing |
++| `web/src/agent.js` | Quiet upper-right globe with motion only during work/listening; remove full-screen activation glow and bounce; simple fallback when globe WebGL fails |
++| `web/src/main.js` | Compact conversation, stable focus on same-page edits, optional feedback in agent menu, remove auto case-notes popup and auto source-ready interruption, on-demand topic check, capped artificial wait, text document fallback, view controls |
++| `web/src/spatial.css` | Current light UI overrides, small frosted composer, corner dock, restrained entry/exit, legible text colours and 44px controls |
++| `web/index.html` | Load visual overrides; accessible previous/next/read/review/close document controls |
++| `verification/spatial.test.mjs` | Offline 3D interaction regression tests |
++
++The original GLBs and assessment modules were not rewritten. `web/src/glow.js` remains in the source archive but is no longer imported by the agent.
++
++## Start by running and reviewing, not rebuilding
++
++1. `cd web && npm ci && npm run dev`.
++2. Open `http://127.0.0.1:5180/?dev=1` in a real browser with WebGL. Review at 1366×768, then 390×844. Test regular learner navigation separately without the developer switcher.
++3. Read the current test report. The code builds and offline checks pass; **there has been no successful browser visual review of this update**.
++4. Verify the P03 folder sequence first, then P00/P01 model framing, Kalinda and hall. Tune the existing implementation.
++5. Preserve `app/content.mjs`, `app/engine.mjs` and local storage key `analysts-brief-prod-v1`. Existing saved runs must remain compatible.
++6. Deliver screenshots from the actual updated browser at key states, a short motion capture and an updated ZIP. Do not substitute generated concept images for runtime evidence.
++
++## Priority work remaining
++
++### P0 — actual browser validation
++
++The local Chromium launch failed with `socket() failed: Operation not permitted`; the remote preview could not reach localhost. These are environment limitations, not successful UI tests. No new screenshots or claims of visual acceptance were produced.
++
++Run `verification/spatial.browser.test.cjs` after installing Playwright in `web/` as a development dependency and installing its Chromium browser. The script is supplied for continuation and has NOT been executed successfully here. Also perform the manual checklist in `verification/SPATIAL_UPDATE_REPORT.md`.
++
++Check for camera clipping, invisible models, cover/paper overlap, shader compilation errors, tiny text, inaccessible document tags, blank globe, mobile panel collisions and keyboard focus traps. The automated transform test uses representative page geometry; it does not prove the imported GLB renders correctly.
++
++### P1 — replace runtime wall cuts with authored Blender cutaways
++
++`spatial.js:cutaway()` hides ceiling objects and clips the two front architectural edges in the fragment shader. The original room meshes combine walls. This preserves assets but can leave uncapped edges, floating architectural decorations or unsuitable baked lighting. Architecture shadow casting is disabled to avoid invisible walls casting shadows. Raycasting does not know about fragment cuts: audit visible hotspots near walls.
++
++In Blender, duplicate the production room source into a new cutaway variant, split walls into named near/far sections, retain two back walls and floor, remove the roof, shorten the two front walls to a low sill and cap the cut faces. Keep furniture and authored scene coordinates. Remove orphan window fittings/door frames above cut walls. Re-bake hall lighting if the roof/wall removal reveals lighting errors. Export and visually compare before replacing a runtime GLB. Update `copy-assets.mjs` if filenames change.
++
++Avoid rebuilding the narrative room unnecessarily. The separately supplied full-size isometric-office source is not part of this uploaded build and has not been substituted in this patch.
++
++### P1 — camera and motion finish
++
++The update uses a 28° perspective camera, default view vector `(1, 1.05, 1)`, with azimuth limited to 20–70° and polar angle 20–65°. This approximates the requested isometric composition while retaining the existing document inspector camera. A mathematically orthographic overview is still a follow-up. If implementing it, give the document inspector its own perspective camera; update picking, fitting, resize and overlay projection together. Do not simply replace the camera class and leave `camera.fov` calculations in the inspector.
++
++Calibrate model scale and the 13% desktop frame shift against real screenshots. The model should hold still while the learner reads or types. Camera motion is currently represented by bounded orbit and model framing; elaborate per-object focus choreography from the reference remains to be tuned.
++
++### P1 — folder animation with real asset
++
++Check that opening ends before the paper starts moving and closing begins only after it returns. The exported open/close animation runs at 8× its original speed (approximately 0.4 seconds). The sequence currently uses known durations; if you re-export the clip, replace timing assumptions with animation completion callbacks. All sheets stay in the same folder and tags persist. Do not introduce separate physical trays or paper curl.
++
++The document has a narrow-screen focus view and an HTML `Read text` alternative. Adjust magnification if the real texture is not readable at laptop size. Do not enlarge the entire folder to fill the screen merely to make text readable.
++
++### P2 — UI polish and access
++
++`spatial.css` intentionally overrides legacy CSS to keep the patch reviewable. Once screenshots pass, consolidate duplicate rules if useful. Keep the 44px touch targets, distinguish selected tags without colour alone, verify contrast, reduced motion, keyboard navigation, screen readers and mobile keyboard reflow. Detailed response information may scroll inside its card; the main desktop page should not scroll.
++
++Optional details currently use a native dialog and temporarily hide the underlying task surfaces. This is intentional progressive disclosure, but dialog focus restoration and rapid close/reopen need browser review. Keep confirmations only for microphone permission, abandoning a saved run or genuinely necessary decisions.
++
++### P2 — remaining existing production features
++
++No LLM or external reasoning service was connected. The globe presents scripted interactions and the existing deterministic teaching model; do not label it a predictive political AI. No new voice recordings, character videos, transcription or character avatars were produced. Real microphone recording, browser media permissions, performance on low-power hardware and audio resume remain unverified. Source speaker identities and where they appear are preserved in the current state machine.
++
++## Completion criteria
++
++A successful continuation preserves all assessment branches, shows a clean model on a plain complementary background, keeps the folder/paper square to the screen, uses one quiet assistant, avoids unsolicited overlays and passes real desktop/mobile playthroughs. Update the report with evidence and exact remaining limitations before calling the build finished.
+--- /dev/null
++++ b/handoff/CURRENT_DESIGN_CONTRACT.md
+@@ -0,0 +1,76 @@
++# Current design contract — 20 November 2026
++
++## Presentation
++
++The environment is a roofless isometric model on warm white (`#f4f3ee`) or a closely matching neutral. The model is the main visual. The learner is offscreen. This supersedes the previous requirement that every environment camera be first-person. Inspected documents are still front-facing and readable, with no skew or decorative rotation.
++
++Use the reference videos for spatial movement and the four Bino images for restraint, capsule controls and compact information. Do not copy their clocks, recording UI, toolbars, florals, labels or icons unless needed by the simulation. Generated images throughout the older kit are conceptual and can be inaccurate.
++
++## UI dimensions implemented
++
++| Element | Desktop | Narrow screen |
++| --- | --- | --- |
++| Agent globe | 48px, 22px from right / 18px from top | 48px, 14px right / 12px top |
++| Composer | Up to 380px wide, right 22px, top 82px | Width viewport minus 28px, bottom 18px; max 48dvh |
++| Composer padding/radius | 18px / 22px | 15px / 22px |
++| Main text | Manrope, 15px, line-height 1.55 | 14px |
++| Secondary result card | Bottom right, up to 380px wide, max 34dvh | Top 78px, max 30dvh |
++| Task actions | Minimum 44px height | Minimum 44px height |
++
++These are implementation starting values, not a claim of pixel-perfect review. The reference’s visual intent overrides accidental geometry or text in an image. Tune spacing when a real browser shows a collision. Avoid repeated headings, unexplained icons and excessive controls.
++
++## Assistant behaviour
++
++One persistent upper-right globe. Clicking opens its small menu. A necessary scripted question opens a compact frosted chat-like composer. Hiding it collapses toward its anchor; reopening restores the same task. No giant chat panel, full-screen ripple, scene bounce, idle breathing or repeated unsolicited questions. The input area and relevant options are prominent but compact. The scene holds still during reading or typing. Optional detail replaces the visible task surface temporarily.
++
++This iteration keeps the globe at its dock while the composer appears adjacent to it. The earlier flying-to-screen-centre particle spectacle is superseded by the user's later request to reduce interruptions. No calendar/date/timer strip is added.
++
++## Document sequence
++
++1. Folder rests closed on the desk.
++2. Selection lifts and aligns it square to the view (about 420ms).
++3. Cover opens while the aligned object holds still (about 400–460ms).
++4. Exactly one selected document slides horizontally to the right (about 300ms to settle). The folder stays on the left. No curl, diagonal drift, page fanning, texture warping or idle tease.
++5. Foundation / Set aside tags are applied to that document without another assistant question. Choices persist in the existing state and appear on its texture.
++6. Next/Previous returns the current document along the same path, then brings out the next. Every document belongs to the same source folder.
++7. Closing returns the paper, closes the cover, then lowers the folder (about 350ms). Reduced motion completes the same state changes without a prolonged transition.
++
++Desktop keys: arrows/PageUp/PageDown, F for Foundations, S for Set aside, +/- zoom, Esc close. Visible contextual controls provide the same reading/navigation actions. `Read text` is an HTML alternative and a fallback when 3D is unavailable.
++
++## Motion values
++
++| Action | Current implementation |
++| --- | --- |
++| Composer appear / disappear | 320ms / 240ms, restrained translation and scale |
++| Optional detail appear / close | 240ms / 160ms |
++| Camera reframe | Capped at 520ms, smooth interpolation |
++| Desktop model position | Smooth 13% horizontal frame offset; 0 during inspection |
++| Globe working | 1.06× local scale; strand motion only while working/listening |
++| Teaching-model computation beat | Capped at 350ms; actual engine remains synchronous |
++| World idle | No automatic orbit or model loop |
++
++## State map and character appearances
++
++| State | Main visual / task | Speaker |
++| --- | --- | --- |
++| P00 | Light cutaway office, title and Start / saved run | None |
++| P01 | Same model, compact name composer | Reception |
++| P02 | Declare connection, then mission briefing | Junior analyst context; Dr Amina Diallo |
++| P03 | Front-facing folder and straight extracted sheet; direct tags | No automatic assistant interruption |
++| P04 | Source review/filter; existing evidence gate | Dr Amina Diallo |
++| P05 | Isolated Kalinda miniature; choose condition, inspect baseline, run test | Scripted model interface |
++| P06 | Brief local computation; quiet globe activity | No fabricated thinking narrative |
++| P07 | Same miniature; trajectory headline and compare/change/findings actions | Scripted model interface |
++| P08 | Same held-still miniature; choose factors and write findings | Learner |
++| P09 | School hall cutaway; situation briefing | Hon. Grace Mwangi; Diallo feedback optional in menu |
++| P10 | Same hall; one response lever at a time | Response plan interface |
++| P11 | Same hall; package/result plus rationale input | Learner |
++| P12 | Chair-office context using existing office/props; briefing choice | Hon. Grace Mwangi; Dialogue feedback optional in menu |
++| P13 | Briefing input; topic check only on request | Learner |
++| P14 | Debrief with original three strands and Restart | Dr Amina Diallo; original Chair feedback |
++
++Characters remain named text speakers. No new physical character positions, animation rigs, footage or videos are implied. Keep the actual fictional place names and chronology from the SDD. Kalinda is the simulation’s fictional case, not a real-world prediction.
++
++## Invariants
++
++Preserve every source record, the requirement for at least fourteen sourced foundations and decisions on both claims, model factors, response options, assessment bands, saved run schema and reflection/briefing. The simplified presentation must not silently remove a learning task. Never make the map appear to establish a causal result that the rule engine does not support.
+--- /dev/null
++++ b/handoff/DESIGN_DISCUSSION_ADDENDUM.md
+@@ -0,0 +1,184 @@
++# The Analyst’s Brief — Existing Claude Build Update
++Date: 20 November 2026
++Status: design and implementation addendum for the user’s existing Claude build.
++This file records requested changes. It does not claim that the external Claude project has been edited. Include this file in the next handoff ZIP.
++
++## Apply as an incremental update
++The user has already done work in Claude. Inspect that implementation first and reuse its components, assets, routing/state, and animation facilities. Apply the changes below to it. Preserve working simulation logic, assessment, narrative, saved progress, and unrelated screens. Do not restart the project or substitute a new generic district/market simulation.
++
++The latest user requirements take precedence over earlier mockups where they conflict. Existing authored script content remains authoritative for names, evidence, choices, outcomes, and character appearances.
++
++## Latest environment direction — isometric model on a plain stage
++This section supersedes the earlier first-person-only environment framing and the generated photographic office/tabletop backdrops. The user now explicitly wants the environment to be isometric, with white surrounding space or a colour that matches the model, and movement like the newly supplied video.
++Keep the learner character off-screen. The document-reading interaction stays direct and front-facing. Do not require a walk-through camera move into a photorealistic room to reconcile the older direction.
++
++Reference: george_railean_ssspin.io_1795180267.mp4 (22.2 seconds).
++Reviewed across the clip at half-second intervals, with closer inspection of selected views. The observations below describe the visible result; the clip alone cannot establish the original camera projection, software, or whether the model or camera is being rotated.
++
++### Observed reference behaviour
++| Approximate time | Visible behaviour |
++|---|---|
++| 0–4 seconds | Furnished roofless/cutaway apartment model on a plain navy field; gentle change in viewing angle; room labels give way to localized markers and line overlays. |
++| 4–8 seconds | View moves toward top-down, with model reframed to the left while a right-hand information column opens. |
++| 8–12 seconds | View returns to a diagonal elevated angle; selected room boundaries become prominent while information remains at the side. |
++| 12–14 seconds | Information column withdraws; model turns through a larger arc, becomes smaller, and recentres. |
++| 14–18 seconds | Thin schematic lines appear across selected areas of the interior. |
++| 18–22 seconds | Schematic overlay recedes; the model returns toward its earlier angle and scale, with labels returning. |
++
++### Apply to this simulation
++- Present the office as one coherent cutaway 3D scene on an uninterrupted white, off-white, or subtly model-matched stage. Kalinda and the hall use the same presentation language where relevant to their scripted activity.
++- The stage is the surrounding space, not a photograph of another room behind the room model. Remove the persistent giant tabletop and city background from evidence-reading views.
++- Keep furniture and objects physically consistent within the environment model. Use natural materials, a restrained palette, and soft contact shadows to give depth on the plain background.
++- Show the whole relevant model with generous margins. A proposed starting composition is 55–65% viewport width for overview; tune to the actual model and screen. Avoid excessive tiny prop detail.
++- Start from an elevated three-quarter, isometric-style view. An orthographic camera is an implementation option, not something proven by the video. Allow controlled orbit/tilt around a stable model centre while keeping the model upright.
++- Use smooth rotation, reframing, and modest zoom to focus on a selected desk or location. Hold the view still once reading or input begins.
++- Model and camera movement must be one coherent system. Keep furnishings fixed relative to each other; do not rotate unrelated pieces independently to mimic the reference.
++- Move/reframe the model into available space when requested information opens. Do not cover the object being inspected with a panel.
++- Use small contextual highlights only when helpful. The video’s dense property sidebar, minimap, financial controls, repeated labels, and technical line networks are not requirements.
++- On closing a detail, reverse the reframing and restore the learner’s previous view. Preserve the selected object and saved decisions.
++
++### Folder and AI behaviour within the new environment
++The learner selects the desk/dossier from the isometric overview. The camera/model may ease closer to locate it. The folder then enters the existing front-facing interaction space and opens straight; one paper slides horizontally out, also straight. Keep the environment visually quiet behind or outside the reading area. Do not leave a duplicate folder at the source.
++After reading, return paper and folder through their existing sequence and restore the overview.
++Keep the AI globe and composer as screen-space controls so orbiting the environment cannot tilt their text. Object markers follow their 3D anchors, but their labels remain readable. Only the current task’s relevant markers are visible.
++
++### Movement defaults for implementation, not extracted measurements
++Use approximately 450–700 ms for a short focus/orbit transition and 300–500 ms for reframing to accommodate a panel. Smooth acceleration/deceleration; no continuous idle spinning.
++A longer turn like the reference can demonstrate navigation, but it must not play automatically during every learner action.
++Provide a discoverable reset-view action inside existing controls. If drag-to-orbit is supported, constrain elevation and zoom, distinguish dragging from object selection, and keep touch/keyboard alternatives available. Reduced motion uses immediate viewpoint changes or brief fades.
++Do not introduce free roaming or complex navigation requirements just to achieve the visual style.
++
++### Acceptance checks for this revision
++- Plain white or model-matched space surrounds the isometric model.
++- No photographic office background is treated as a required environment.
++- Rotation, zoom, and focus transitions preserve object relationships and keep the model in frame.
++- Selecting a desk/location produces a clear focus transition without exposing unnecessary UI.
++- Documents and input remain straight and steady while the environment can use an elevated angle.
++- Earlier clutter-reduction and interruption rules remain in force.
++- Existing Claude implementation and script are extended incrementally; this file is guidance, not evidence of an applied patch.
++
++## Confirmed visual direction
++- Clean, minimal spatial interface, with only information needed for the current action.
++- Isometric environment overview on a white or model-matched background, following the latest direction below. Keep the learner off-screen; focused documents face the learner directly.
++- Follow the supplied spatial-interface video for restrained floating panels, comfortable scale, depth, and staged workspace changes.
++- Opening and closing should feel polished and fluid, inspired by Apple UI and the user’s Procreate / CleanMyMac references. These are references to feel and transition quality, not instructions to reproduce branding or an unprovided exact animation.
++- The UI expands from the selected object or agent globe and collapses back to its origin.
++- Keep both folder and reading document straight and facing the learner. Do not skew, distort, curl, or rotate the document during its extraction/return.
++
++## Remove visual clutter
++Remove repeated project titles, breadcrumb trails, redundant instruction pills, decorative labels, and permanently expanded toolbars from activity views.
++Consolidate sound, captions, pause, and other settings into one small settings entry where those functions exist. Preserve their functionality and accessible names.
++Keep the active object as the focal point. Show task choices only when needed.
++Do not leave unrelated dioramas, evidence panels, old prompts, or completed options visible behind the current activity.
++Never hide controls needed to complete, dismiss, or revisit the active task merely to make the screenshot look cleaner.
++
++## Dossier and document interaction
++1. Rest: the dossier is closed on the desk at natural scale. Use an unobtrusive hover/focus affordance instead of a permanent “Open dossier” instruction panel.
++2. Select: the dossier lifts to the reading area and aligns with the screen. Any rotation needed to move from the desk finishes before it opens.
++3. Open: the cover hinges open naturally. Its settled front-facing position has straight horizontal and vertical edges, without perspective distortion. Keep the folder on the left and reserve the right for the selected document.
++4. Extract: exactly one paper slides horizontally out to the right. Keep its face parallel to the screen and its vertical orientation unchanged. Use the same apparent paper size at extraction; any additional reading enlargement must be uniform, subtle, and clearly separate from extraction.
++5. Read: hold the camera and paper steady. Render actual script text sharply; do not use generated placeholder lines as final content. Give the document priority over the empty folder cover.
++6. Decide: reveal compact Foundation / Set aside choices only when classification is relevant. Reuse the existing script’s exact labels if different.
++7. Mark and return: attach the selected tag, then return the paper along the same horizontal path into the same folder. Persist the classification. Revisions must be possible through the existing review flow.
++8. Finish: retract any active paper before closing the cover; then return the closed dossier to its resting position and clear the task UI.
++
++“Straight on” refers to the folder and paper in their settled interaction state. It does not require flattening the environment. The new isometric overview and the front-facing document interaction are separate presentation states.
++
++## Agent globe and compact composer
++Use one persistent agent globe, small and quiet, docked in the upper-right area with suitable separation from Settings.
++Open assistance when the learner requests it or reaches a required decision boundary. Optional guidance stays available through the docked globe without automatically opening. For required assistance, bring the globe toward a clear area beside/below the active content and expand a compact rounded composer from that same globe.
++Use soft translucency with sufficient contrast, a short prompt, and only the necessary input or choices. Long information belongs in the relevant document, not in an oversized chat panel.
++For processing, animate a gentle pulse and restrained shape changes only while real work or a defined simulation transition is occurring.
++On submit or dismissal, fold the composer back into the globe, then return the globe to its dock. Do not render a second globe during the transition.
++Move assistance out of the reading area. Avoid continuous ripples, particles, or screen effects while the learner reads.
++Keep responses/actions tied to the actual state and existing reasoning system; animation must not invent outcomes or create a new dependency on a live AI service.
++
++## Motion implementation defaults
++These values are proposed implementation starting points, not measurements from the reference video. Tune them in the existing build.
++
++| Transition | Starting duration | Behaviour |
++|---|---:|---|
++| Hover/focus feedback | 120–160 ms | Subtle material/contrast change |
++| Dossier lift and alignment | 350–450 ms | Smooth deceleration, settle before opening |
++| Cover opening | 280–360 ms | Hinge rotation, no rubbery deformation |
++| Paper extraction/return | 280–360 ms | Straight horizontal translation, zero paper rotation |
++| Composer opening | 240–320 ms | Expand from globe, fade in contents after shell begins |
++| Composer closing | 180–240 ms | Reverse toward globe, then dock |
++| Clearing one activity / revealing next | 300–500 ms | Staged fade/scale after prior objects withdraw |
++
++Use a restrained spring or ease-out on entry and a controlled ease-in on exit. Avoid conspicuous bounce, overshoot, exaggerated zoom, and simultaneous competing animations.
++Read the source object’s actual screen position when starting an animation. Recalculate positions on viewport changes rather than hard-coding one screenshot’s coordinates.
++
++## State and accessibility requirements
++Use explicit phases so repeated clicks cannot duplicate papers or open multiple composers.
++Suggested phases: resting → aligning → opening → extracting → reading → returning → closing → resting.
++The globe/composer has its own docked → opening → active → closing → docked phases.
++State changes must retain saved decisions even if motion is interrupted. Escape should dismiss the current layer safely without losing confirmed work.
++Keyboard users must be able to open the dossier, select documents, classify, dismiss, and return focus to the originating control.
++Reduced-motion mode should retain the same sequence using brief fades or instant positioning, without camera travel or morphing.
++At 1366×768, keep the primary interaction within the viewport with legible text and usable controls. On smaller screens, prioritize the document and collapse the folder to a compact accessible return control rather than shrinking everything until unreadable.
++
++## Image/reference authority
++All generated images are conceptual guides. They may contain incorrect dimensions, position, perspective, interface scale, labels, or background objects.
++The recent upright-folder image illustrates front-facing alignment only. Its large folder, persistent map, repeated header, and always-open classification bar are not approved requirements.
++Earlier generic market labels such as “Delivery record”, “Access”, “Cost”, and “Reliability” were visual placeholders. Do not add them to the simulation unless they belong to the actual script.
++Do not reproduce generated flags, implied real-world geography, or invented evidence.
++Use the written requirements in this file for behaviour and the supplied video for spatial visual character. Preserve the real script and existing build functionality.
++
++## Acceptance review
++- Only the active task’s objects and necessary controls are visible.
++- Folder opens straight on and the paper exits straight, without distortion.
++- Opening and closing visibly connect each UI element to its source.
++- Closing reverses the interaction cleanly; no abandoned panels, duplicate orbs, or floating pages remain.
++- The learner can read without continuous camera or particle movement.
++- Tags and decisions survive reopening, dismissal, and saved-run restoration.
++- Existing narrative and assessment still behave as before.
++- Review actual motion in the browser; a generated still image cannot validate animation quality.
++
++## Additional UI references — reduce interruptions
++The user supplied Bino_MR_kids_07.webp, Bino_MR_kids_10.webp, Bino_MR_kids_11.webp, and Bino_MR_kids_12.webp as UI references. They show environmental views with restrained translucent controls, a narrow question capsule, and an expanded information state. Use these for interface restraint and progressive disclosure. Keep this simulation's mature visual style and subject matter.
++
++These are still-image references; they do not establish exact animation timing. The earlier video and Apple-like opening/closing direction continue to guide motion.
++
++### Apply the references selectively
++- Keep the environment visible around the task. Use soft frosted surfaces whose tint fits the office, while ensuring text remains readable over both bright and dark backgrounds.
++- Default assistance to a slim rounded question/input capsule with one short prompt. Expand only when the current answer or action requires more space.
++- Expanded information replaces the compact state within the same interaction. Do not accumulate another modal, another panel, and a confirmation toast.
++- Keep the centre available for the active document or model. Put temporary prompts in available space beside or below it, without covering text or selected locations.
++- The reference's image-plus-description pair is useful only when both are necessary. Do not introduce two cards for every response or duplicate the active document in a second panel.
++- Keep the single settings entry and single agent globe already specified. Do not copy the full side rails, bottom dock, zoom slider, clock, date, recording controls, or save hints merely because they appear in the examples.
++- If an existing recording task is actively recording, show a small status indicator and an accessible stop action. Do not add recording or microphone permissions to unrelated tasks.
++- Use one short contextual cue for the current task when needed; avoid leaving labels on every object at once.
++
++### Interruption policy
++| Situation | Behaviour |
++|---|---|
++| Reading, typing, or inspecting | Keep camera and layout stable; no unsolicited expanded panels or focus changes |
++| Optional help | Keep it in the docked globe; open on user request |
++| Required choice | Show the smallest sufficient inline choice control at the task boundary |
++| Classification | Update the document tag; avoid an extra confirmation dialog |
++| Saved successfully | Save silently; show recoverable error feedback if saving fails |
++| Model running | Use one compact status; no fabricated progress or forced pause for decorative animation |
++| Result ready | Update the existing result surface; let the learner choose when to inspect detail or continue |
++| Expanded detail dismissed | Reverse into its origin; restore focus and the previous reading position |
++
++Do not trigger assistance merely because time has elapsed. Do not repeatedly ask the same question or replay explanations on reopening. Queue nonessential updates while the learner is reading, editing, or using another control. Necessary errors and required decisions must remain discoverable and must not be silently discarded.
++
++Keep classification efficient: show the relevant two choices in one compact surface when the learner enters the decision state. Do not insert a separate “Are you ready?” step before every document. Retain required script activities and offer concise detail on demand; minimal UI must not silently remove educational content.
++
++### Additional review checks
++- No unsolicited movement into the centre while reading or typing.
++- At most one expanded assistant/detail surface at a time; the folder and its extracted paper remain the active task objects.
++- A translucent surface never makes document text or controls hard to read.
++- Dismissal does not lose drafted input, confirmed choices, or reading position.
++- Reduced motion and keyboard focus work without requiring hover.
++- Background remains visible; clocks, toolbars, and extra cards are not copied from the references without a functional reason.
++
++## Later ZIP integration
++Include this file as handoff/EXISTING_BUILD_UPDATE.md.
++Include george_railean_ssspin.io_1795180267.mp4 under references/motion/ and identify it as the current environment/orbit reference. Older photographic office concepts are superseded for the environment backdrop; the earlier video still informs compact spatial panels.
++Include the four user-supplied Bino UI references under references/ui/ with a note that they guide material, compact controls, and progressive disclosure, not simulation content or a requirement to copy every visible control.
++Keep the latest written specifications authoritative and label older conflicting screenshots as superseded or illustrative.
++Include approved new references only after review, alongside any actual patch made against the user’s current Claude project.
++Do not describe this addendum alone as an implemented or tested application update.
++
+--- a/production/BLENDER_SCENE_GUIDE.md
++++ b/production/BLENDER_SCENE_GUIDE.md
+@@ -1,3 +1,5 @@
++> **Historical reference:** the 20 November spatial update supersedes older first-person-only environment, dark subtitle UI, bottom-centre globe and full-screen glow instructions. Read `handoff/CURRENT_DESIGN_CONTRACT.md` and `handoff/CONTINUE_IN_CLAUDE.md` from the kit root first. Generated images are approximate guides. Prior verification does not verify the updated `web/` build.
++
+ # Blender production guide
+ 
+ ## Precise authority
+--- a/production/MOTION_AND_ORB.md
++++ b/production/MOTION_AND_ORB.md
+@@ -1,3 +1,5 @@
++> **Historical reference:** the 20 November spatial update supersedes older first-person-only environment, dark subtitle UI, bottom-centre globe and full-screen glow instructions. Read `handoff/CURRENT_DESIGN_CONTRACT.md` and `handoff/CONTINUE_IN_CLAUDE.md` from the kit root first. Generated images are approximate guides. Prior verification does not verify the updated `web/` build.
++
+ # Motion, composer and one persistent orb
+ 
+ ## Authority
+--- a/production/RUNTIME_MODELS.md
++++ b/production/RUNTIME_MODELS.md
+@@ -1,3 +1,5 @@
++> **Historical reference:** the 20 November spatial update supersedes older first-person-only environment, dark subtitle UI, bottom-centre globe and full-screen glow instructions. Read `handoff/CURRENT_DESIGN_CONTRACT.md` and `handoff/CONTINUE_IN_CLAUDE.md` from the kit root first. Generated images are approximate guides. Prior verification does not verify the updated `web/` build.
++
+ # Runtime models (exported 19 Nov 2026; case file and hall replaced 20 Nov 2026)
+ 
+ Files in `blender/production/export/`, produced by `blender/production/export_glb.py` from
+--- a/production/THREE_INTEGRATION.md
++++ b/production/THREE_INTEGRATION.md
+@@ -1,3 +1,5 @@
++> **Historical reference:** the 20 November spatial update supersedes older first-person-only environment, dark subtitle UI, bottom-centre globe and full-screen glow instructions. Read `handoff/CURRENT_DESIGN_CONTRACT.md` and `handoff/CONTINUE_IN_CLAUDE.md` from the kit root first. Generated images are approximate guides. Prior verification does not verify the updated `web/` build.
++
+ # Connecting Blender to the application
+ 
+ `app/three-bridge.mjs` is dependency-injected with THREE and GLTFLoader. It is not activated by the default CSS stand-in harness. Claude should install/pin Three.js in the production project and verify its current official APIs. Load clean exports, never the entire source packs.
+--- a/verification/REPORT.md
++++ b/verification/REPORT.md
+@@ -1,3 +1,5 @@
++> **Historical reference:** the 20 November spatial update supersedes older first-person-only environment, dark subtitle UI, bottom-centre globe and full-screen glow instructions. Read `handoff/CURRENT_DESIGN_CONTRACT.md` and `handoff/CONTINUE_IN_CLAUDE.md` from the kit root first. Generated images are approximate guides. Prior verification does not verify the updated `web/` build.
++
+ # Verification report
+ 
+ ## Observed passing checks
+--- /dev/null
++++ b/verification/SPATIAL_UPDATE_REPORT.md
+@@ -0,0 +1,52 @@
++# Spatial update verification — 20 November 2026
++
++This report covers the modified `web/` app. Older reports/screenshots in this kit describe earlier versions.
++
++## Passed here
++
++| Check | Result |
++| --- | --- |
++| Production build | `npm --prefix web run build` passed with Node 24.22.3 / Vite 8.3.8 |
++| Teaching model | All 128 factor combinations passed; outcome counts unchanged: 76 Coup, 32 Personalised rule, 20 Consolidation |
++| Response model | All 729 checks across Calm, Strained and Hostile passed |
++| Source handling | Existing source-example discrepancy handling passed |
++| Inspector transforms | Lift before opening; one sheet moves right; Y/Z remain fixed; plane faces camera; no idle tease; return before replacement; prohibit reading rotation; close sequence; restore original parent and stack |
++| Reduced motion | Inspector can enter and exit without a stuck state |
++| Runtime cutaway helper | Hides representative ceiling and disables architecture shadow casting |
++| Syntax | Updated main, world, agent and the supplied browser continuation test parse successfully |
++| Original assets/content | See `handoff/CHANGED_FILES.json` for hashes and original-file comparison |
++
++Detailed command output: `spatial/build.log`, `spatial/rules.log`, `spatial/transforms.log`.
++
++## Not verified here
++
++No updated browser screenshots, video or successful end-to-end UI run were produced. Local Chromium could not launch because the environment denied its socket operation. A remote preview attempt could not reach the local development server. This is a concrete testing limitation, not proof that the UI passes or fails.
++
++The offline inspector test uses representative Three.js page geometry. It does not validate every transform/material/morph in the real exported case-file asset. Shader compilation, cutaway appearance, real paper texture readability, layout overlap and actual GPU performance require a browser.
++
++Build warning: the main JavaScript chunk is about 1.21 MB before gzip (about 361 KB gzip). It exceeds the configured 900 KB advisory threshold. Build succeeds; code splitting/asset-loading performance remains production work. An npm proxy configuration warning belongs to the execution environment and is not an application failure.
++
++## Claude acceptance checklist
++
++- [ ] Run `web/` at 1366×768 and 390×844; verify no whole-page scrolling or clipped primary action.
++- [ ] P00: model is visible, on a plain light background, with a readable title and Start.
++- [ ] P01–P02: one compact composer; stable typed value; corner globe and menu remain accessible.
++- [ ] P03: closed folder lifts; cover opens square to view; one sheet exits straight right. Check front/back texture orientation and cover clipping in the actual GLB.
++- [ ] Tags remain readable and persist across next/previous, closing/reopening and a saved run.
++- [ ] Next/Previous cannot leave duplicate floating pages or a half-closed folder, including rapid repeated input.
++- [ ] Reading does not allow tilt. Zoom/pan remain useful. Read-text fallback exposes the whole source and both tags.
++- [ ] Close reverses the sequence. Escape, F/S and page-navigation keys work without firing inside text fields.
++- [ ] P04: all 18 sources remain accessible; source gate has not changed.
++- [ ] P05–P08: Kalinda is isolated; no office surrounds it; user-controlled orbit works after hiding the conversation; model holds during reading/typing; outputs match the engine.
++- [ ] P09–P11: hall cutaway reveals content without floating fittings, roof remnants or misleading baked shadows; response choices and rationale remain intact.
++- [ ] P12–P14: Chair context loads; typed briefing, optional topic check and debrief work; restart and resume work.
++- [ ] Optional feedback remains discoverable in the globe menu and does not automatically cover the next task.
++- [ ] Globe/composer motion stays local and restrained; no screen-edge glow or camera bounce.
++- [ ] Reduced motion works for world, inspector, assistant and dialogs; Pause does not strand navigation.
++- [ ] Mobile keyboard does not cover the active input or submit action. UI surface reflow and internal scrolling work.
++- [ ] Keyboard-only / screen-reader / focus restoration pass, including Escape and native-dialog close/reopen.
++- [ ] Real microphone consent, recording, playback, download and deletion work; no external transmission implied.
++- [ ] WebGL unavailable and model-load failure paths provide text interaction, not a dead end.
++- [ ] Capture actual runtime screenshots and a short clip before declaring visual acceptance.
++
++`spatial.browser.test.cjs` is a continuation script, not a passed test. It targets the production app and is separate from `browser.test.cjs`, which still targets the old `app/` reference.
+--- /dev/null
++++ b/verification/spatial.browser.test.cjs
+@@ -0,0 +1,48 @@
++/* Continuation test: NOT successfully run in the editing environment.
++   In web/: npm install --save-dev playwright && npx playwright install chromium
++   Start npm run dev, then from kit root: node verification/spatial.browser.test.cjs */
++const {createRequire}=require('node:module');
++const path=require('node:path'), fs=require('node:fs'), assert=require('node:assert/strict');
++const req=createRequire(path.resolve(__dirname,'../web/package.json'));
++const {chromium}=req('playwright');
++(async()=>{
++ const browser=await chromium.launch({headless:true,...(process.env.CHROME_PATH?{executablePath:process.env.CHROME_PATH}:{}),args:['--no-sandbox']});
++ const page=await browser.newPage({viewport:{width:1366,height:768}}), errors=[];
++ const out=path.join(__dirname,'spatial-browser');fs.mkdirSync(out,{recursive:true});
++ page.on('pageerror',e=>errors.push(e.message));
++ await page.goto((process.env.BASE_URL||'http://127.0.0.1:5180/')+'?dev=1');
++ await page.waitForFunction(()=>window.__ab,{},{timeout:60000});
++ const action=(a,arg)=>page.locator(`[data-action="${a}"]${arg===undefined?'':`[data-arg="${arg}"]`}`).filter({visible:true}).first().click();
++ await action('start'); await page.locator('#name').fill('Review Analyst');await page.locator('[data-form=identity] button').click();await action('declare');await action('go','P03');
++ await page.waitForFunction(()=>__ab.world()?.inspector.state==='held');
++ for(let i=0;i<18;i++){
++  await action('tag',i<16?'foundations':'aside');
++  if(i<17){await action('doc','1');await page.waitForFunction(i=>__ab.world().inspector.pageIdx===i,i+1);}
++ }
++ await page.screenshot({path:path.join(out,'P03-desktop.png')});
++ await action('reviewSources');await action('commitEvidence');await page.locator('#factor').waitFor();
++ assert.equal(await page.locator('#drawer').isVisible(),false,'case notes must not open automatically');
++ await action('runModel');await page.locator('[data-action=compare]').waitFor();await action('go','P08');
++ await action('finding','F2');await action('finding','F6');await page.locator('#why').fill('Army oversight and succession rules changed the outcome together.');await page.locator('[data-form=findings] button.primary').click();
++ await page.locator('[data-action=hallDetails]').waitFor({timeout:60000});assert.equal(await page.locator('#drawer').isVisible(),false,'feedback must not interrupt the next task');await action('go','P10');
++ for(const id of ['L1-2','L2-2','L3-3','L4-2','L5-1']){await action('choice',id);await action('lever','1');}
++ await page.locator('#rationale').fill('Focused checks and consultation use the time available; some claims remain uncertain.');await action('runHall');await page.waitForFunction(()=>document.querySelector('.kicker')?.textContent==='After your test');await page.locator('[data-form=rationale] button.primary').click();
++ await page.locator('[data-action=recordConsent]').waitFor();await action('go','P13');
++ assert.equal(await page.locator('#stage .card').count(),0,'topic check only appears on request');
++ await page.locator('#brief').fill('The inherited boundary and institutions matter. Army and succession rules mattered. I recommend consultation and oversight. Further evidence is needed.');await action('checkBrief');await page.locator('[data-form=brief] button.primary').click();await page.locator('.debrief-grid').waitFor();
++ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('analysts-brief-prod-v1')));assert.deepEqual(saved.strands,['Strong','Strong','Strong']);
++ await page.reload();await action('resume');await page.locator('.debrief-grid').waitFor();
++ const overflow=[];
++ for(const size of [{width:1366,height:768},{width:390,height:844}]){
++  await page.setViewportSize(size);
++  for(let i=0;i<15;i++){
++   const id='P'+String(i).padStart(2,'0');await page.getByLabel('Developer state navigation').selectOption(id);
++   await page.waitForFunction(id=>document.body.dataset.page===id&&!document.body.classList.contains('busy'),id);
++   const bounds=await page.evaluate(()=>({w:document.documentElement.scrollWidth,h:document.documentElement.scrollHeight,iw:innerWidth,ih:innerHeight}));
++   if(bounds.w>bounds.iw||bounds.h>bounds.ih)overflow.push({id,size,...bounds});
++   if([0,1,3,5,9,11,14].includes(i))await page.screenshot({path:path.join(out,`${id}-${size.width}.png`)});
++  }
++ }
++ fs.writeFileSync(path.join(out,'results.json'),JSON.stringify({normalFlow:true,resume:true,savedStrands:saved.strands,errors,overflow},null,2));
++ await browser.close();assert.deepEqual(errors,[]);assert.deepEqual(overflow,[]);console.log('SPATIAL_BROWSER_CHECKS_PASSED');
++})().catch(e=>{console.error(e);process.exit(1)});
+--- /dev/null
++++ b/verification/spatial.test.mjs
+@@ -0,0 +1,35 @@
++// Offline transform regressions: useful even when a GPU/browser is unavailable.
++import assert from 'node:assert/strict';
++import * as THREE from '../web/node_modules/three/build/three.module.js';
++import { Inspector } from '../web/src/inspector.js';
++import { visibleBounds, cutaway } from '../web/src/spatial.js';
++globalThis.innerWidth=1366; globalThis.innerHeight=768;
++const scene=new THREE.Scene(), root=new THREE.Group();
++root.userData.sim_interaction='open_close';root.scale.setScalar(.1); scene.add(root);
++for(let i=0;i<18;i++){
++ const geo=new THREE.PlaneGeometry(2.1,2.97);geo.rotateX(-Math.PI/2);
++ const pg=new THREE.Mesh(geo,new THREE.MeshStandardMaterial()); pg.name=`CF_Page_${String(i+1).padStart(2,'0')}`;pg.position.y=.154-i*.0011;root.add(pg);
++}
++scene.updateMatrixWorld(true);
++const camera=new THREE.PerspectiveCamera(28,1366/768,.02,300);camera.position.set(8,9,8);camera.lookAt(0,0,0);camera.updateMatrixWorld();
++const events=[];const inspector=new Inspector({camera,hooks:{open:()=>events.push('open'),close:()=>events.push('close')}});
++const advance=t=>{for(let s=0;s<t;s+=1/120)inspector.update(1/120)};
++assert(inspector.enter(root,{startPage:3}));assert.equal(events.length,0,'cover must stay closed during lift');
++advance(.5);assert.deepEqual(events,['open']);advance(1);
++assert.equal(inspector.state,'held');assert.equal(inspector.pageIdx,3);
++assert.equal(inspector.pages.filter(p=>p.o.visible).length,1);
++let pg=inspector.pages[3]; assert(pg.cur.x>pg.home.x,'sheet exits to right');
++assert.equal(pg.cur.y,pg.home.y);assert.equal(pg.cur.z,pg.home.z);
++root.updateWorldMatrix(true,true);
++const normal=new THREE.Vector3(0,1,0).transformDirection(root.matrixWorld);
++const cameraFacing=new THREE.Vector3(0,0,1).applyQuaternion(camera.quaternion);
++assert(normal.dot(cameraFacing)>.99999,'sheet normal must face camera');
++advance(.5);const before=pg.o.position.clone();advance(5);assert(pg.o.position.distanceTo(before)<1e-6,'no idle teasing');
++inspector.turnTo(4);advance(.15);assert.equal(inspector.pageIdx,3,'return sheet before extracting next');advance(.65);
++assert.equal(inspector.pageIdx,4);assert.equal(inspector.pages.filter(p=>p.o.visible).length,1);
++inspector.rotate(100,100);assert(inspector.spin.angleTo(new THREE.Quaternion())<1e-8,'reading cannot tilt');
++inspector.exit();assert.equal(events.length,1);advance(.35);assert.equal(events[1],'close');assert.equal(inspector.state,'returning');advance(1);assert.equal(inspector.state,'idle');assert.equal(root.parent,scene);
++assert(root.children.every(p=>p.visible),'restores stack on desk');
++inspector.reduced=true;assert(inspector.enter(root));advance(.1);inspector.exit();advance(.1);assert.equal(inspector.state,'idle','reduced motion still completes close');
++const model=new THREE.Group(), wall=new THREE.Mesh(new THREE.BoxGeometry(6,3,6),new THREE.MeshStandardMaterial()), ceiling=new THREE.Mesh(new THREE.BoxGeometry(6,.1,6),new THREE.MeshStandardMaterial());wall.name='ARCH_Walls';ceiling.name='ARCH_Ceiling';ceiling.position.y=3;model.add(wall,ceiling);cutaway(model,'office');assert.equal(ceiling.visible,false);assert.equal(wall.castShadow,false);assert(!visibleBounds(model).isEmpty());
++console.log('SPATIAL_TRANSFORMS_PASSED: lift/open, straight extraction, page replacement, no idle motion, no tilt, return/close, reduced motion, cutaway');
+--- a/web/README.md
++++ b/web/README.md
+@@ -1,41 +1,19 @@
+-# The Analyst’s Brief: production web app
++# Current production app
+ 
+-First-person 3D simulation built from the kit. Vite + plain ES modules + Three.js 0.187 (pinned).
++Vite + plain ES modules + Three.js. Continue work here; `../app/` supplies the unchanged content and rule engine.
+ 
+ ```sh
+-npm install
+-npm run dev        # copies the GLBs + Draco decoder into public/, serves http://127.0.0.1:5180
+-npm run build      # production build in dist/
+-npm run test:rules # the kit's rule suite (128 model / 729 response checks)
++npm ci
++npm run dev
++npm run build
++npm run test:rules
++npm run test:spatial
+ ```
+ 
+-- Content and rules are the kit's own `app/content.mjs` and `app/engine.mjs`, imported via the `@kit` alias. They are not copied, so the rules suite tests exactly what the app runs.
+-- Cameras come from `blender/layout.json`. Models come from `blender/production/export/` (see `production/RUNTIME_MODELS.md`).
+-- `?dev=1` adds the developer page switcher and `window.__ab`. Never enable it in a learner release.
++Use Node 22.12+; this patch was built using Node 24.22.3. Development URL: http://127.0.0.1:5180/ . `?dev=1` exposes the page switcher and `window.__ab`; never include it in a learner release.
+ 
+-## Source map
+-- `src/world.js`: renderer and the investigation viewer's rendering recipe (room HDR `office_env.hdr`, AgX, PCF soft
+-  shadows, GTAO, bloom, blur passes and a contrast/vignette grade per place), the GLB loader (Draco), named camera poses,
+-  the case file (open/close segments), the edge-wall shader, map loops, hotspots.
+-- `src/inspector.js`: port of the viewer's `inspect.js`. The case file flies to the screen upright over the blurred
+-  room and opens; clicking the paper slides the top page onto the open flap; scroll/drag reads, pinch/+/- zooms, Esc
+-  puts it back. Portrait screens open straight onto the top page.
+-- `src/pages.js`: paints the 18 evidence pages (canvas textures, real text only near the open page).
+-- `src/strands.js` + `strands.css`: React Bits "Strands" (JS-CSS variant) ported to a plain module (shader unchanged).
+-- `src/agent.js` + `src/glow.js`: the agent globe (Strands), bottom centre, and an Apple Intelligence-style activation: a
+-  WebGL edge glow (bright rim + soft flowing bloom on the screen's rounded edges) ripples in with a small scene bounce,
+-  then fades; it is held while the agent works or listens. The globe's menu holds Notebook, Settings, Read as text,
+-  Review sources and Hide/Show the conversation.
+-- `src/main.js`: the state machine for P00-P14, the save system, the subtitles and the actions.
+-- HUD: nothing on screen but the room and the globe. The agent speaks in subtitles beside the globe; choices are plain
+-  text options under the line. In the held case file the only marks are two stamps against the page edge
+-  (Foundations, Set aside; shown on hover, always on touch) and a page count. Keys: arrows turn, F/S stamp, Esc puts
+-  the file down. Filters live on the Review page (P04). Content cards and dialogs share the globe menu's dark glass:
+-  centred for the Review list and the debrief, top right (beside the subtitles) for headlines, the response package and
+-  the topic check. Options are "›" text; the one main action in a dialog is a white pill.
++Models are copied from `../blender/production/export/` by `npm run assets`. `public/models`, `public/draco`, `dist` and `node_modules` are regenerated locally and intentionally excluded from this handoff ZIP. Keep this folder beside `app/` and `blender/`; do not move it out of the kit.
+ 
+-## Status (20 Nov 2026)
+-Verified in the browser (1366x768 and 390x844): the minimal HUD (globe + subtitles), the edge-glow activation, the case
+-file (to the screen, page slide, stamps, page count), the globe menu, and the hall (P09).
+-Not yet re-verified after the rebuild: the full learner path end to end, the map pages (P05-P08), the Chair's office
+-(P12-P14) and recording with a real microphone, keyboard-only and screen-reader passes.
++Read `../handoff/CONTINUE_IN_CLAUDE.md`. New visual authority is `src/spatial.css`; camera/cutaway controls are in `src/spatial.js`, integrated into `src/world.js`. The front-facing reading sequence is in `src/inspector.js`. The agent is compact, upper-right and quiet. `src/glow.js` is unused legacy code.
++
++Current verification: production build, exact rule suite and offline transform regressions pass. Browser visual checks, real imported-asset animation, mobile layout and microphone recording are outstanding. Historical browser verification of the previous build is not evidence for these changes.
+--- a/web/index.html
++++ b/web/index.html
+@@ -4,9 +4,10 @@
+     <meta charset="UTF-8" />
+     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+     <title>The Analyst’s Brief</title>
+-    <meta name="description" content="A first-person simulation for IRS 103: Introduction to African Politics." />
++    <meta name="description" content="An interactive spatial simulation for IRS 103: Introduction to African Politics." />
+     <link rel="preload" href="/fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin />
+     <link rel="stylesheet" href="/src/styles.css" />
++    <link rel="stylesheet" href="/src/spatial.css" />
+   </head>
+   <body data-scene="office">
+     <canvas id="world" aria-hidden="true"></canvas>
+@@ -19,6 +20,7 @@
+       <button type="button" class="stamp a" data-action="tag" data-arg="aside" aria-pressed="false"><span aria-hidden="true">–</span> Set aside</button>
+     </div>
+     <p id="pageCount" class="page-count" aria-hidden="true" hidden></p>
++    <nav id="documentNav" aria-label="Document controls" hidden><button data-action="doc" data-arg="-1" aria-label="Previous document">←</button><button data-action="readText">Read text</button><button data-action="doc" data-arg="1" aria-label="Next document">→</button><button data-action="reviewSources">Review</button><button data-action="putBack" aria-label="Close folder">×</button></nav>
+     <article id="reader" class="sr" aria-live="off"></article>
+ 
+     <!-- the agent: a globe bottom-left, subtitles beside it, a small menu above it -->
+--- a/web/package.json
++++ b/web/package.json
+@@ -3,13 +3,14 @@
+   "private": true,
+   "version": "0.1.0",
+   "type": "module",
+-  "description": "The Analyst's Brief: production web app (first-person 3D, Three.js) built from the kit.",
++  "description": "The Analyst's Brief: spatial Three.js simulation with a compact agent interface",
+   "scripts": {
+     "assets": "node scripts/copy-assets.mjs",
+     "dev": "npm run assets && vite --host 127.0.0.1 --port 5180",
+     "build": "npm run assets && vite build",
+     "preview": "vite preview --host 127.0.0.1 --port 5181",
+-    "test:rules": "node ../verification/rules.test.mjs"
++    "test:rules": "node ../verification/rules.test.mjs",
++    "test:spatial": "node ../verification/spatial.test.mjs"
+   },
+   "dependencies": {
+     "three": "0.187.0"
+--- a/web/src/agent.js
++++ b/web/src/agent.js
+@@ -1,36 +1,17 @@
+-// The one persistent agent globe (Strands, React Bits), bottom centre. The agent speaks in centred subtitles above it.
+-// Activation follows Apple Intelligence: the edge glow ripples in (glow.js), the scene gives a small bounce and the
+-// globe blooms in; the glow then fades. While the agent works or listens the glow stays and breathes.
+-// With nothing pending the globe collapses to a small resting dot. Clicking it opens its menu.
+-//   place("prompt")  bloom + one activation      place("rest")    small, calm
+-//   place("working") larger, full energy, held   place("hidden")  gone (cinematic moments)
++// A quiet persistent corner globe. Motion signals actual interaction, never a full-screen interruption.
+ import { Strands } from "./strands.js";
+-import { EdgeGlow } from "./glow.js";
+-
+-const ENERGY = { rest: 0.4, prompt: 0.7, working: 1, hidden: 0.3 };
+-
++const ENERGY={rest:.18,prompt:.35,working:.7,hidden:0};
+ export class AgentGlobe {
+-  constructor(el, glowCanvas, bounceEl) {
+-    this.el = el; this.phase = "hidden"; this._reduced = false;
+-    this.glow = new EdgeGlow(glowCanvas, bounceEl);
+-    this.strands = new Strands(el.querySelector(".globe"), { energy: ENERGY.hidden, glassSize: 1.1, maxDevicePixelRatio: 2 });
++  constructor(el) {
++    this.el=el; this.phase="hidden"; this._reduced=false; this._paused=false; this.listening=false;
++    try { this.strands=new Strands(el.querySelector(".globe"),{energy:.18,glassSize:1.1,maxDevicePixelRatio:1.5,speed:0}); }
++    catch { this.strands={set(){}}; el.classList.add("globe-fallback"); }
+   }
+-  set reduced(v) { this._reduced = v; this.glow.reduced = v; }
+-  get reduced() { return this._reduced; }
+-  place(phase, { activate = true } = {}) {
+-    const was = this.phase;
+-    this.phase = phase;
+-    this.el.dataset.phase = phase;
+-    this.el.querySelector(".hit").tabIndex = phase === "hidden" ? -1 : 0;
+-    this.strands.set({ energy: ENERGY[phase] ?? 0.6 });
+-    this.glow.hold(phase === "working", "working");
+-    if (phase === "prompt" && was !== "prompt" && activate) {
+-      this.glow.activate();
+-      this.strands.set({ energy: 1 }); setTimeout(() => this.phase === "prompt" && this.strands.set({ energy: ENERGY.prompt }), 900);
+-    }
+-  }
+-  listen(on) { this.strands.set({ listening: !!on, level: undefined, energy: on ? 0.8 : ENERGY[this.phase] }); this.glow.hold(!!on, "listening"); }
+-  hold(on, why) { this.glow.hold(on, why); }
+-  level(v) { this.strands.set({ level: v }); }
+-  set paused(v) { this.strands.set({ speed: v ? 0 : 1 }); }
++  sync() { this.strands.set({energy:ENERGY[this.phase],speed:this._paused||this._reduced?0:(this.phase==="working"||this.listening ? .7 : 0)}); }
++  set reduced(v){this._reduced=v;this.sync();} get reduced(){return this._reduced;}
++  place(phase){this.phase=phase;this.el.dataset.phase=phase;this.el.querySelector(".hit").tabIndex=phase==="hidden"?-1:0;this.sync();}
++  listen(on){this.listening=!!on;this.strands.set({listening:!!on});this.sync();}
++  hold(on){this.listen(on);}
++  level(v){this.strands.set({level:v});}
++  set paused(v){this._paused=v;this.sync();}
+ }
+--- a/web/src/inspector.js
++++ b/web/src/inspector.js
+@@ -6,7 +6,7 @@
+ 
+ const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+ const smooth = (cur, target, dt, rate) => cur + (target - cur) * (1 - Math.exp(-dt * rate));
+-const FIT = 0.8;                                         // leaves room for the top pill and the tray
++const FIT = 0.70;                                         // leaves room for the top pill and the tray
+ 
+ const _boxes = new WeakMap();
+ function baseBox(geo) {
+@@ -53,22 +53,23 @@
+     const box = boxOf(node);
+     this.center = box.getCenter(new THREE.Vector3()).sub(this.from.p);
+     this.isCase = node.userData.sim_interaction === "open_close";
+-    if (this.isCase) this.center.addScaledVector(new THREE.Vector3(1, 0, 0).applyQuaternion(this.from.q), -1.18 * this.from.s.x);
++
+     this._readingBasis(node);
+     this._extents(node);
+     this.state = "in"; this.t = this.reduced ? 1 : 0; this.spin.identity();
+     this.resetView(true);
+-    if (this.isCase) { this.hooks.open?.(); this._initPages(startPage); }
++    if (this.isCase) this._initPages(startPage);
++    this.sequence = null;
+     this.turned = startPage > 0; this.heldAt = 0;
+     this.hooks.change?.();
+     return true;
+   }
+ 
+   exit() {
+-    if (!this.active || this.state === "out") return;
+-    this.state = "out"; this.t = this.reduced ? 1 : 0;
+-    if (this.pages) this.pages.forEach((p) => { p.target = p.home.clone(); });
+-    if (this.isCase) this.hooks.close?.();
++    if (!this.active || ["out","returning"].includes(this.state)) return;
++    // Return the sheet, close the cover, then lower the complete folder.
++    this.state="returning"; this.sequence="exitReturn"; this.sequenceTime=0;
++    this.pages?.forEach(p=>p.target.copy(p.home));
+     this.hooks.change?.();
+   }
+ 
+@@ -78,7 +79,7 @@
+     const lb = boxOf(node, inv).getSize(new THREE.Vector3()).multiply(this.from.s);
+     const along = (v) => Math.abs(v.x) * lb.x + Math.abs(v.y) * lb.y + Math.abs(v.z) * lb.z;
+     const { n, u } = this.basis, r = new THREE.Vector3().crossVectors(u, n);
+-    this.ext = { w: along(r) * (this.isCase ? 2.08 : 1), h: along(u), d: along(n) };
++    this.ext = { w: along(r) * (this.isCase ? 3.25 : 1), h: along(u), d: along(n) };
+   }
+   _fitDist() {
+     const tanH = Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2)), a = this.camera.aspect;
+@@ -104,11 +105,11 @@
+   focusPage() {
+     if (!this.pages || this.state !== "held") return;
+     const tanH = Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
+-    const a = this.camera.aspect, pageW = this.ext.w / 2.08;
++    const a = this.camera.aspect, pageW = this.ext.w / 3.25;
+     const zH = this._fitDist() / (this.ext.h / 2 / (0.95 * tanH) + this.ext.d / 2);           // page height fits
+     const zW = this._fitDist() / (pageW * 0.55 / (tanH * a) + this.ext.d / 2);               // page width fits (portrait screens)
+     const z = THREE.MathUtils.clamp(Math.min(zH, zW), 1, this.maxZoom);
+-    this.zoomT = z; this.panT.set(this.ext.w / 4.16, 0); this._clampPan();
++    this.zoomT = z; this.panT.set(this.ext.w / 3.25, 0); this._clampPan();
+   }
+   panBy(dxPx, dyPx) {
+     if (this.state !== "held") return;
+@@ -171,48 +172,31 @@
+     const pageW = (bb.max.x - bb.min.x) * docs[0].scale.x;
+     this.pageBox = bb;
+     this.pages = docs.map((o) => ({ o, home: o.position.clone(), target: o.position.clone(), cur: o.position.clone(), lift: 0 }));
+-    this.slide = pageW * 1.08; this.pileY = 0.095; this.pageIdx = 0;
+-    for (let i = 0; i < startPage; i++) this._turnOne(1, true);
+-  }
+-  _turnOne(dir, instant) {
+-    if (dir < 0 && this.pageIdx > 0) {
+-      this.pageIdx--; const p = this.pages[this.pageIdx]; p.target = p.home.clone(); p.lift = instant ? 0 : 1;
+-    } else if (dir > 0 && this.pageIdx < this.pages.length - 1) {
+-      const p = this.pages[this.pageIdx];
+-      p.target = new THREE.Vector3(p.home.x - this.slide, this.pileY + this.pageIdx * 0.0025, p.home.z); p.lift = instant ? 0 : 1;
+-      if (instant) p.cur.copy(p.target);
+-      this.pageIdx++;
+-    } else return false;
+-    return true;
+-  }
+-  /** Which side of the open file was clicked: -1 the turned pile (left), 1 the unread pile (right). */
+-  side(hitPointWorld) {
+-    if (!this.pages) return 0;
+-    const local = this.node.worldToLocal(hitPointWorld.clone());
+-    const cx = this.pages[0].home.x + (this.pageBox.min.x + this.pageBox.max.x) / 2;
+-    return local.x < cx - this.slide * 0.5 ? -1 : 1;
+-  }
+-  /** Turn pages until `idx` is on top. */
++    this.slide=pageW*1.12; this.pageIdx=Math.min(startPage,docs.length-1);
++    this.pages.forEach((pg,i)=>{ pg.o.visible=i===this.pageIdx; });
++  }
++  side() { return 1; }
+   turnTo(idx) {
+-    if (!this.pages) return;
+-    idx = THREE.MathUtils.clamp(idx, 0, this.pages.length - 1);
+-    while (this.pageIdx < idx) this._turnOne(1);
+-    while (this.pageIdx > idx) this._turnOne(-1);
+-    this.turned = true;
+-    this.hooks.change?.();
+-  }
+-
+-  rotate(dx, dy) {
+-    if (this.state !== "held") return;
+-    this.spin.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), dx * 0.008))
+-      .premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), dy * 0.008));
+-  }
++    if (!this.pages || this.state!=="held") return;
++    this.pendingIdx=THREE.MathUtils.clamp(idx,0,this.pages.length-1);
++    this.pages.forEach(pg=>pg.target.copy(pg.home));
++    this.sequence="pageReturn"; this.sequenceTime=0;
++  }
++  _extract() {
++    this.pages?.forEach((pg,i)=>{
++      pg.o.visible=i===this.pageIdx;
++      pg.target.copy(pg.home);
++      if(i===this.pageIdx) pg.target.x+=this.slide;
++    });
++  }
++
++  rotate() { /* Reading surfaces always remain parallel to the screen. */ }
+ 
+   pick(raycaster) { return this.node ? raycaster.intersectObject(this.node, true)[0] || null : null; }
+ 
+   update(dt) {
+     if (!this.node) { this.blur = smooth(this.blur, 0, dt, 8); return false; }
+-    if (this.state === "in" || this.state === "out") this.t = Math.min(1, this.t + dt / (this.state === "in" ? 0.8 : 0.6));
++    if (this.state === "in" || this.state === "out") this.t = Math.min(1, this.t + dt / (this.state === "in" ? 0.42 : 0.35));
+     const k = this.state === "in" ? ease(this.t) : this.state === "out" ? 1 - ease(this.t) : 1;
+     this.blur = k;
+     this.zoom = smooth(this.zoom, this.zoomT, dt, 12);
+@@ -223,25 +207,33 @@
+     this.node.matrixAutoUpdate = true; this.node.position.copy(p); this.node.quaternion.copy(q); this.node.scale.copy(this.from.s);
+ 
+     if (this.pages) {
+-      // until the first page is turned, the top page lifts and peeks toward the flap every few seconds
+-      const tease = this.state === "held" && !this.turned && !this.reduced && this.pageIdx < this.pages.length - 1;
+-      this.heldAt = tease ? this.heldAt + dt : 0;
+-      const tt = tease ? (this.heldAt + 2.6) % 3.6 : 9, peek = tt < 1.1 ? Math.sin(Math.PI * tt / 1.1) ** 2 : 0;
+-      const rate = this.reduced ? 1e3 : 9;
+-      this.pages.forEach((pg, i) => {
+-        pg.cur.x = smooth(pg.cur.x, pg.target.x, dt, rate); pg.cur.y = smooth(pg.cur.y, pg.target.y, dt, rate); pg.cur.z = smooth(pg.cur.z, pg.target.z, dt, rate);
+-        const arc = pg.lift * 0.45; pg.lift = smooth(pg.lift, 0, dt, 5);
+-        pg.o.position.copy(pg.cur); pg.o.position.y += arc * 0.08;
+-        if (i === this.pageIdx && peek) { pg.o.position.x -= this.slide * 0.07 * peek; pg.o.position.y += 0.03 * peek; }
++      const rate=this.reduced?1e3:22;
++      this.pages.forEach(pg=>{
++        pg.cur.lerp(pg.target,1-Math.exp(-dt*rate));
++        pg.o.position.copy(pg.cur); // Straight X translation only; no curl, tilt, lift or idle tease.
+       });
+     }
+-    if (this.state === "in" && this.t >= 1) {
+-      this.state = "held";
+-      if (this.pages && this.camera.aspect < 0.85) this.focusPage();   // portrait: read the top page, not the whole spread
++    if(this.state === "in" && this.t>=1) {
++      this.state="held"; this.hooks.open?.();
++      this.sequence="opening"; this.sequenceTime=0;
+       this.hooks.change?.();
++    }
++    if(this.sequence) {
++      this.sequenceTime+=dt;
++      const duration=this.sequence === "opening" || this.sequence === "exitClose" ? .46 : .3;
++      if(this.reduced || this.sequenceTime>=duration) {
++        const step=this.sequence; this.sequence=null; this.sequenceTime=0;
++        if(step === "opening") { this._extract(); if(this.camera.aspect<.85) this.focusPage(); }
++        if(step === "pageReturn") {
++          this.pageIdx=this.pendingIdx; this._extract(); this.hooks.change?.();
++        }
++        if(step === "exitReturn") { this.hooks.close?.(); this.sequence="exitClose"; }
++        if(step === "exitClose") { this.state="out"; this.t=this.reduced?1:0; }
++      }
+     }
+     if (this.state === "out" && this.t >= 1) {
+       if (this.pages) this.pages.forEach((pg) => { pg.o.position.copy(pg.home); pg.cur.copy(pg.home); });
++      this.pages?.forEach(pg=>pg.o.visible=true);
+       this.origParent.attach(this.node);
+       const inv = new THREE.Matrix4().copy(this.origParent.matrixWorld).invert();
+       this.origMatrix.clone().premultiply(inv).decompose(this.node.position, this.node.quaternion, this.node.scale);
+--- a/web/src/main.js
++++ b/web/src/main.js
+@@ -47,23 +47,31 @@
+ const speaker = (name, role) => `<p class="who">${name}<span> · ${role}</span></p>`;
+ const dot = (tag) => `<span class="status-dot ${tag || ""}">${tag === "foundations" ? "Foundations" : tag === "aside" ? "Set aside" : "Not reviewed"}</span>`;
+ // The conversation: subtitles beside the globe. New words rise in softly; options are plain text under the line.
+-let lastSub = "";
++let lastSub = "", focusedPage = null;
++let textMode = false;
+ function composer(html) {
+   const changed = html !== lastSub; lastSub = html;
+-  panel.innerHTML = html; panel.classList.toggle("empty", !html);
+-  if (html) panel.classList.remove("folded");
++  if (changed) panel.innerHTML = html; panel.classList.toggle("empty", !html);
++  if (html && changed) panel.classList.remove("folded");
+   document.body.classList.toggle("talking", !!html && !panel.classList.contains("folded"));
+   orb.reduced = state.settings.reduced;
+   if (changed && html && !state.settings.reduced) {
+     let k = 0;
+-    panel.querySelectorAll(".who, p:not(.who), .opts, form > *:not(.sr)").forEach((el) => { el.style.setProperty("--d", `${Math.min(k++ * 70, 420)}ms`); el.classList.add("rise"); });
++    panel.querySelectorAll(".who, p:not(.who), .opts, form > *:not(.sr)").forEach((el) => { el.style.setProperty("--d", "0ms"); el.classList.add("rise"); });
+   }
+   const quiet = busy || state.page === "P00";      // the title screen and scene changes have no globe
+   requestAnimationFrame(() => orb.place(html ? (panel.classList.contains("folded") ? "rest" : "prompt") : (quiet ? "hidden" : "rest"), { activate: changed }));
+ }
+-function modal(html) { closeMenu(); $("#drawerBody").innerHTML = html; if (!drawer.open) drawer.showModal(); }
+-function close() { if (drawer.open) drawer.close(); }
++function modal(html) { drawer.getAnimations().forEach(a=>a.cancel()); closeMenu(); snapshotDrafts(); document.body.classList.add("detail-open"); $("#drawerBody").innerHTML = html; if (!drawer.open) drawer.showModal(); }
++function close() {
++  if (!drawer.open) return;
++  if (state.settings.reduced) { drawer.close(); return; }
++  const a=drawer.animate([{opacity:1,transform:"none"},{opacity:0,transform:"translateY(6px) scale(.98)"}],{duration:160,easing:"ease-in"});
++  a.finished.then(()=>{drawer.close();}).catch(()=>{});
++}
++drawer.addEventListener("close", () => document.body.classList.remove("detail-open"));
+ $("#closeDrawer").onclick = close;
++drawer.addEventListener("cancel", e=>{e.preventDefault();close();});
+ drawer.addEventListener("click", (e) => { if (e.target === drawer) close(); });
+ 
+ // ---- the globe's menu: everything that used to sit on screen lives here
+@@ -74,6 +82,8 @@
+   }
+   if (!panel.classList.contains("empty")) items.push(["toggleTalk", panel.classList.contains("folded") ? "Show the conversation" : "Hide the conversation"]);
+   if (state.page !== "P00") items.push(["notebook", "Notebook"]);
++  if (state.feedback) items.push(["feedback", "Latest feedback"]);
++  if (!inspecting()) items.push(["viewReset", "Reset model view"], ["viewTop", "View from above"]);
+   items.push(["settings", "Settings"]);
+   return items;
+ }
+@@ -104,8 +114,8 @@
+ 
+ async function fadeTo(kicker, title, work) {
+   const f = $("#fade"); $("#fadeKicker").textContent = kicker || ""; $("#fadeTitle").textContent = title || ""; $("#fadeSub").textContent = "";
+-  f.classList.add("on"); await wait(700 + (title ? 900 : 0));
+-  await work(); f.classList.remove("on"); await wait(500);
++  f.classList.add("on"); await wait(title ? 650 : 250);
++  await work(); f.classList.remove("on"); await wait(250);
+ }
+ 
+ const loading = {};                                // one load per model; later callers await the same promise
+@@ -122,7 +132,8 @@
+   if (name === "casefile") paintCase();
+   if (name === "kalinda") world.prepareKalinda();
+   if (name === "chair") world.prepareChairProps();
+-  world.setMood(currentScene);                     // a late-loading model must obey the current place's visibility
++  world.setMood(currentScene);
++  if (!world.inspector.active) world.pose(CAMERA[state.page], 0); // a late-loading model must obey the current place's visibility
+   return a;
+ }
+ 
+@@ -158,11 +169,14 @@
+   world?.paintPages(pageInfo, C.evidence.length, state.doc);
+   reader.innerHTML = readerHTML(state.doc);
+ }
+-const inspecting = () => !!world?.inspector.active && world.inspector.state !== "out";
++const inspecting = () => textMode || (!!world?.inspector.active && !["out","returning"].includes(world.inspector.state));
+ const TOUCH = matchMedia("(hover: none)").matches;
+ let hudRAF = 0, hoverFile = false, introUntil = 0;
+ function caseHUD() {
+-  const on = state.page === "P03" && inspecting() && world.inspector.state === "held";
++  const on = state.page === "P03" && inspecting() && !textMode && world?.inspector.state === "held";
++  $("#documentNav").hidden = state.page !== "P03" || !inspecting();
++  $("#documentNav [data-arg=\"-1\"]").disabled = state.doc === 0;
++  $("#documentNav [data-arg=\"1\"]").disabled = state.doc === C.evidence.length-1;
+   stampsEl.hidden = !on; countEl.hidden = !on;
+   cancelAnimationFrame(hudRAF);
+   if (!on) return;
+@@ -181,7 +195,7 @@
+       else stampsEl.style.transform = `translate(${Math.max(12, Math.min(innerWidth - 300, a.bottom.x - 140))}px, ${Math.min(innerHeight - 178, a.bottom.y + 14)}px)`;
+       countEl.style.transform = `translate(${a.bottom.x}px, ${Math.min(innerHeight - (fits ? 104 : 128), a.bottom.y + (fits ? 16 : 58))}px) translateX(-50%)`;
+     }
+-    const show = TOUCH || hoverFile || performance.now() < introUntil || stampsEl.contains(document.activeElement) || stampsEl.matches(":hover");
++    const show = true;
+     stampsEl.classList.toggle("show", show);
+     hudRAF = requestAnimationFrame(step);
+   };
+@@ -189,7 +203,8 @@
+ }
+ async function openCaseFile() {
+   await ensureAsset("casefile");
+-  if (!world?.assets.casefile) return;
++  if (!world?.assets.casefile) { textMode=true; render(); return; }
++  textMode=false;
+   await world.pose("CAM_Desk", 600);
+   paintCase();
+   orb.place("hidden");
+@@ -199,6 +214,7 @@
+   return new Promise((res) => { const t = () => (!world || world.inspector.state === "idle" ? res() : requestAnimationFrame(t)); t(); });
+ }
+ async function closeCaseFile() {
++  textMode=false;
+   if (!world?.inspector.active) return;
+   world.inspector.exit();
+   await untilIdle();
+@@ -218,6 +234,7 @@
+ // ---------------------------------------------------------------- navigation
+ async function go(page) {
+   if (busy) return;
++  if (paused) { paused=false; orb.paused=false; world?.setPaused(false); }
+   const from = state.page;
+   busy = true; document.body.classList.add("busy");
+   try {
+@@ -240,10 +257,11 @@
+   document.body.dataset.scene = scene; document.body.classList.toggle("reduced", state.settings.reduced);
+   stage.innerHTML = "";
+   stage.dataset.layout = p === "P00" ? "hero" : ["P04", "P14"].includes(p) ? "center" : "side";
+-  world?.setBlur(p === "P00" ? 0.6 : ["P04", "P14"].includes(p) ? 0.45 : 0);
++  world?.setBlur(0);
++  document.body.dataset.page = p;
+   if (p === "P00") {
+-    stage.innerHTML = `<div class="hero"><div class="hero-strands" aria-hidden="true"></div><small>IRS 103 · Introduction to African Politics</small><h1>The Analyst’s Brief</h1><p>Check what can be trusted · test what changed events · recommend · explain</p>${row(b("Start", "start", "", "primary"), state.resumePage && state.resumePage !== "P00" ? b("Continue saved run", "resume") : "")}</div>`;
+-    heroStrands = new Strands(stage.querySelector(".hero-strands"), { glass: false, energy: 0.6, interactive: false, opacity: 0.75 });
++    stage.innerHTML = `<div class="hero"><small>IRS 103 · Introduction to African Politics</small><h1>The Analyst’s Brief</h1>${row(b("Start", "start", "", "primary"), state.resumePage && state.resumePage !== "P00" ? b("Continue saved run", "resume") : "")}</div>`;
++
+     composer(""); orb.place("hidden");
+   }
+   if (p === "P01") composer(`${speaker("Reception", "The Commission")}<form data-form="identity"><label for="name">Welcome. What should we call you?</label><div class="row"><input id="name" name="name" maxlength="60" value="${esc(state.name)}" required autocomplete="given-name" placeholder="Your name"><button class="primary">Continue</button></div><small id="nameHelp"></small></form>`);
+@@ -253,7 +271,10 @@
+       : `${speaker("Dr Amina Diallo", "Research Director")}<p>Kalinda faces a disputed election, clashes at the Crossing, rumours of an army mutiny and a corruption scandal. Check the evidence, test the causes, then recommend a response.</p>${row(b("Open the case file", "go", "P03", "primary"), b("Full transcript", "transcript"))}`);
+   }
+   if (p === "P03") {
+-    if (inspecting()) composer(E.evidenceReady(state.tags) && !state.readyNoted ? `${speaker("Dr Amina Diallo", "Research Director")}<p>That is enough to build on. Review your sources when you are ready.</p>${row(b("Review sources", "reviewSources", "", "primary"))}` : "");
++    if (inspecting()) {
++      composer("");
++      if (textMode) stage.innerHTML=`<article class="card wide">${readerHTML(state.doc)}${row(b("Foundations","tag","foundations"),b("Set aside","tag","aside"))}</article>`;
++    }
+     else composer(`<p>The case file is on your desk. ${Object.keys(state.tags).length} of 18 sources tagged.</p>${row(b("Open the case file", "openFile", "", "primary"), b("Review sources", "go", "P04"))}`);
+     caseHUD();
+   }
+@@ -298,7 +319,7 @@
+   }
+   if (p === "P12") composer(`${speaker("Hon. Grace Mwangi", "Commission Chair")}<p>Sixty seconds. What do I tell the Dialogue in the morning?</p>${row(b("Type briefing", "go", "P13", "primary"), b("Record briefing", "recordConsent"))}`);
+   if (p === "P13") {
+-    stage.innerHTML = `<article class="card"><span class="kicker">Topic check · unscored</span><h2>Your briefing</h2><div class="lines">${Object.entries(E.briefingCheck(state.brief)).map(([k, v]) => `<div><b>${k}</b><em class="${v ? "ok" : ""}">${v ? "Detected" : "Not yet"}</em></div>`).join("")}</div><small>A check for topics, not a judgement of your reasoning.</small></article>`;
++    if (state.showTopicCheck) stage.innerHTML = `<article class="card"><span class="kicker">Topic check · unscored</span><h2>Your briefing</h2><div class="lines">${Object.entries(E.briefingCheck(state.brief)).map(([k, v]) => `<div><b>${k}</b><em class="${v ? "ok" : ""}">${v ? "Detected" : "Not yet"}</em></div>`).join("")}</div><small>A check for topics, not a judgement of your reasoning.</small></article>`;
+     composer(`<p class="who">Your briefing<span> · for the Chair, about sixty seconds</span></p><form data-form="brief"><label class="sr" for="brief">Briefing</label><textarea id="brief" name="brief" required maxlength="6000" placeholder="Your recommendation for the Chair…">${esc(state.brief)}</textarea>${row(b("Check topics", "checkBrief"), b("Record instead", "recordConsent"), '<button class="primary">Send to the Chair</button>')}</form>`);
+   }
+   if (p === "P14") {
+@@ -306,10 +327,12 @@
+     stage.innerHTML = `<article class="card wide"><span class="kicker">Thursday night · Debrief</span><h2>Your analyst’s brief</h2><p>${C.forward[f]}</p><div class="debrief-grid">${["Sourcing evidence", "Explaining causes", "Responding today"].map((t, i) => `<div><small>${t}</small><strong>${state.strands[i] || "Not submitted"}</strong></div>`).join("")}</div><p>${C.chair[f]}</p>${row(b("Why it happened", "whyResults"), b("Reflect", "reflect"), b("Your record", "download"))}</article>`;
+     composer(`${speaker("Dr Amina Diallo", "Research Director")}<p>No analysis can promise a safe future. Good analysis can show what is known, what is not, and what to do next.</p>${b("Restart simulation", "restart")}`);
+   }
++  if (p !== "P03") $("#documentNav").hidden=true;
+   announce(p === "P06" ? "Running the model" : ((p === "P00" ? "" : PLACE[scene] + ". ") + (stage.textContent || panel.textContent)).slice(0, 220));
+   requestAnimationFrame(() => {
+     const focus = panel.querySelector("input,textarea,select,button.primary,button") || stage.querySelector("button");
+-    if (focus && p !== "P03") focus.focus({ preventScroll: true, focusVisible: false });   // ring only once the keyboard is used
++    if (focus && p !== "P03" && focusedPage !== p) focus.focus({ preventScroll: true, focusVisible: false });   // ring only once the keyboard is used
++    focusedPage = p;
+   });
+ }
+ 
+@@ -318,7 +341,7 @@
+ async function ritual(ms, work, after) { // a short skippable beat; the result is computed locally, never "thinking"
+   busy = true; document.body.classList.add("busy"); composer("");
+   orb.place("working");
+-  await wait(ms);
++  await wait(Math.min(ms, 350));
+   try { work(); } finally { busy = false; document.body.classList.remove("busy"); save(); await enterScene(state.page); render(); after?.(); }
+ }
+ 
+@@ -334,7 +357,7 @@
+     if (busy) return;
+     const e = C.evidence[state.doc]; state.tags[e.id] = value; save();
+     paintCase(); caseHUD();
+-    if (E.evidenceReady(state.tags) && !state.readyShown) { state.readyShown = true; render(); }
++    if (textMode) render();
+     window.dispatchEvent(new CustomEvent("analyst:tag", { detail: { id: e.id, value } }));
+     announce(`Tagged ${value === "aside" ? "Set aside" : "Foundations"}. Click the page, or press the right arrow, for the next source.`);
+   },
+@@ -343,22 +366,25 @@
+     const nextDoc = Math.max(0, Math.min(C.evidence.length - 1, state.doc + Number(dir)));
+     if (nextDoc === state.doc) return;
+     state.doc = nextDoc; save();
+-    world.inspector.turnTo(nextDoc); paintCase(); caseHUD();
++    world?.inspector.turnTo(nextDoc); paintCase(); caseHUD(); if (textMode) render();
+     announce(`${C.evidence[state.doc].title}. ${state.doc + 1} of 18.`);
+   },
+   filter(f) { state.filter = f; save(); render(); },
+   openFile() { if (!busy && state.page === "P03") { composer(""); openCaseFile(); } },
+-  putBack() { if (world?.inspector.active) { world.inspector.exit(); } },
++  putBack() { if(textMode){textMode=false;render();return;} if (world?.inspector.active) { world.inspector.exit(); } },
+   zoom(d) { world?.inspector.zoomBy(Number(d) > 0 ? 1.35 : 1 / 1.35); },
+   zoomPage() { world?.inspector.focusPage(); },
+   reviewSources() { state.readyNoted = true; go("P04"); },
+   toggleTalk() { panel.classList.toggle("folded"); document.body.classList.toggle("talking", !panel.classList.contains("folded")); orb.place(panel.classList.contains("folded") ? "rest" : "prompt", { activate: false }); },
+   notebook() { modal(`<h2>Analyst’s notebook</h2><p>${esc(state.name) || "Name not set"} · ${state.interest ? "Connection to Tamarind Crossing declared" : "Declaration pending"}</p><p>${Object.keys(state.tags).length} sources tagged · ${state.runs.length} model tests · ${state.hallRuns.length} response tests</p><h3>Your findings</h3><p>${esc(state.why) || "Not submitted yet."}</p><h3>Response rationale</h3><p>${esc(state.rationale) || "Not submitted yet."}</p>${b("Download record", "download")}`); },
++  viewReset() { world?.view("reset"); },
++  viewTop() { world?.view("top"); },
++  feedback() { if(state.feedback) modal(state.feedback); },
+   settings() { modal(`<h2>Settings</h2><label class="settings-row">Reduced motion<input type="checkbox" data-setting="reduced" ${state.settings.reduced ? "checked" : ""}></label><label class="settings-row">Sound<input type="checkbox" data-setting="sound" ${state.settings.sound ? "checked" : ""}></label><label class="settings-row">Captions<input type="checkbox" data-setting="captions" ${state.settings.captions ? "checked" : ""}></label><div class="row">${b(paused ? "Resume" : "Pause", "pause")}</div><p class="muted">Voice recordings are not produced yet; all speech is shown as text.</p>`); },
+   readText() { modal(readerHTML(state.doc) + row(b("Add to Foundations", "tagClose", "foundations", "primary"), b("Set aside", "tagClose", "aside"))); },
+   tagClose(v) { close(); actions.tag(v); },
+   reviewDoc(i) { state.doc = +i; go("P03"); },
+-  commitEvidence() { if (!E.evidenceReady(state.tags)) return; state.strands[0] = E.sourcing(state.tags); go("P05").then(() => actions.caseNotes()); },
++  commitEvidence() { if (!E.evidenceReady(state.tags)) return; state.strands[0] = E.sourcing(state.tags); go("P05"); },
+   year(d) { state.year = Math.max(0, Math.min(4, state.year + Number(d))); render(); },
+   caseNotes() { modal(`<h2>Case notes</h2>${C.notes.map((n) => `<details><summary>${esc(n.title)}</summary><p>${esc(n.text)}</p></details>`).join("")}`); },
+   condition() { const f = C.factors.find((f) => f.id === $("#factor").value); modal(`<h2>${esc(f.title)}</h2><p><strong>As it happened:</strong> ${esc(f.base)}</p><p><strong>Alternative:</strong> ${esc(f.alternative)}</p>${row(b("Keep base condition", "factorBase", f.id), b("Use alternative", "factorAlt", f.id, "primary"))}`); },
+@@ -379,7 +405,7 @@
+   editLever(i) { state.lever = +i; go("P10"); },
+   runHall() { snapshotDrafts(); try { const r = E.response(state.choices, state.weather); ritual(900, () => { state.hallRuns.push(r); state.page = "P11"; }); } catch (e) { announce(e.message); modal(`<p>${esc(e.message)}</p>${b("Return to choices", "closeAndPlan")}`); } },
+   closeAndPlan() { close(); go("P10"); },
+-  checkBrief() { snapshotDrafts(); render(); },
++  checkBrief() { snapshotDrafts(); state.showTopicCheck=true; render(); },
+   recordConsent() { snapshotDrafts(); modal(`<h2>Record your briefing</h2><p>Your microphone records only after you choose Allow and start. Audio stays in this tab unless you download it, and you can delete it. Automatic transcription is not connected, so the topic check will show as unavailable for audio.</p>${row(b("Allow and start", "recordStart", "", "primary"), b("Type instead", "typeInstead"))}`); },
+   typeInstead() { stopMedia(); close(); go("P13"); },
+   async recordStart() {
+@@ -474,14 +500,15 @@
+   if (kind === "rationale") {
+     snapshotDrafts(); if (!state.rationale.trim()) return;
+     let r; try { r = E.response(state.choices, state.weather); } catch { actions.runHall(); return; }
+-    ritual(4000, () => { state.strands[2] = r.strand; state.finalResponse = r; state.page = "P12"; }, () => modal(`<h2>Grace Mwangi · Dialogue response</h2><p>${esc(E.dialogue(r))}</p>`));
++    ritual(4000, () => { state.strands[2] = r.strand; state.finalResponse = r; state.page = "P12"; }, () => queueFeedback(`<h2>Grace Mwangi · Dialogue response</h2><p>${esc(E.dialogue(r))}</p>`));
+   }
+   if (kind === "brief") { snapshotDrafts(); if (state.brief.trim()) { state.briefCheck = E.briefingCheck(state.brief); go("P14"); } }
+ });
++function queueFeedback(html) { state.feedback=html; save(); announce("Feedback available in the agent menu."); $("#agentButton").setAttribute("aria-label","Agent menu — new feedback available"); }
+ function submitFindings() {
+   close();
+   ritual(3000, () => { state.strands[1] = E.findings(state.findings); state.weather = E.climate(state.strands[0], state.strands[1]); state.page = "P09"; },
+-    () => modal(`<h2>Dr Amina Diallo</h2><p>${C.diallo[state.strands[1]]}</p>`));
++    () => queueFeedback(`<h2>Dr Amina Diallo</h2><p>${C.diallo[state.strands[1]]}</p>`));
+ }
+ actions.submitFindings = submitFindings;
+ actions.closeToModel = () => { close(); go("P05"); };
+--- /dev/null
++++ b/web/src/spatial.css
+@@ -0,0 +1,34 @@
++/* Current authority: light stage, quiet corner assistant. Overrides legacy styles.css. */
++:root{--ink:#252b29;--ink-2:#58625e;--ink-3:#69726e;--glass:rgba(255,255,252,.9);--dglass:var(--glass);--dedge:inset 0 0 0 1px #3f4a421a;--dfloat:0 12px 40px #2830291a;--float:var(--dfloat);--ease:cubic-bezier(.22,.8,.3,1)}
++body{background:#f4f3ee}#scrim,#aiGlow{display:none}button,.ic,.seg button,#closeDrawer{min-width:44px;min-height:44px}button:hover{transform:none}
++#stage[data-layout=hero]{inset:auto auto 38px 40px;width:min(440px,calc(100vw - 80px))}.hero{text-align:left;color:var(--ink)}.hero h1{font-size:clamp(32px,4vw,48px)}.hero small{color:var(--ink-2);font-size:10px}.hero .row{justify-content:flex-start;margin-top:18px}.hero button.primary{background:var(--ink);color:white}.hero button:not(.primary){background:var(--glass);color:var(--ink)}
++#agent{left:auto;right:22px;top:18px;bottom:auto;width:48px;height:48px;background:#ffffffc2;box-shadow:var(--dedge),0 4px 16px #263b2912;transition:transform 280ms var(--ease),opacity 200ms}
++#agent[data-phase=rest],#agent[data-phase=prompt]{transform:none;opacity:1}#agent[data-phase=working]{transform:scale(1.06)}#agent[data-phase=hidden]{transform:scale(.9);filter:none}#agent .hit{inset:0;min-width:44px;min-height:44px}#agent .hit:focus-visible{outline-color:#48765c}#agent .globe.strands-container{inset:-5px}
++#agentMenu{left:auto;right:22px;top:76px;bottom:auto;width:230px;background:var(--glass);box-shadow:var(--dedge),var(--dfloat);transform-origin:100% 0;text-align:left;filter:none}#agentMenu button{color:var(--ink);min-height:44px;padding:8px 12px}#agentMenu button:hover,#agentMenu button:focus-visible{background:#e9eee7;color:var(--ink)}
++#composer{left:auto;right:22px;top:82px;bottom:auto;width:min(380px,calc(100vw - 44px));max-height:calc(100dvh - 108px);transform:none;transform-origin:100% 0;text-align:left;padding:18px;border-radius:22px;background:var(--glass);backdrop-filter:blur(18px);box-shadow:var(--dedge),var(--dfloat);color:var(--ink);transition:opacity 220ms,transform 320ms var(--ease),visibility 0s}
++#composer.empty,#composer.folded{transform:translate(10px,-12px) scale(.94);filter:none;transition:opacity 180ms,transform 240ms var(--ease),visibility 0s 240ms}
++#composer p,#composer label{color:var(--ink);text-shadow:none;font-size:15px;font-weight:500;line-height:1.55}#composer .who{color:var(--ink);font-size:12px;font-weight:700;margin-bottom:10px}#composer .who span,#composer small{color:var(--ink-2);text-shadow:none;font-size:12px}
++#composer .row,#composer .choices{gap:8px;justify-content:flex-start}#composer .stack{gap:6px;align-items:stretch}#composer button{box-sizing:border-box;min-height:44px;min-width:44px;padding:9px 12px;border-radius:12px;align-items:center;background:#e9eee7;color:var(--ink);font-size:13px;text-shadow:none;font-weight:600}#composer button::before{content:none}#composer button:hover,#composer button:focus-visible{color:var(--ink);background:#dfe7dc}#composer button.primary,#composer button.selected{background:#334d3f;color:#fff}#composer button:focus-visible{outline:2px solid #48765c}
++#composer input,#composer textarea,#composer select,#composer form .row:has(input){background:#edf0e9e6;color:var(--ink);box-shadow:inset 0 0 0 1px #526a4f26;backdrop-filter:none;border-radius:14px;text-shadow:none}#composer input::placeholder,#composer textarea::placeholder{color:#69726e}#composer select{min-width:0;width:100%}#composer form{display:block}#composer form .row:has(input){padding:3px}#composer form .row:has(input) button{background:#334d3f;color:white;height:44px;padding:0 12px}#composer textarea{width:100%;min-height:112px}
++#stage[data-layout=side]{top:auto;bottom:24px;right:22px;width:min(380px,calc(100vw - 44px))}#stage[data-layout=side] .card{max-height:34dvh}#stage[data-layout=center]{inset:28px 430px 28px 28px;padding:0}
++.card,.card h2,.card p,.card strong,dialog,dialog h2,dialog p,dialog strong{color:var(--ink)}.card small,.card .muted,.kicker,dialog small,dialog .muted{color:var(--ink-2)}.card{background:var(--glass);padding:18px;border-radius:20px;box-shadow:var(--dedge),var(--dfloat);max-height:calc(100dvh - 56px)}.card h2{font-size:20px}.card p{font-size:14px}.card .headline{color:var(--ink)}.card .list button,.card button.plain{color:var(--ink)}.card .list button:hover{background:#e9eee7}.card .status-dot,.card .num,.card .seg button{color:var(--ink-2)}.card .seg button[aria-pressed=true]{background:#dce7d8;color:var(--ink)}.card .lines b,.card .lines span,.card .lines em{color:var(--ink)}.card .lines>div{border-color:#334d3f20}.card .debrief-grid div{background:#e9eee7}
++dialog{background:#fffffcf5;box-shadow:var(--dedge),var(--dfloat);width:min(560px,calc(100vw - 32px));border-radius:22px;animation:detailIn 240ms var(--ease)}dialog::backdrop{background:#e6e9e333;backdrop-filter:none}body.detail-open #composer,body.detail-open #stage,body.detail-open #documentNav,body.detail-open #stamps{visibility:hidden}dialog button:not(.primary){color:var(--ink);background:#e9eee7}dialog input,dialog textarea{background:#f0f2ec;color:var(--ink)}.reader .body{font:15px/1.7 Manrope,system-ui,sans-serif}.rise{animation:none}
++@keyframes detailIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}@keyframes cardIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
++.stamps{gap:6px}.stamp,.stamps.show .stamp,.stamps.show .stamp.a{box-sizing:border-box;min-height:44px;transform:none;border:1px solid #4b65572e;border-radius:10px;letter-spacing:0;text-transform:none;font:600 12px Manrope,sans-serif;color:#334d3f;text-shadow:none;background:#fffffaf0;filter:none}.stamp.f.on{color:#274833;background:#dcebdc}.stamp.a.on{color:#344d66;background:#e0eaf3}.stamp:focus-visible{outline:2px solid #334d3f}.page-count{color:#59635e;text-shadow:none}
++#documentNav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:12;display:flex;gap:4px;padding:5px;border-radius:18px;background:var(--glass);backdrop-filter:blur(16px);box-shadow:var(--dedge),var(--dfloat)}#documentNav[hidden]{display:none}#documentNav button{background:transparent;box-shadow:none;padding:0 12px;font-size:12px}#documentNav button:hover{background:#e9eee7}
++.xf{background:#f4f3ee;color:var(--ink);transition:opacity 250ms}.xf small{color:var(--ink-2)}body.no-webgl #stage{background:transparent}body[data-page=P03] #stage{inset:82px 24px 90px;width:auto;display:flex}
++@media(max-width:700px){#agent{right:14px;top:12px}#agentMenu{right:14px;top:70px}#composer{top:auto;bottom:18px;right:14px;width:calc(100vw - 28px);max-height:48dvh;padding:15px;transform-origin:100% 100%}#composer.empty,#composer.folded{transform:translateY(12px) scale(.97)}#composer p,#composer label{font-size:14px}#stage[data-layout=side]{right:14px;top:78px;bottom:auto;width:calc(100vw - 28px)}#stage[data-layout=side] .card{max-height:30dvh}#stage[data-layout=center]{inset:78px 14px auto;max-height:45dvh;padding:0}#stage[data-layout=center] .card{max-height:45dvh}#stage[data-layout=hero]{left:24px;bottom:32px;width:calc(100vw - 48px)}.list .title{font-size:12px}.list button{gap:7px;padding:8px}.list .status-dot{font-size:10px;white-space:normal}.list .num{display:none}#documentNav{bottom:12px;max-width:calc(100vw - 20px)}#documentNav button{padding:0 9px}.debrief-grid{grid-template-columns:1fr}}
++/* Explicitly replace inherited dark-theme foregrounds and undersized legacy buttons. */
++.card button,dialog button:not(#closeDrawer):not(.primary),.card button.primary,dialog button.primary,.card .seg button,.list button{box-sizing:border-box;min-height:44px;min-width:44px;padding:8px 12px;color:var(--ink);border-radius:12px;align-items:center}
++.card button:hover,.card button:focus-visible,dialog button:not(#closeDrawer):not(.primary):hover{color:var(--ink);background:#e9eee7}
++.card button::before,dialog button::before{content:none!important}.card button.primary,dialog button.primary{background:#334d3f;color:#fff}
++.card button:focus-visible,dialog button:focus-visible{outline-color:#48765c}
++#closeDrawer{min-height:44px;min-width:44px;color:var(--ink);background:#e9eee7}
++dialog h3,dialog label,dialog summary,.settings-row,.reader .body{color:var(--ink)}.reader .source{color:var(--ink-2)}.reader .flag{background:#f5edda;color:#62441f}
++.card .lines em.ok{color:#356345}.card .lines em.warn{color:#795117}.card .lines em.bad{color:#963e37}
++.meter{background:#334d3f20}.meter i{background:#587861}.card .debrief-grid small{color:var(--ink-2)}
++.nt{background:var(--glass);color:var(--ink)}.nt span{color:var(--ink-2)}.nt i{background:#334d3f}.nt button{min-height:44px}
++dialog[open]{animation:detailIn 240ms var(--ease)}dialog::backdrop{-webkit-backdrop-filter:none}
++#agent.globe-fallback .globe{inset:9px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#e2eecf,#7b9b7e 48%,#3d5d50);box-shadow:inset 0 0 0 1px #ffffff80}
++
++@media(max-width:700px){#stage[data-layout=center],#stage[data-layout=center] .card{max-height:36dvh}}
+--- /dev/null
++++ b/web/src/spatial.js
+@@ -0,0 +1,67 @@
++// Runtime adaptation of the supplied room assets. No GLB is rewritten.
++import * as THREE from "three";
++import { OrbitControls } from "three/addons/controls/OrbitControls.js";
++
++export function visibleBounds(root) {
++  const box = new THREE.Box3();
++  root?.updateWorldMatrix(true, true);
++  root?.traverse(o => {
++    if (!o.isMesh) return;
++    for (let a=o; a; a=a.parent) if (!a.visible) return;
++    o.geometry.computeBoundingBox();
++    box.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld));
++  });
++  return box;
++}
++
++export function cutaway(root, kind) {
++  if (!["office", "hall"].includes(kind)) return;
++  const box = visibleBounds(root), size=box.getSize(new THREE.Vector3()), c=box.getCenter(new THREE.Vector3());
++  // Existing assets combine walls. Cut just the front two architectural edges at runtime.
++  // A production Blender pass should replace this with authored, capped wall meshes.
++  root.traverse(o => {
++    if (/Ceiling|CeilingFixtures|HALL_Block_Lamps|HALL_Lamp/i.test(o.name)) o.visible=false;
++    if (!o.isMesh || !/ARCH_|HALL_Block|HALL_Door|HALL_Window/.test(o.name)) return;
++    if (/Floor/i.test(o.name)) return;
++    o.castShadow=false;
++    const materials=Array.isArray(o.material)?o.material:[o.material];
++    const cloned=materials.map(source=>{
++      const m=source.clone(); m.side=THREE.DoubleSide;
++      m.onBeforeCompile=shader=>{
++        shader.uniforms.cutLimits={value:new THREE.Vector3(c.x+size.x*.32,box.min.y+.5,c.z+size.z*.32)};
++        shader.vertexShader='varying vec3 cutWorld;\n'+shader.vertexShader;
++        shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ncutWorld=(modelMatrix*vec4(transformed,1.0)).xyz;');
++        shader.fragmentShader='varying vec3 cutWorld; uniform vec3 cutLimits;\n'+shader.fragmentShader;
++        shader.fragmentShader=shader.fragmentShader.replace('#include <clipping_planes_fragment>','#include <clipping_planes_fragment>\nif(cutWorld.y>cutLimits.y && (cutWorld.x>cutLimits.x || cutWorld.z>cutLimits.z)) discard;');
++      };
++      m.customProgramCacheKey=()=>`cutaway-${kind}`;
++      return m;
++    });
++    o.material=Array.isArray(o.material)?cloned:cloned[0];
++  });
++}
++
++export function spatialControls(camera, canvas) {
++  const controls=new OrbitControls(camera,canvas);
++  controls.enablePan=false; controls.enableDamping=false; controls.enableZoom=true;
++  controls.minPolarAngle=THREE.MathUtils.degToRad(20);
++  controls.maxPolarAngle=THREE.MathUtils.degToRad(65);
++  controls.minAzimuthAngle=THREE.MathUtils.degToRad(20);
++  controls.maxAzimuthAngle=THREE.MathUtils.degToRad(70);
++  controls.rotateSpeed=.45; controls.zoomSpeed=.55;
++  controls.mouseButtons={LEFT:THREE.MOUSE.ROTATE,MIDDLE:THREE.MOUSE.DOLLY,RIGHT:THREE.MOUSE.ROTATE};
++  function fit(root) {
++    let box=visibleBounds(root);
++    if(box.isEmpty()) box=new THREE.Box3(new THREE.Vector3(-3,0,-3),new THREE.Vector3(3,3,3));
++    const center=box.getCenter(new THREE.Vector3()), size=box.getSize(new THREE.Vector3());
++    // Narrow perspective gives an isometric-style model view while sharing the document camera.
++    const radius=size.length()*.5;
++    const aspect=innerWidth/innerHeight;
++    const fitAspect=aspect>1.2?aspect*.66:aspect;
++    const distance=radius/Math.sin(THREE.MathUtils.degToRad(28/2))*Math.max(1,1/fitAspect)*1.10;
++    controls.target.copy(center); controls.minDistance=distance*.65; controls.maxDistance=distance*1.7;
++    const direction=new THREE.Vector3(1,1.05,1).normalize();
++    return {position:center.clone().addScaledVector(direction,distance),center};
++  }
++  return {controls,fit};
++}
+--- a/web/src/world.js
++++ b/web/src/world.js
+@@ -14,6 +14,7 @@
+ import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+ import { ShaderPass } from "three/addons/postprocessing/ShaderPass.js";
+ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
++import { cutaway, spatialControls } from "./spatial.js";
+ import { Inspector } from "./inspector.js";
+ import { PageTextures } from "./pages.js";
+ 
+@@ -21,17 +22,10 @@
+ 
+ // Per place: environment strength, exposure, live lights, and the grade (contrast around mid-grey, saturation,
+ // vignette). Contrast is applied in linear light before tone mapping, so it deepens shadows without crushing.
+-const MOODS = {
+-  office: { env: 0.85, exposure: 1.18, windows: 2.2, ceil: 0.5, hemi: 0.12, sun: 1.9, lamp: 0, bg: 0x0d0f12,
+-    contrast: 1.32, sat: 1.1, vig: 0.55, tint: [0.98, 0.99, 1.02] },
+-  model: { env: 0.85, exposure: 1.15, windows: 2.0, ceil: 0.6, hemi: 0.15, sun: 1.6, lamp: 0, bg: 0x0d0f12,
+-    contrast: 1.28, sat: 1.12, vig: 0.55, tint: [0.98, 0.99, 1.02] },
+-  // the hall's light is baked into its lightmaps (emissive); live light only touches the furniture added to it
+-  hall: { env: 0.3, exposure: 0.62, windows: 0, ceil: 0.9, hemi: 0.15, sun: 0, lamp: 0, bg: 0x101112,
+-    contrast: 1.24, sat: 1.06, vig: 0.5, tint: [1.0, 0.99, 0.97] },
+-  chair: { env: 0.22, exposure: 1.0, windows: 0.35, ceil: 0, hemi: 0.08, sun: 0, lamp: 7, bg: 0x07080c,
+-    contrast: 1.2, sat: 1.0, vig: 0.6, tint: [1.04, 0.98, 0.92] },
+-};
++const MOODS = Object.fromEntries(["office", "model", "hall", "chair"].map(name => [name, {
++  env: name === "hall" ? .65 : .9, exposure: 1.15, windows: .5, ceil: .7, hemi: .7, sun: 1.8, lamp: 0,
++  bg: 0xf4f3ee, contrast: 1, sat: .95, vig: 0, tint: [1,1,1]
++}]));
+ 
+ const EDGE_VERT = /* glsl */ `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`;
+ const EDGE_FRAG = /* glsl */ `
+@@ -65,9 +59,9 @@
+       x = 0.18 * pow(x / 0.18, vec3(contrast));                       // contrast around mid-grey, in linear light
+       float l = dot(x, vec3(0.2126, 0.7152, 0.0722));
+       x = max(mix(vec3(l), x, sat), 0.0);
+-      x = mix(x, mix(vec3(l), x, 0.75) * 0.55, amt);                    // held object: desaturate + darken the room
++      x = mix(x, mix(vec3(l), x, 0.9) * 0.95, amt);                    // held object: desaturate + darken the room
+       float v = smoothstep(0.95, 0.25, distance(vUv, vec2(0.5)));
+-      x *= mix(1.0, mix(0.72, 1.0, v), clamp(vig + 0.65 * amt, 0.0, 1.0));
++      x *= mix(1.0, mix(0.72, 1.0, v), clamp(vig, 0.0, 1.0));
+       gl_FragColor = vec4(x, c.a); }`,
+ };
+ 
+@@ -84,8 +78,10 @@
+   const dirtyShadows = () => { renderer.shadowMap.needsUpdate = true; };
+ 
+   const scene = new THREE.Scene();
+-  const camera = new THREE.PerspectiveCamera(45, 1, 0.02, 60);
++  const camera = new THREE.PerspectiveCamera(28, 1, 0.02, 300);
+   camera.filmGauge = 36;
++  const spatial = spatialControls(camera, canvas);
++  let poseName = "CAM_OfficeEntry";
+   const pmrem = new THREE.PMREMGenerator(renderer);
+   const roomEnv = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+   let officeEnv = null;
+@@ -119,7 +115,7 @@
+   gtao.blendIntensity = 0.9;
+   composer.addPass(gtao);
+   const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.22, 0.6, 0.92);
+-  composer.addPass(bloom);
++  bloom.enabled = false; composer.addPass(bloom);
+   const blurs = [[1, 0], [0, 1], [1, 0], [0, 1]].map(([x, y]) => {
+     const p = new ShaderPass(BlurShader); p.uniforms.dir.value.set(x, y); p.enabled = false; composer.addPass(p); return p;
+   });
+@@ -159,7 +155,7 @@
+   }
+   function stepCase(dt) {
+     if (!caseAction) return;
+-    assets.casefile.mixer.update(caseAction.paused ? 0 : dt);
++    assets.casefile.mixer.update(caseAction.paused ? 0 : dt * 8);
+     if (segEnd !== null && caseAction.time >= segEnd) {
+       caseAction.time = segEnd; caseAction.paused = true; assets.casefile.mixer.update(0); caseState = segTarget; segEnd = null;
+       if (closeAfterOpen && caseState === "open") { closeAfterOpen = false; toggleCase(); }
+@@ -169,7 +165,7 @@
+   function prepareCaseFile() {
+     caseRoot = node("casefile", "CASEFILE_Root");
+     if (!caseRoot) return;
+-    caseRoot.rotation.y = -0.07;                       // spine away from the learner; the flap opens to the left
++    caseRoot.rotation.y = 0;                       // spine away from the learner; the flap opens to the left
+     const clip = assets.casefile.clips.find((c) => c.name === (caseRoot.userData.sim_anim_clip || "CaseFile_OpenClose"));
+     if (clip) {
+       caseAction = assets.casefile.mixer.clipAction(clip);
+@@ -205,11 +201,11 @@
+       const root = g.scene; root.name = "ASSET_" + name;
+       if (place) root.position.copy(place);
+       root.traverse((o) => { if (o.isMesh && name !== "kalinda") { o.castShadow = true; o.receiveShadow = true; } });
+-      scene.add(root);
++      scene.add(root); cutaway(root, name);
+       const mixer = new THREE.AnimationMixer(root);
+       assets[name] = { root, mixer, clips: g.animations };
+       if (name === "casefile") prepareCaseFile();
+-      if (name === "hall") root.traverse((o) => { if (o.isMesh && /^MAT_Hall_Paint/.test(o.material.name)) o.material.emissiveIntensity = 0.25; });
++      if (name === "hall") root.traverse((o) => { if (o.isMesh && /^MAT_Hall_Paint/.test(o.material?.name)) o.material.emissiveIntensity = 0.25; });
+       dirtyShadows();
+       return assets[name];
+     } catch (error) {
+@@ -221,18 +217,27 @@
+ 
+   // ---- cameras (named first-person poses)
+   function pose(name, duration = 800) {
+-    const p = layout.cameras[name];
+-    if (!p) throw Error("Unknown camera " + name);
+-    const to = cv(p.position);
+-    const tmp = camera.clone(); tmp.position.copy(to); tmp.lookAt(cv(p.target));
++    poseName = name;
++    tween?.resolve?.();
++    const key = name === "CAM_Model" ? "kalinda" : name === "CAM_Hall" ? "hall" : "office";
++    const fitted = spatial.fit(assets[key]?.root);
++    const to=fitted.position, tmp=camera.clone(); tmp.position.copy(to); tmp.lookAt(fitted.center); tmp.fov=28; tmp.updateProjectionMatrix();
+     if (!duration || reduced) {
+-      camera.position.copy(to); camera.quaternion.copy(tmp.quaternion); camera.setFocalLength(p.lens_mm); tween = null;
++      camera.position.copy(to); camera.quaternion.copy(tmp.quaternion); camera.fov=28; camera.updateProjectionMatrix(); tween=null;
+       return Promise.resolve();
+     }
+-    return new Promise((resolve) => {
+-      tween = { from: camera.position.clone(), to, q0: camera.quaternion.clone(), q1: tmp.quaternion.clone(),
+-        f0: camera.getFocalLength(), f1: p.lens_mm, duration, elapsed: 0, resolve };
+-    });
++    return new Promise(resolve => { tween={from:camera.position.clone(),to,q0:camera.quaternion.clone(),q1:tmp.quaternion.clone(),
++      f0:camera.getFocalLength(), f1:tmp.getFocalLength(),duration:Math.min(duration,520),elapsed:0,resolve}; });
++  }
++  function view(action) {
++    if (inspector.active) return;
++    if (action === "reset") return pose(poseName, 360);
++    const v=camera.position.clone().sub(spatial.controls.target);
++    const spherical=new THREE.Spherical().setFromVector3(v);
++    if(action === "top") spherical.phi=THREE.MathUtils.degToRad(20);
++    else spherical.theta=THREE.MathUtils.clamp(spherical.theta+(action === "left" ? -.15 : .15),.35,1.22);
++    camera.position.copy(spatial.controls.target).add(new THREE.Vector3().setFromSpherical(spherical));
++    camera.lookAt(spatial.controls.target);
+   }
+ 
+   let lastW = 0, lastH = 0;
+@@ -246,6 +251,7 @@
+     for (const p of blurs) p.uniforms.res.value.set(w * DPR, h * DPR);
+     const f = camera.getFocalLength();
+     camera.aspect = w / h; camera.setFocalLength(f); camera.updateProjectionMatrix();
++    if (!inspector.active) pose(poseName, 0);
+   }
+ 
+   // ---- clips (map loops)
+@@ -260,7 +266,8 @@
+         depthWrite: false, side: THREE.DoubleSide, uniforms: { uTime: { value: 0 }, uColor: { value: new THREE.Color(0xf28c38) } } });
+       wall.traverse((o) => { if (o.isMesh) o.material = edgeMat; });
+     }
+-    startLoops("kalinda");
++    // The miniature holds still while reading. Test output is reported by the rule engine.
++    if (wall) wall.visible = false;
+   }
+   function prepareChairProps() { const rec = node("chair", "CHAIR_RecIndicator"); if (rec) rec.visible = false; }
+   function setRecording(on) { const rec = node("chair", "CHAIR_RecIndicator"); if (rec) rec.visible = !!on; }
+@@ -280,7 +287,7 @@
+     grade.uniforms.contrast.value = m.contrast; grade.uniforms.sat.value = m.sat; grade.uniforms.vig.value = m.vig;
+     grade.uniforms.tint.value.set(...m.tint);
+     const vis = (asset, v) => { if (assets[asset]) assets[asset].root.visible = v; };
+-    vis("office", name !== "hall");
++    vis("office", name === "office" || name === "chair");
+     vis("casefile", name === "office" || inspector.active);
+     vis("kalinda", name === "model");
+     vis("hall", name === "hall");
+@@ -326,10 +333,11 @@
+     }
+     const id = hotAt(); if (id) onHotspot?.(id);
+   });
++  canvas.addEventListener("pointercancel", () => { mouse.down=false; });
+   canvas.addEventListener("contextmenu", (e) => { if (inspector.active) e.preventDefault(); });
+   canvas.addEventListener("wheel", (e) => { if (inspector.active) { e.preventDefault(); inspector.wheel(e); } }, { passive: false });
+   function hotAt() {
+-    const hits = ray.intersectObjects(scene.children, true).filter((h) => h.object.visible);
++    const hits = ray.intersectObjects(scene.children, true).filter((h) => { for(let o=h.object;o;o=o.parent) if(!o.visible) return false; return true; });
+     for (const h of hits.slice(0, 4)) {
+       let o = h.object;
+       while (o) { if (HOT[o.name]) return HOT[o.name]; o = o.parent; }
+@@ -358,6 +366,7 @@
+ 
+   // ---- loop (adaptive quality as in the viewer: drop resolution, then ambient occlusion, when frames run slow)
+   const perf = { ema: 16, slow: 0 };
++  let frameShift=0;
+   function adapt(dt) {
+     if (document.hidden || dt >= 0.05) return;
+     perf.ema += (dt * 1000 - perf.ema) * 0.05;
+@@ -367,6 +376,11 @@
+   function frame() {
+     const dt = Math.min(clock.getDelta(), 0.05);
+     resize();
++    const shiftTarget=inspector.active || innerWidth<700 ? 0 : document.body.dataset.page === "P00" ? -.08 : .13;
++    frameShift=reduced?shiftTarget:THREE.MathUtils.lerp(frameShift,shiftTarget,1-Math.exp(-dt*10));
++    if(Math.abs(frameShift)>.0001) camera.setViewOffset(innerWidth,innerHeight,innerWidth*frameShift,0,innerWidth,innerHeight);
++    else camera.clearViewOffset();
++    spatial.controls.enabled = !paused && !inspector.active && !tween && !document.body.classList.contains("talking") && !document.querySelector("#drawer")?.open;
+     if (!paused) {
+       for (const [k, a] of Object.entries(assets)) if (k !== "casefile") a.mixer.update(dt);
+       stepCase(dt);
+@@ -416,5 +430,6 @@
+ 
+   return { THREE, scene, camera, renderer, assets, inspector, cv, load, node, pose, setMood, setRecording, project,
+     prepareKalinda, prepareChairProps, setPaused, setReduced, setBlur, inspectCase, paintPages, caseAnchor, dispose,
++    view,
+     get caseState() { return caseState; } };
+ }

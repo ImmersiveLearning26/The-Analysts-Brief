@@ -1,0 +1,778 @@
+/* Design v3 (handoff/DESIGN_V3_SPEC.md). Loaded last: it owns layout, material, type and the agent.
+   Three zones that never compete: the preview (model), the rail (context as icons), the agent (bottom centre). */
+
+/* ---------------------------------------------------------------- tokens */
+:root{
+  --page:#ecebe6;
+  --ink:#1d2321;--ink-2:#535b57;--ink-3:#868c88;--accent:#a8763e;--hair:#1d23211f;
+  --primary:#1d2321;--on-primary:#fbfaf7;
+
+  /* iOS-style glass: translucent fill, strong blur + saturation, bright top edge, soft long shadow */
+  --glass:linear-gradient(180deg,#ffffff8c,#ffffff5e);
+  --glass-solid:#fbfaf7e6;
+  --glass-blur:blur(24px) saturate(180%);
+  --glass-edge:inset 0 1px 0 #ffffffd9,inset 0 0 0 1px #ffffff59,inset 0 -1px 0 #0000000a;
+  --glass-shadow:0 1px 2px #1416140f,0 14px 44px #1416141a;
+  --chip:#1d23210d;--chip-hover:#1d232117;
+
+  --r-card:24px;--r-frame:28px;
+  --ios:cubic-bezier(.32,.72,0,1);         /* Apple sheet curve */
+  --out:cubic-bezier(.16,1,.3,1);          /* ease-out (enter) */
+  --in:cubic-bezier(.7,0,.84,0);           /* ease-in (exit) */
+  --pop:cubic-bezier(.34,1.56,.64,1);      /* small overshoot for icon lift */
+
+  --display:"Afacad Variable",Afacad,Manrope,system-ui,sans-serif;   /* titles and headers */
+  --rail-w:340px;--gap:20px;
+  /* written by main.js from #frame's box */
+  --fcx:50vw;--fw:100vw;
+}
+body{background:var(--page);color:var(--ink);font-family:Manrope,system-ui,sans-serif}
+.xf{background:var(--page)}
+
+/* ---------------------------------------------------------------- type (from the Nasara workbook) */
+.kicker,#composer .who,.hero small{display:block;font:600 11px/1.2 Manrope,system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+#composer .who span{color:var(--ink-3);letter-spacing:.2em}
+.serif,.display,.hero h1,.card h2,.card h3,.card .headline,dialog h2,dialog h3,.pin-card h3{font-family:var(--display);font-weight:600;letter-spacing:-.015em;color:var(--ink)}
+.hero h1 em,.card h2 em,.card .headline em{font-style:italic}
+.meta,.card small,#composer small{font:500 12px/1.4 Manrope,system-ui,sans-serif;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+/* ---------------------------------------------------------------- material */
+.glass,#composer,.card,#railTools button,#viewDock,#documentNav,.nt,.pin-card,dialog{
+  background:var(--glass);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  box-shadow:var(--glass-edge),var(--glass-shadow);border:0}
+dialog{background:var(--glass-solid)}
+
+/* ---------------------------------------------------------------- zone 1: the preview */
+#frame{position:fixed;z-index:0;left:var(--gap);top:var(--gap);bottom:var(--gap);right:calc(var(--rail-w) + var(--gap) * 2);
+  border-radius:var(--r-frame);overflow:hidden;
+  background:radial-gradient(120% 95% at 50% 38%,#fcfbf8 0%,#f1efe9 52%,#e3e0d8 100%);
+  box-shadow:inset 0 0 0 1px #1d23210d,inset 0 1px 0 #ffffffb3}
+#world{z-index:1}
+body[data-page=P00] #frame{right:var(--gap)}       /* the title uses the full stage */
+
+/* ---------------------------------------------------------------- zone 2: the rail */
+#railTools{position:fixed;z-index:6;top:var(--gap);right:var(--gap);display:flex;gap:8px;justify-content:flex-end}
+body[data-page=P00] #railTools{display:none}
+#stage[data-layout=side],#stage[data-layout=center]{inset:auto;top:calc(var(--gap) + 64px);right:var(--gap);bottom:auto;left:auto;
+  width:var(--rail-w);max-height:calc(100dvh - var(--gap) * 2 - 64px);padding:0;display:flex;flex-direction:column;gap:12px;align-items:stretch;justify-content:flex-start}
+#stage[data-layout=side] .card,#stage[data-layout=center] .card{width:auto;max-width:none;max-height:calc(100dvh - var(--gap) * 2 - 64px);overflow:auto}
+.card{border-radius:var(--r-card);padding:20px 20px 18px;color:var(--ink)}
+.card h2{font-size:26px;line-height:1.1;margin:0 0 8px}
+.card .headline{font-size:24px;line-height:1.18;margin:2px 0 12px}
+.card p{font-size:14.5px;line-height:1.55;color:var(--ink-2)}
+.card .kicker{color:var(--accent)}
+.card .meter{height:3px;border-radius:2px;background:var(--hair);margin:6px 0 12px}.card .meter i{background:var(--ink)}
+.card .row{gap:6px}
+.card button,.card .list button{background:var(--chip);color:var(--ink);border-radius:999px;font:600 13px Manrope,sans-serif;padding:0 16px;min-height:40px;box-shadow:none}
+.card button:hover,.card .list button:hover{background:var(--chip-hover)}
+.card .list button{border-radius:14px;justify-content:flex-start}
+.card button.primary{background:var(--primary);color:var(--on-primary)}
+
+/* ---------------------------------------------------------------- icon buttons with a fluid label reveal */
+.ib{position:relative;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:50%;display:grid;place-items:center;color:var(--ink);
+  transition:scale 220ms var(--pop),background 160ms}
+.ib .ph{width:20px;height:20px;fill:currentColor}
+.ib:hover,.ib:focus-visible{scale:1.08}
+.ib:active{scale:.96;transition-duration:90ms}
+.ib .tip{position:absolute;pointer-events:none;white-space:nowrap;padding:7px 12px;border-radius:999px;font:600 12px/1 Manrope,sans-serif;color:var(--ink);
+  background:var(--glass-solid);box-shadow:var(--glass-edge),0 6px 20px #1416141f;opacity:0;scale:.9;
+  transition:opacity 120ms var(--in),scale 120ms var(--in),translate 120ms var(--in)}
+.ib:hover .tip,.ib:focus-visible .tip{opacity:1;scale:1;translate:0 0;transition:opacity 200ms var(--out) 60ms,scale 240ms var(--out) 60ms,translate 240ms var(--out) 60ms}
+#railTools .tip{top:calc(100% + 8px);right:0;translate:0 -6px;transform-origin:100% 0}
+#viewDock .tip{left:calc(100% + 10px);top:50%;margin-top:-14px;translate:-6px 0;transform-origin:0 50%}
+.ib:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* ---------------------------------------------------------------- view capsule, inside the preview's left edge */
+#viewDock{left:calc(var(--gap) + 16px);padding:5px;gap:0;border-radius:28px}
+#viewDock button{width:44px;height:44px;background:none;box-shadow:none}
+#viewDock button:hover{background:var(--chip)}
+#viewDock i{background:var(--hair)}
+#viewDock svg.ph{width:20px;height:20px;fill:currentColor;stroke:none}
+
+/* ---------------------------------------------------------------- title */
+#stage[data-layout=hero]{inset:auto auto calc(var(--gap) + 44px) calc(var(--gap) + 48px);width:min(560px,calc(100vw - 120px))}
+.hero h1{font-size:clamp(44px,5.4vw,76px);line-height:.98;margin:0 0 22px;letter-spacing:-.02em}
+.hero small{margin-bottom:14px}
+.hero button.primary{background:var(--primary);color:var(--on-primary);min-height:48px;padding:0 26px;border-radius:999px;font-weight:600}
+.hero button:not(.primary){background:var(--glass);box-shadow:var(--glass-edge),var(--glass-shadow);color:var(--ink);min-height:48px;border-radius:999px}
+
+/* ---------------------------------------------------------------- document controls and notices follow the preview */
+#documentNav{left:var(--fcx);bottom:calc(var(--gap) + 16px);border-radius:999px;padding:5px}
+#documentNav button{border-radius:999px;color:var(--ink)}
+#documentNav button:hover{background:var(--chip)}
+.nt{left:var(--fcx);border-radius:18px}
+
+/* ---------------------------------------------------------------- phones */
+@media (max-width:700px){
+  :root{--gap:10px}
+  #frame{right:var(--gap)!important;border-radius:22px}
+  #railTools{top:12px;right:12px;gap:6px}
+  #railTools .tip{display:none}
+  #stage[data-layout=side],#stage[data-layout=center]{top:66px;left:12px;right:12px;width:auto}
+  #stage[data-layout=side] .card{max-height:30dvh}
+  #stage[data-layout=hero]{left:28px;bottom:34px;width:calc(100vw - 56px)}
+  #viewDock .tip{display:none}
+}
+@media (prefers-reduced-motion:reduce){.ib,.ib .tip{transition-duration:0ms!important}}
+body.reduced .ib,body.reduced .ib .tip{transition-duration:0ms!important}
+
+/* ---------------------------------------------------------------- zone 3: the agent (bottom centre of the preview)
+   The globe appears only when the agent has something to say. The conversation morphs out of it like the Dynamic
+   Island: a clip from the globe's circle to the full card (460ms, Apple sheet curve), then its content rises in
+   order. Closing reverses into the globe in 260ms. */
+#agentMenu{display:none!important}
+#agent{left:var(--fcx);right:auto;top:auto;bottom:calc(var(--gap) + 18px);width:56px;height:56px;translate:-50% 0;transform:none!important;z-index:9;
+  border-radius:50%;background:transparent;box-shadow:none;opacity:1;scale:1;transition:opacity 260ms var(--out),scale 460ms var(--ios)}
+#agent[data-phase=hidden]{opacity:0;scale:.6;pointer-events:none;transition:opacity 160ms var(--in),scale 200ms var(--in)}
+#agent[data-phase=working]{scale:1.12}
+#agent .hit{border-radius:50%}
+body:has(#documentNav:not([hidden])) #agent{opacity:0;scale:.6;pointer-events:none}
+
+#composer{left:var(--fcx);right:auto;top:auto;bottom:calc(var(--gap) + 10px);translate:-50% 0;transform:none!important;filter:none!important;
+  width:min(600px,calc(var(--fw) - 64px));max-height:46dvh;overflow:auto;padding:22px 24px 84px;border-radius:28px;text-align:left;z-index:8;
+  clip-path:inset(0 0 0 0 round 28px);opacity:1;visibility:visible;
+  transition:clip-path 460ms var(--ios),opacity 180ms var(--out),visibility 0s}
+#composer.empty,#composer.folded{clip-path:inset(calc(100% - 74px) calc(50% - 37px) 0 calc(50% - 37px) round 37px);opacity:0;visibility:hidden;pointer-events:none;
+  transition:clip-path 260ms var(--in),opacity 140ms var(--in) 120ms,visibility 0s 260ms}
+#composer>*{opacity:1;translate:0 0;transition:opacity 260ms var(--out),translate 360ms var(--out)}
+#composer.empty>*,#composer.folded>*{opacity:0;translate:0 10px;transition:opacity 80ms,translate 0s 120ms}
+#composer>*:nth-child(1){transition-delay:140ms}#composer>*:nth-child(2){transition-delay:180ms}#composer>*:nth-child(3){transition-delay:220ms}
+#composer>*:nth-child(4){transition-delay:260ms}#composer>*:nth-child(n+5){transition-delay:300ms}
+#composer.empty>*,#composer.folded>*{transition-delay:0ms}
+
+#composer p,#composer label{font:500 16px/1.5 Manrope,system-ui,sans-serif;color:var(--ink);margin:0 0 4px}
+#composer .who{margin-bottom:10px}
+#composer .row,#composer .choices{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start;margin-top:14px}
+#composer button{min-height:40px;padding:0 16px;border-radius:999px;background:var(--chip);color:var(--ink);font:600 13.5px Manrope,sans-serif;box-shadow:none;transition:background 140ms,scale 160ms var(--pop)}
+#composer button:hover{background:var(--chip-hover)}#composer button:active{scale:.97}
+#composer button.primary,#composer button.selected{background:var(--primary);color:var(--on-primary)}
+#composer input,#composer select,#composer textarea{background:#ffffffa6;box-shadow:inset 0 0 0 1px var(--hair);border-radius:16px;color:var(--ink);font:500 15px Manrope,sans-serif}
+#composer form .row:has(input){display:flex;align-items:center;gap:6px;padding:4px 4px 4px 6px;border-radius:999px;background:#ffffffb3;box-shadow:inset 0 0 0 1px var(--hair)}
+#composer form .row:has(input) input{flex:1;background:none;box-shadow:none;border-radius:999px;min-height:40px;padding:0 12px}
+#composer .send{width:40px;height:40px;min-width:40px;padding:0;border-radius:50%;display:grid;place-items:center;background:var(--primary);color:var(--on-primary)}
+#composer .send .ph{width:18px;height:18px;fill:currentColor}
+#composer .send:disabled{opacity:.35}
+@media (max-width:700px){#composer{width:calc(100vw - 20px);bottom:10px;padding:18px 18px 80px}#agent{bottom:24px}}
+body.reduced #composer,body.reduced #composer>*,body.reduced #agent{transition-duration:0ms!important;transition-delay:0ms!important}
+@media (prefers-reduced-motion:reduce){#composer,#composer>*,#agent{transition-duration:0ms!important;transition-delay:0ms!important}}
+
+/* ---------------------------------------------------------------- the rail as one column */
+#rail{position:fixed;z-index:6;top:var(--gap);right:var(--gap);bottom:var(--gap);width:var(--rail-w);display:flex;flex-direction:column;gap:12px;pointer-events:none}
+#rail>*{pointer-events:auto}
+#rail #railTools{position:static;display:flex;gap:8px;justify-content:flex-end;min-height:44px}
+#rail #stage[data-layout=side],#rail #stage[data-layout=center]{position:static;inset:auto;width:auto;max-height:none;flex:1 1 auto;min-height:0;overflow:visible;padding:0}
+#rail #stage[data-layout=side] .card,#rail #stage[data-layout=center] .card{max-height:100%}
+#rail #stage:empty{display:none}
+body[data-page=P00] #railTools,body[data-page=P00] #chapter{display:none}
+#chapter[hidden]{display:none}
+
+/* chapter card: kicker, serif title, one line, six icons joined by a progress hairline */
+#chapter{flex:none;padding:20px 20px 16px}
+#chapter .kicker span{color:var(--ink-3)}
+#chapter h2{font-size:30px;line-height:1.05;margin:0 0 8px}
+#chapter p{margin:0 0 6px;font-size:14px;color:var(--ink-2)}
+#chapter .meta{display:block;margin-bottom:2px}
+#chapter .steps{list-style:none;margin:16px 0 0;padding:0;display:flex;justify-content:space-between;position:relative}
+#chapter .steps::before,#chapter .steps::after{content:"";position:absolute;left:16px;right:16px;top:50%;height:1px;background:var(--hair)}
+#chapter .steps::after{background:var(--ink);right:auto;width:calc((100% - 32px) * var(--p));transition:width 600ms var(--ios)}
+#chapter .step{position:relative;z-index:1;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:var(--ink-3);
+  background:var(--glass-solid);box-shadow:inset 0 0 0 1px var(--hair);transition:scale 220ms var(--pop),background 200ms,color 200ms;outline:none}
+#chapter .step .ph{width:15px;height:15px;fill:currentColor}
+#chapter .step.done{color:var(--ink);box-shadow:inset 0 0 0 1px #1d232140}
+#chapter .step.now{background:var(--primary);color:var(--on-primary);box-shadow:0 4px 14px #1d232133}
+#chapter .step:hover,#chapter .step:focus-visible{scale:1.12}
+#chapter .step:focus-visible{box-shadow:0 0 0 2px var(--page),0 0 0 4px var(--ink)}
+#chapter .step .tip{position:absolute;top:calc(100% + 8px);left:50%;translate:-50% -4px;white-space:nowrap;padding:6px 10px;border-radius:999px;
+  font:600 11.5px/1 Manrope,sans-serif;color:var(--ink);background:var(--glass-solid);box-shadow:var(--glass-edge),0 6px 18px #1416141f;
+  opacity:0;scale:.9;pointer-events:none;transition:opacity 120ms var(--in),scale 120ms var(--in),translate 120ms var(--in)}
+#chapter .step:hover .tip,#chapter .step:focus-visible .tip{opacity:1;scale:1;translate:-50% 0;transition:opacity 200ms var(--out) 60ms,scale 240ms var(--out) 60ms,translate 240ms var(--out) 60ms}
+#chapter .step:first-child .tip{left:0;translate:0 -4px}#chapter .step:first-child:hover .tip,#chapter .step:first-child:focus-visible .tip{translate:0 0}
+#chapter .step:last-child .tip{left:auto;right:0;translate:0 -4px}#chapter .step:last-child:hover .tip,#chapter .step:last-child:focus-visible .tip{translate:0 0}
+/* a new chapter: the text block rises in, staged */
+#chapter.swap>.kicker,#chapter.swap>h2,#chapter.swap>p,#chapter.swap>.meta{animation:chapIn 520ms var(--out) both}
+#chapter.swap>h2{animation-delay:60ms}#chapter.swap>p{animation-delay:120ms}#chapter.swap>.meta{animation-delay:160ms}
+@keyframes chapIn{from{opacity:0;translate:0 10px;filter:blur(4px)}to{opacity:1;translate:0 0;filter:none}}
+
+/* send arrow: ink, not the legacy green */
+#composer form .row:has(input) button.send{background:var(--primary);color:var(--on-primary);height:40px;padding:0}
+
+/* scene-change card in the same editorial voice */
+.xf small{font:600 11px/1.2 Manrope,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+.xf strong{font-family:var(--display);font-weight:500;font-size:clamp(30px,3.6vw,46px);letter-spacing:-.01em;color:var(--ink)}
+.xf em{color:var(--ink-3)}
+
+@media (max-width:700px){
+  #rail{top:10px;left:10px;right:10px;bottom:auto;width:auto;gap:8px}
+  #chapter{display:none}
+  #rail #railTools{justify-content:flex-end}
+}
+body.reduced #chapter *,body.reduced #chapter{animation:none!important;transition-duration:0ms!important}
+#chapter{overflow:visible!important;max-height:none!important}
+
+/* ---------------------------------------------------------------- points of interest (§5): dots, never text, on the model */
+#pins{position:fixed;inset:0;z-index:4;pointer-events:none}
+.poi{position:fixed;left:0;top:0;width:0;height:0;min-width:0;min-height:0;padding:0;border:0;background:none;box-shadow:none;pointer-events:none}
+.poi::after{content:"";position:absolute;left:-22px;top:-22px;width:44px;height:44px;border-radius:50%}   /* 44px target */
+#pins.on .poi.on,#pins.on .poi.on::after{pointer-events:auto;cursor:pointer}
+.poi-core{position:absolute;left:-11px;top:-11px;width:22px;height:22px;border-radius:50%;
+  background:radial-gradient(circle,var(--ink) 0 3.5px,transparent 4px),var(--glass-solid);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);box-shadow:var(--glass-edge),0 4px 14px #14161433;
+  opacity:0;scale:.4;transition:opacity 140ms var(--in),scale 160ms var(--in)}
+.poi-ring{position:absolute;left:-11px;top:-11px;width:22px;height:22px;border-radius:50%;box-shadow:0 0 0 1.5px #ffffffd9;opacity:0}
+#pins.on .poi.on .poi-core{opacity:1;scale:1;transition:opacity 220ms var(--out),scale 420ms var(--pop);transition-delay:calc(var(--i,0) * 60ms)}
+#pins.on .poi.on .poi-ring{animation:poiPulse 1300ms var(--out) forwards;animation-delay:calc(240ms + var(--i,0) * 60ms)}
+@keyframes poiPulse{0%{opacity:.9;scale:1}100%{opacity:0;scale:2.4}}
+.poi:hover .poi-core,.poi:focus-visible .poi-core{scale:1.18;background:radial-gradient(circle,var(--accent) 0 4px,transparent 4.5px),#fff}
+.poi:focus-visible{outline:none}.poi:focus-visible .poi-core{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink)}
+
+/* the motion-graphics layer: brackets, dotted leader, end dot */
+.callout-svg{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:4;color:var(--ink);opacity:0;transition:opacity 120ms}
+.callout-svg.on{opacity:1}
+.callout-svg .brackets{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.callout-svg .lead{stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-dasharray:0 7}
+.callout-svg .lead-end{fill:currentColor}
+
+/* the callout card: kicker / serif title / one line / meta */
+.callout{position:fixed;left:0;top:0;z-index:5;width:248px;padding:16px 18px 14px;border-radius:20px;color:var(--ink);opacity:0;pointer-events:none;transform-origin:0 0;
+  background:var(--glass);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);box-shadow:var(--glass-edge),var(--glass-shadow)}
+.callout .kicker{margin-bottom:6px}
+.callout h3{font-family:var(--display);font-weight:600;font-size:22px;line-height:1.1;margin:0 0 6px;letter-spacing:-.01em}
+.callout p{font:500 13.5px/1.5 Manrope,sans-serif;color:var(--ink-2);margin:0 0 6px}
+.callout small{display:block;font:500 11.5px/1.4 Manrope,sans-serif;color:var(--ink-3)}
+
+/* Bino-style question capsule */
+.ask-capsule{position:fixed;z-index:5;translate:-50% 10px;display:flex;align-items:center;gap:10px;min-height:44px;padding:0 18px 0 8px;border-radius:999px;
+  font:600 13.5px Manrope,sans-serif;color:var(--ink);background:var(--glass);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  box-shadow:var(--glass-edge),var(--glass-shadow);opacity:0;scale:.94;pointer-events:none;transition:opacity 160ms var(--in),translate 200ms var(--in),scale 200ms var(--in)}
+.ask-capsule.on{opacity:1;translate:-50% 0;scale:1;pointer-events:auto;transition:opacity 260ms var(--out),translate 520ms var(--ios),scale 520ms var(--ios)}
+.ask-capsule .spark{width:28px;height:28px;border-radius:50%;background:conic-gradient(from 200deg,#f2b36d,#c99bf0,#7fb8f2,#9fe0c0,#f2b36d);box-shadow:inset 0 0 0 2px #ffffffb3}
+.ask-capsule:hover{scale:1.03}
+body.reduced .poi-core,body.reduced .poi-ring,body.reduced .ask-capsule,body.reduced .callout-svg{transition:none!important;animation:none!important}
+@media (prefers-reduced-motion:reduce){.poi-core,.poi-ring,.ask-capsule,.callout-svg{transition:none!important;animation:none!important}}
+.callout{background:linear-gradient(180deg,#ffffffe6,#ffffffc2);box-shadow:var(--glass-edge),0 2px 4px #1416140f,0 18px 50px #14161426}
+body[data-page=P00] #rail #railTools,body[data-page=P00] #rail #chapter{display:none}
+
+/* ---------------------------------------------------------------- the agent's thinking form: Orizon arcs orbit */
+#agent .globe-arcs{position:absolute;inset:-12px;width:calc(100% + 24px);height:calc(100% + 24px);pointer-events:none;overflow:visible;opacity:0;scale:.85;
+  transition:opacity 200ms var(--in),scale 300ms var(--in)}
+#agent .globe-arcs circle{fill:none;stroke:var(--ink);stroke-width:1.1;stroke-linecap:round;opacity:.55;transform-origin:50px 50px}
+#agent .globe-arcs .a1{stroke-dasharray:62 38;animation:arcSpin 2.4s linear infinite}
+#agent .globe-arcs .a2{stroke-dasharray:28 72;animation:arcSpin 1.6s linear infinite reverse;opacity:.35}
+#agent[data-phase=working] .globe-arcs{opacity:1;scale:1;transition:opacity 300ms var(--out),scale 600ms var(--ios)}
+@keyframes arcSpin{to{rotate:360deg}}
+body.reduced #agent .globe-arcs circle{animation:none}
+
+/* ---------------------------------------------------------------- the Orizon stage (§9) */
+#orizon{position:fixed;inset:0;z-index:7;display:grid;place-items:center;color:#f3f1fb;opacity:0;
+  background:radial-gradient(130% 95% at 50% 118%,#5a3fd0 0%,#2a1f6b 30%,#141327 64%,#0b0b12 100%);
+  transition:opacity 600ms var(--in)}
+#orizon[hidden]{display:none}
+#orizon.on{opacity:1;transition:opacity 480ms var(--out)}
+#orizon .oz{position:relative;width:260px;height:300px;display:grid;justify-items:center}
+#orizon .oz-emblem{width:260px;height:260px;overflow:visible}
+#orizon path{fill:none;stroke:#f3f1fbcc;stroke-width:1.15;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100}
+#orizon.on path{stroke-dashoffset:0;transition:stroke-dashoffset 1100ms var(--ios)}
+#orizon.on .oz-a2{transition-delay:140ms}#orizon.on .oz-a3{transition-delay:280ms}
+#orizon .oz-spin{transform-origin:100px 92px}
+#orizon[data-mode=run].on .oz-spin{animation:arcSpin 6s linear infinite}
+#orizon .oz-word{position:absolute;top:96px;left:0;right:0;text-align:center;font:300 30px/1 Manrope,system-ui,sans-serif;letter-spacing:.01em;
+  opacity:0;filter:blur(6px);translate:0 4px;transition:opacity 300ms,filter 300ms,translate 300ms}
+#orizon.on .oz-word{opacity:1;filter:none;translate:0 0;transition:opacity 700ms var(--out) 360ms,filter 700ms var(--out) 360ms,translate 700ms var(--out) 360ms}
+#orizon .oz-kicker{position:absolute;top:246px;left:0;right:0;text-align:center;font:600 10.5px/1 Manrope,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#b9a2ff;
+  opacity:0;transition:opacity 300ms}
+#orizon.on .oz-kicker{opacity:1;transition:opacity 600ms var(--out) 600ms}
+#orizon .oz-years{position:absolute;top:276px;left:-60px;right:-60px;display:none;justify-content:center;gap:22px;list-style:none;margin:0;padding:0;
+  font:600 11px/1 Manrope,sans-serif;letter-spacing:.08em;color:#f3f1fb}
+#orizon[data-mode=run] .oz-years{display:flex}
+#orizon[data-mode=run] .oz-years li{opacity:.18}
+#orizon[data-mode=run].on .oz-years li{animation:yearOn 300ms var(--out) both}
+#orizon[data-mode=run].on .oz-years li:nth-child(1){animation-delay:200ms}#orizon[data-mode=run].on .oz-years li:nth-child(2){animation-delay:400ms}
+#orizon[data-mode=run].on .oz-years li:nth-child(3){animation-delay:600ms}#orizon[data-mode=run].on .oz-years li:nth-child(4){animation-delay:800ms}
+#orizon[data-mode=run].on .oz-years li:nth-child(5){animation-delay:1000ms}
+@keyframes yearOn{from{opacity:.18}to{opacity:1}}
+#orizon[data-mode=run] .oz-kicker::after{content:" · running a test"}
+#orizon.static,#orizon.static *{transition:none!important;animation:none!important}
+#orizon.static path{stroke-dashoffset:0}#orizon.static .oz-word,#orizon.static .oz-kicker,#orizon.static .oz-years li{opacity:1;filter:none;translate:none}
+
+/* ---------------------------------------------------------------- the model chapter lives on the Orizon stage */
+body[data-scene=model]{
+  --page:#0c0c14;--ink:#f2f0fa;--ink-2:#c3bed8;--ink-3:#8f8aa8;--accent:#b9a2ff;--hair:#ffffff1f;
+  --primary:#f2f0fa;--on-primary:#15131f;
+  --glass:linear-gradient(180deg,#2c2856b3,#1b1838b3);--glass-solid:#1e1b38f0;
+  --glass-edge:inset 0 1px 0 #ffffff2e,inset 0 0 0 1px #ffffff12,inset 0 -1px 0 #00000040;
+  --glass-shadow:0 1px 2px #0000004d,0 20px 54px #00000099;
+  --chip:#ffffff14;--chip-hover:#ffffff24}
+body{transition:background-color 700ms var(--ios)}
+body[data-scene=model] #frame{background:radial-gradient(120% 105% at 50% 122%,#5a3fd0 0%,#2b2070 30%,#15142a 66%,#0d0d17 100%);box-shadow:inset 0 0 0 1px #ffffff10}
+body[data-scene=model] #composer input,body[data-scene=model] #composer select,body[data-scene=model] #composer textarea{background:#ffffff12;box-shadow:inset 0 0 0 1px #ffffff1f;color:var(--ink)}
+body[data-scene=model] #composer select option{color:#15131f}
+body[data-scene=model] .callout{background:linear-gradient(180deg,#2c2856f0,#1d1a3af0)}
+body[data-scene=model] .poi-core{background:radial-gradient(circle,#fff 0 3.5px,transparent 4px),#ffffff2e}
+body[data-scene=model] .card .meter i{background:var(--accent)}
+body[data-scene=model] .xf{background:var(--page)}
+#composer{width:min(640px,calc(var(--fw) - 64px));padding-bottom:78px}
+#orizon .oz-kicker{left:-120px;right:-120px;white-space:nowrap}
+
+/* Afacad for titles and headers, Manrope for everything else */
+.hero h1{font-weight:600;letter-spacing:-.025em;line-height:.95}
+.hero h1 em{font-weight:500}
+#chapter h2{font-weight:600;font-size:30px}
+#orizon .oz-word{font-family:var(--display);font-weight:400;font-size:34px;letter-spacing:.01em}
+
+/* ================================================================ v3.1 (user review, 20 Nov) */
+/* Springs: a bouncy one for things that open, a soft one for small lifts (CSS linear() approximations). */
+:root{
+  --hot:#ff7a1a;--on-hot:#fff;          /* strong hover/selection accent that holds its own against the glass */
+  --spring:linear(0,.006,.025 2.8%,.101 6.1%,.539 18.9%,.721 25.3%,.849 31.5%,.937 38.1%,.968 41.8%,.991 45.7%,1.006 50.1%,1.015 55%,1.017 63.9%,1.001 85.4%,1);
+  --spring-pop:linear(0,.009,.035 2.1%,.141 4.4%,.723 12.9%,.938 16.7%,1.017 19.4%,1.077,1.121 24.3%,1.149 27.1%,1.159 29.9%,1.154 32.8%,1.129 35.8%,1.051 43.1%,1.017 46.9%,.991 51%,.977 56.1%,.975 63.1%,.997 76.9%,1.003 83.8%,1);
+}
+/* ---- one hover language: orange fill, white glyph/text */
+.ib:hover,.ib:focus-visible,#viewDock button:hover,#viewDock button:focus-visible{background:var(--hot)!important;color:var(--on-hot)!important}
+#composer button:not(.send):hover,#composer button:not(.send):focus-visible,.card button:hover,.card button:focus-visible,.card .list button:hover,
+#documentNav button:hover,#documentNav button:focus-visible{background:var(--hot)!important;color:var(--on-hot)!important}
+#composer button.selected{background:var(--hot);color:var(--on-hot)}
+#composer .send:hover,#composer form .row:has(input) button.send:hover{background:var(--hot)}
+#chapter .step:hover,#chapter .step:focus-visible{background:var(--hot);color:var(--on-hot);box-shadow:0 6px 16px #ff7a1a59}
+.poi:hover .poi-core,.poi:focus-visible .poi-core{background:radial-gradient(circle,#fff 0 4px,transparent 4.5px),var(--hot)}
+:where(button,[tabindex]):focus-visible{outline:2px solid var(--hot)!important;outline-offset:2px}
+.ib:focus-visible{outline-offset:2px}
+
+/* ---- tag pins (blue = Foundations, red = Set aside). Hover lifts the pin and slides its name out; choosing one
+   presses it into the paper with a spring while the other steps back. */
+#stamps{display:flex;flex-direction:column;gap:6px;filter:none}
+#stamps .stamp.pin-tag{all:unset;position:relative;box-sizing:border-box;width:44px;height:52px;display:grid;place-items:center;cursor:pointer;
+  opacity:1;transform:none;transition:opacity 200ms var(--out)}
+#stamps .pin-svg{width:30px;height:42px;overflow:visible;filter:drop-shadow(0 5px 4px #1416143d);transform-origin:50% 95%;
+  transition:transform 420ms var(--spring-pop),filter 300ms var(--out)}
+#stamps .pin-svg .needle{stroke:#8d939a;stroke-width:1.6;stroke-linecap:round}
+#stamps .stamp.pin-tag:hover .pin-svg,#stamps .stamp.pin-tag:focus-visible .pin-svg{transform:translateY(-4px) rotate(-6deg) scale(1.08);filter:drop-shadow(0 10px 7px #14161433)}
+#stamps .stamp.pin-tag.on .pin-svg{transform:translateY(5px) rotate(-12deg) scale(.96);filter:drop-shadow(0 2px 1.5px #14161459)}
+#stamps:has(.on) .stamp.pin-tag:not(.on){opacity:.42}
+#stamps:has(.on) .stamp.pin-tag:not(.on):hover{opacity:1}
+#stamps .stamp.pin-tag .tip{position:absolute;left:46px;top:50%;translate:-6px -50%;white-space:nowrap;padding:7px 12px;border-radius:999px;pointer-events:none;
+  font:600 12.5px/1 Manrope,sans-serif;color:#fff;background:#141416eb;box-shadow:0 8px 22px #14161433;opacity:0;scale:.9;transform-origin:0 50%;
+  transition:opacity 120ms var(--in),scale 140ms var(--in),translate 140ms var(--in)}
+#stamps .stamp.pin-tag:hover .tip,#stamps .stamp.pin-tag:focus-visible .tip{opacity:1;scale:1;translate:0 -50%;transition:opacity 180ms var(--out) 40ms,scale 420ms var(--spring-pop) 40ms,translate 420ms var(--spring-pop) 40ms}
+#stamps .stamp.f .tip{box-shadow:inset 3px 0 0 #2f6bff,0 8px 22px #14161433}
+#stamps .stamp.a .tip{box-shadow:inset 3px 0 0 #e0352b,0 8px 22px #14161433}
+#stamps.under{flex-direction:row}
+#stamps.under .stamp.pin-tag .tip{left:50%;top:auto;bottom:-30px;translate:-50% -6px}
+#stamps.under .stamp.pin-tag:hover .tip{translate:-50% 0}
+body.reduced #stamps *{transition:none!important}
+
+/* ---- the preview is the whole stage; the rail floats over it as glass and steps back to tags */
+:root{interpolate-size:allow-keywords}
+#frame{right:var(--gap)!important}
+#rail{align-items:flex-end}
+#rail>#chapter,#rail>#railPanel,#rail>#stage{width:var(--rail-w)}
+
+/* chapter: a compact pill (icon + chapter + title); hover, focus or click opens it with a spring */
+#chapter{padding:10px 12px;overflow:hidden!important;transition:width 520ms var(--spring),padding 420ms var(--spring),box-shadow 300ms}
+#chapter .ch-head{display:flex;align-items:center;gap:12px;cursor:pointer;outline:none;border-radius:16px}
+#chapter .ch-icon{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--primary);color:var(--on-primary);transition:background 200ms,scale 420ms var(--spring-pop)}
+#chapter .ch-icon .ph{width:18px;height:18px;fill:currentColor}
+#chapter .ch-text{display:flex;flex-direction:column;min-width:0}
+#chapter .ch-text .kicker{margin:0 0 2px;font-size:10px}
+#chapter h2{font-size:22px!important;line-height:1.05;margin:0!important;white-space:nowrap}
+#chapter .ch-more{display:grid;grid-template-rows:1fr;transition:grid-template-rows 520ms var(--spring),opacity 260ms var(--out)}
+#chapter .ch-more>div{overflow:hidden;min-height:0;padding-top:12px}
+#chapter .steps::before,#chapter .steps::after{display:none}             /* no connector line */
+#chapter .steps{margin-top:14px}
+#chapter .ch-head:hover .ch-icon,#chapter .ch-head:focus-visible .ch-icon{background:var(--hot);scale:1.06}
+body:not(.rail-announce) #chapter:not(:hover):not(:focus-within):not(.open){width:236px}
+body:not(.rail-announce) #chapter:not(:hover):not(:focus-within):not(.open) .ch-more{grid-template-rows:0fr;opacity:0;transition:grid-template-rows 300ms var(--in),opacity 140ms var(--in)}
+#chapter.swap .ch-text{animation:chapIn 520ms var(--out) both}
+
+/* info cards announce, then shrink to their heading line (hover/focus reopens) */
+#stage .card.peek{transition:height 520ms var(--spring),width 520ms var(--spring);overflow:hidden}
+body:not(.rail-announce) #stage .card.peek:not(:hover):not(:focus-within){height:84px;width:236px}
+body:not(.rail-announce) #stage .card.peek:not(:hover):not(:focus-within)>:not(.kicker):not(.headline):not(h2){opacity:0;transition:opacity 120ms}
+body:not(.rail-announce) #stage .card.peek:not(:hover):not(:focus-within) .headline,body:not(.rail-announce) #stage .card.peek:not(:hover):not(:focus-within) h2{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#rail #stage{align-items:flex-end}
+#rail #stage>.card{width:100%}
+#rail #stage>.card.peek{width:100%}
+
+/* the rail panel (settings, notebook, details): grows from the top-right tools with a spring */
+#railPanel{position:relative;flex:0 1 auto;max-height:calc(100dvh - 200px);overflow:auto;padding:20px 20px 18px;transform-origin:100% 0;
+  opacity:0;scale:.92;translate:0 -8px;transition:opacity 140ms var(--in),scale 200ms var(--in),translate 200ms var(--in)}
+#railPanel.on{opacity:1;scale:1;translate:0 0;transition:opacity 220ms var(--out),scale 560ms var(--spring-pop),translate 560ms var(--spring)}
+#railPanel[hidden]{display:none}
+#railPanel #closePanel{position:absolute;top:10px;right:10px;width:36px;height:36px;min-width:36px;min-height:36px;background:var(--chip)}
+#railPanel #closePanel .ph{width:16px;height:16px}
+#railPanel h2{font-size:24px;margin:0 40px 10px 0}#railPanel h3{font-size:17px;margin:14px 0 6px}
+#railPanel p{font-size:14px;line-height:1.55;color:var(--ink-2)}
+#railPanel .settings-row{display:flex;justify-content:space-between;align-items:center;min-height:44px;border-bottom:1px solid var(--hair);font-size:14px}
+#railPanel>div>*{animation:panelIn 520ms var(--spring) both}
+#railPanel>div>*:nth-child(2){animation-delay:40ms}#railPanel>div>*:nth-child(3){animation-delay:80ms}#railPanel>div>*:nth-child(n+4){animation-delay:120ms}
+@keyframes panelIn{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
+@media (max-width:700px){#rail>#chapter,#rail>#railPanel,#rail>#stage{width:100%}#railPanel{max-height:50dvh}}
+body.reduced #chapter,body.reduced #chapter *,body.reduced #railPanel,body.reduced #railPanel *,body.reduced #stage .card{transition:none!important;animation:none!important}
+#stamps[hidden]{display:none!important}
+#railPanel #closePanel{display:grid;place-items:center;padding:0}#railPanel #closePanel svg.ph{flex:none;width:16px!important;min-width:16px;height:16px}
+
+/* ---- the agent speaks: words rise in one after another (34ms apart), after the card has opened */
+#composer .w{display:inline-block;animation:wordIn 460ms var(--out) both;animation-delay:calc(620ms + var(--w) * 34ms)}
+@keyframes wordIn{from{opacity:0;translate:0 .35em;filter:blur(5px)}to{opacity:1;translate:0 0;filter:none}}
+body.reduced #composer .w{animation:none}
+/* responsive input: starts compact, grows with its content (like Claude's input), never wider than 640px */
+#composer{width:fit-content!important;min-width:min(380px,calc(var(--fw) - 32px));max-width:min(640px,calc(var(--fw) - 64px))}
+#composer input,#composer textarea{field-sizing:content}
+#composer form .row:has(input) input{min-width:200px;max-width:520px}
+#composer textarea{min-width:min(420px,calc(var(--fw) - 120px));min-height:3.2lh;max-height:30dvh}
+
+/* ---- the globe changes form: a glowing shell morphs circle → rotated square → blob → circle while it thinks,
+   and breathes while it speaks */
+#agent .globe-shape{position:absolute;inset:-6px;border-radius:50%;opacity:0;scale:.8;pointer-events:none;
+  background:conic-gradient(from 0deg,#ff7a1a,#c99bf0,#6fb2ff,#9fe0c0,#ffd27a,#ff7a1a);filter:blur(1px);
+  -webkit-mask:radial-gradient(closest-side,transparent 72%,#000 74%);mask:radial-gradient(closest-side,transparent 72%,#000 74%);
+  transition:opacity 220ms var(--in),scale 320ms var(--in)}
+#agent[data-phase=working] .globe-shape{opacity:1;scale:1;animation:morph 2.4s var(--ios) infinite,hue 3s linear infinite;
+  -webkit-mask:none;mask:none;filter:blur(.5px) saturate(1.2);transition:opacity 260ms var(--out),scale 520ms var(--spring-pop)}
+#agent[data-phase=working] .globe{animation:thinkPulse 1.2s var(--ios) infinite}
+@keyframes morph{
+  0%{border-radius:50%;rotate:0deg;scale:1}
+  25%{border-radius:22%;rotate:45deg;scale:.94}
+  50%{border-radius:58% 42% 63% 37% / 41% 56% 44% 59%;rotate:120deg;scale:1.08}
+  75%{border-radius:30%;rotate:225deg;scale:.96}
+  100%{border-radius:50%;rotate:360deg;scale:1}}
+@keyframes hue{to{filter:hue-rotate(360deg) saturate(1.2)}}
+@keyframes thinkPulse{0%,100%{scale:.86}50%{scale:.96}}
+#agent.speaking .globe{animation:speakPulse 520ms var(--ios) infinite alternate}
+@keyframes speakPulse{from{scale:1}to{scale:1.07}}
+body.reduced #agent .globe-shape,body.reduced #agent .globe{animation:none!important}
+
+/* ---- callouts and the question capsule (v3.1): a high-contrast HUD that resists the glass — near-black, white
+   type, orange kicker, orange brackets and dotted leader. The card springs out of the line's end. */
+.callout,body[data-scene=model] .callout{background:#141418e0;-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);
+  box-shadow:inset 0 1px 0 #ffffff1f,0 2px 6px #0000002e,0 24px 60px #00000052;color:#fff;border-radius:18px;padding:15px 18px 14px;width:248px}
+.callout .kicker{color:var(--hot)!important}
+.callout h3{color:#fff;font-size:21px}
+.callout p{color:#d3d3db}
+.callout small{color:#8f8f9b}
+.callout-svg{color:var(--hot)}
+.callout-svg .lead{stroke-width:2.6}
+.callout-svg .lead-end{r:3.5}
+.ask-capsule,body[data-scene=model] .ask-capsule{background:#141418e6;color:#fff;box-shadow:inset 0 1px 0 #ffffff1f,0 18px 44px #00000047;
+  transition:opacity 140ms var(--in),translate 180ms var(--in),scale 180ms var(--in)}
+.ask-capsule.on{transition:opacity 220ms var(--out),translate 640ms var(--spring-pop),scale 640ms var(--spring-pop)}
+.ask-capsule:hover{background:var(--hot);scale:1.04}
+.ask-capsule .spark{animation:sparkSpin 4s linear infinite}
+@keyframes sparkSpin{to{rotate:360deg}}
+body.reduced .ask-capsule .spark{animation:none}
+#composer{transition:clip-path 600ms var(--spring),opacity 180ms var(--out),visibility 0s}
+#composer>*{transition:opacity 260ms var(--out),translate 520ms var(--spring)}
+
+/* ---- response package (P11): a numbered grid with clear hierarchy — lever (label) / choice (bold) / change */
+.card.pkg{padding:20px 18px 16px}
+.card.pkg h2{margin-bottom:14px}
+.pkg-list{list-style:none;margin:0;padding:0;counter-reset:none}
+.pkg-list li{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid var(--hair);
+  animation:panelIn 520ms var(--spring) both}
+.pkg-list li:nth-child(2){animation-delay:40ms}.pkg-list li:nth-child(3){animation-delay:80ms}.pkg-list li:nth-child(4){animation-delay:120ms}.pkg-list li:nth-child(5){animation-delay:160ms}
+.pkg-list .num{align-self:start;padding-top:2px;font:600 11px/1.4 Manrope,sans-serif;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.pkg-list .lever{display:block;font:600 10.5px/1.3 Manrope,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
+.pkg-list strong{display:block;font:600 14px/1.4 Manrope,sans-serif;color:var(--ink)}
+.pkg-list strong.unset{color:var(--ink-3);font-weight:500}
+.pkg-list .edit{width:36px;height:36px;min-width:36px;min-height:36px;background:var(--chip);border-radius:50%}
+.pkg-list .edit .ph{width:15px;height:15px}
+.pkg-list.result li{align-items:start}
+.pkg-list.result strong{font-weight:500;color:var(--ink-2);font-size:13.5px}
+.pkg-list .badge{align-self:start;font:700 11px/1 Manrope,sans-serif;font-style:normal;padding:6px 10px;border-radius:999px;white-space:nowrap;background:var(--chip);color:var(--ink)}
+.pkg-list .badge.ok{background:#2f9e6626;color:#1f7a4c}.pkg-list .badge.warn{background:#e7a3182e;color:#9a6408}.pkg-list .badge.bad{background:#d6453b26;color:#b3352c}
+.pkg-foot{border-top:1px solid var(--hair);padding-top:12px;margin-top:2px}
+.pkg-time{display:flex;align-items:center;gap:8px;font:500 12.5px Manrope,sans-serif;color:var(--ink-2)}
+.pkg-time b{font-weight:700;color:var(--ink);font-size:14px}
+.pkg-time .ph{width:15px;height:15px;fill:currentColor}
+.pkg-foot .meter{height:4px;border-radius:2px;margin:8px 0 4px;background:var(--hair)}
+.pkg-foot .meter i{background:var(--ink);border-radius:2px}
+.pkg-foot.over .meter i{background:var(--hot)}.pkg-foot.over small{color:#b3352c}
+body.reduced .pkg-list li{animation:none}
+.card .ib,#railPanel .ib{padding:0!important;display:grid;place-items:center}
+
+/* ---- the run (v3.1): no full-screen cover; the map stays visible and animates. The Orizon arcs become a light
+   HUD at the top of the preview with the year ticker, over a soft vignette. */
+#orizon[data-mode=run]{background:radial-gradient(ellipse 70% 70% at 40% 45%,transparent 40%,#0b0b1270 100%);pointer-events:none;place-items:start center;padding-top:48px}
+#orizon[data-mode=run] .oz{width:260px;height:200px;scale:.62;transform-origin:50% 0;translate:calc((var(--fcx) - 50vw)) 0}
+#orizon[data-mode=run] .oz-years{top:286px;font-size:14px;gap:28px}
+#orizon[data-mode=run].on .oz-years li:nth-child(1){animation-delay:300ms}#orizon[data-mode=run].on .oz-years li:nth-child(2){animation-delay:900ms}
+#orizon[data-mode=run].on .oz-years li:nth-child(3){animation-delay:1500ms}#orizon[data-mode=run].on .oz-years li:nth-child(4){animation-delay:2100ms}
+#orizon[data-mode=run].on .oz-years li:nth-child(5){animation-delay:2700ms}
+#orizon[data-mode=run] .oz-years li{animation-duration:500ms}
+
+/* ---------------------------------------------------------------- the Chair's office: Thursday evening (dusk stage) */
+body[data-scene=chair]{
+  --page:#0f0e14;--ink:#f4efe8;--ink-2:#cdc4b8;--ink-3:#968c80;--accent:#e9b26b;--hair:#ffffff1f;
+  --primary:#f4efe8;--on-primary:#17141a;
+  --glass:linear-gradient(180deg,#2d2530b8,#1c1820b8);--glass-solid:#211c24f0;
+  --glass-edge:inset 0 1px 0 #ffffff2b,inset 0 0 0 1px #ffffff12,inset 0 -1px 0 #00000040;
+  --glass-shadow:0 1px 2px #0000004d,0 20px 54px #00000099;--chip:#ffffff14;--chip-hover:#ffffff24}
+body[data-scene=chair] #frame{background:radial-gradient(120% 100% at 50% 118%,#7a4a22 0%,#3a2630 32%,#17151f 66%,#0f0e14 100%);box-shadow:inset 0 0 0 1px #ffffff10}
+body[data-scene=chair] #composer input,body[data-scene=chair] #composer textarea,body[data-scene=chair] #composer select{background:#ffffff12;box-shadow:inset 0 0 0 1px #ffffff1f;color:var(--ink)}
+body[data-scene=chair] .poi-core{background:radial-gradient(circle,#fff 0 3.5px,transparent 4px),#ffffff2e}
+body[data-scene=chair] .xf{background:var(--page)}
+body[data-scene=chair] .pkg-list .badge.ok{color:#7fd8a6}body[data-scene=chair] .pkg-list .badge.warn{color:#f2c063}body[data-scene=chair] .pkg-list .badge.bad{color:#ff8f86}
+/* the hall is a pale room: a deeper warm-grey studio lets it separate from the stage */
+body[data-scene=hall] #frame{background:radial-gradient(120% 95% at 50% 38%,#f2eee7 0%,#e2dbd0 52%,#cfc6b8 100%)}
+body[data-scene=hall]{--page:#e6e2da}
+
+/* ---- choices (response plan and other single-choice questions): wrapped cards with a radio dot */
+#composer .q{font-family:var(--display);font-weight:600;font-size:21px;line-height:1.2;letter-spacing:-.01em;margin:2px 0 4px}
+#composer .stack{display:flex;flex-direction:column;gap:6px;align-items:stretch;margin-top:12px;max-width:560px}
+#composer .stack button{position:relative;display:block;width:100%;height:auto;min-height:44px;padding:11px 14px 11px 42px;border-radius:14px;
+  text-align:left;white-space:normal;line-height:1.38;font:600 13.5px/1.38 Manrope,sans-serif}
+#composer .stack button::before{content:""!important;position:absolute;left:15px;top:50%;width:14px;height:14px;margin-top:-7px;border-radius:50%;
+  box-shadow:inset 0 0 0 1.6px currentColor;opacity:.45;transform:none!important;transition:box-shadow 260ms var(--spring-pop),opacity 160ms}
+#composer .stack button.selected::before{opacity:1;box-shadow:inset 0 0 0 4.5px #fff}
+#composer .stack button.selected{box-shadow:0 8px 20px #ff7a1a40}
+#composer .stack button:not(.selected)::before{opacity:.7;box-shadow:inset 0 0 0 1.8px var(--ink-3)}
+#rail>#stage[data-layout=hero]{width:min(560px,calc(100vw - 120px))}
+.pkg-list.debrief{margin:10px 0 12px}.pkg-list.debrief li{align-items:center}.pkg-list.debrief .lever{margin:0;font-size:11px}
+@media (max-width:700px){#viewDock{left:10px;top:64px;flex-direction:column;padding:4px}#viewDock i{width:20px;height:1px;margin:3px 0}#viewDock button{width:40px;height:40px;min-height:40px;min-width:40px}}
+
+/* ================================================================ v3.2 (user review, 21 Nov) */
+/* ---- tools: one quiet button; hovering or focusing unfolds the tools to its left with a spring stagger */
+#rail #railTools{display:flex;align-items:center;gap:0;padding:4px;border-radius:999px;align-self:flex-end;margin-right:var(--gap);
+  background:var(--glass);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);box-shadow:var(--glass-edge),var(--glass-shadow)}
+#railTools .ib{width:40px;height:40px;min-width:40px;min-height:40px;background:none;box-shadow:none}
+#railTools .tools-more{display:flex;gap:2px;max-width:0;overflow:hidden;opacity:0;transition:max-width 300ms var(--in),opacity 160ms var(--in)}
+#railTools .tools-more .ib{scale:.6;opacity:0;transition:scale 200ms var(--in),opacity 120ms}
+#railTools:hover .tools-more,#railTools:focus-within .tools-more{max-width:220px;opacity:1;overflow:visible;transition:max-width 520ms var(--spring),opacity 200ms var(--out)}
+#railTools:hover .tools-more .ib,#railTools:focus-within .tools-more .ib{scale:1;opacity:1;transition:scale 520ms var(--spring-pop),opacity 200ms var(--out)}
+#railTools:hover .tools-more .ib:nth-child(1),#railTools:focus-within .tools-more .ib:nth-child(1){transition-delay:120ms}
+#railTools:hover .tools-more .ib:nth-child(2),#railTools:focus-within .tools-more .ib:nth-child(2){transition-delay:80ms}
+#railTools:hover .tools-more .ib:nth-child(3),#railTools:focus-within .tools-more .ib:nth-child(3){transition-delay:40ms}
+#railTools .tools-key{transition:rotate 420ms var(--spring-pop),background 160ms}
+#railTools:hover .tools-key,#railTools:focus-within .tools-key{rotate:90deg}
+#railTools .tip{top:calc(100% + 10px)}
+
+/* ---- rail cards dock to the screen edge: square right corners, no gap */
+#rail{right:0}
+#rail>#chapter,#rail>#railPanel,#rail #stage>.card{border-radius:22px 0 0 22px}
+#rail>#chapter{padding-right:16px}
+
+/* ---- chapter pill without numbers: icon + title */
+#chapter .ch-text h2{font-size:20px!important}
+body:not(.rail-announce) #chapter:not(:hover):not(:focus-within):not(.open){width:200px}
+
+/* ---- tag marks: blue O (Foundations), red X (Set aside) on a paper chip; choosing draws the mark on */
+#stamps .stamp.mark-tag{all:unset;position:relative;box-sizing:border-box;width:46px;height:46px;display:grid;place-items:center;cursor:pointer;border-radius:50%;
+  background:#fffdf8;box-shadow:0 1px 0 #ffffffcc inset,0 6px 16px #14161426,0 0 0 1px #1d23211a;transition:scale 420ms var(--spring-pop),box-shadow 200ms,opacity 200ms}
+#stamps .mark-svg{width:28px;height:28px;overflow:visible}
+#stamps .mark-svg path{stroke-dasharray:100;stroke-dashoffset:0;opacity:.55;transition:opacity 200ms}
+#stamps .stamp.mark-tag:hover,#stamps .stamp.mark-tag:focus-visible{scale:1.1}
+#stamps .stamp.mark-tag:hover .mark-svg path{opacity:1}
+#stamps .stamp.mark-tag.on{scale:1.06}
+#stamps .stamp.mark-tag.f.on{box-shadow:0 0 0 2px #2f6bff,0 8px 20px #2f6bff40}
+#stamps .stamp.mark-tag.a.on{box-shadow:0 0 0 2px #e0352b,0 8px 20px #e0352b40}
+#stamps .stamp.mark-tag.on .mark-svg path{opacity:1;animation:markDraw 520ms var(--out) both}
+@keyframes markDraw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+#stamps:has(.on) .stamp.mark-tag:not(.on){opacity:.5}
+#stamps .stamp.mark-tag .tip{position:absolute;left:54px;top:50%;translate:-6px -50%;white-space:nowrap;padding:7px 12px;border-radius:999px;pointer-events:none;
+  font:600 12.5px/1 Manrope,sans-serif;color:#fff;background:#141416eb;box-shadow:0 8px 22px #14161433;opacity:0;scale:.9;transform-origin:0 50%;
+  transition:opacity 120ms var(--in),scale 140ms var(--in),translate 140ms var(--in)}
+#stamps .stamp.mark-tag:hover .tip,#stamps .stamp.mark-tag:focus-visible .tip{opacity:1;scale:1;translate:0 -50%;transition:opacity 180ms var(--out) 40ms,scale 420ms var(--spring-pop) 40ms,translate 420ms var(--spring-pop) 40ms}
+#stamps.under .stamp.mark-tag .tip{left:50%;top:auto;bottom:-32px;translate:-50% -6px}
+#stamps.under .stamp.mark-tag:hover .tip{translate:-50% 0}
+#stamps{gap:10px}
+
+/* ---- scene dots stay still (no pulse) */
+#pins.on .poi.on .poi-ring{animation:none!important;opacity:0}
+
+/* ---- the callout in focus: a thin thread of light travels around its edge */
+@property --edge-a{syntax:"<angle>";inherits:false;initial-value:0deg}
+.callout::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:conic-gradient(from var(--edge-a),transparent 0 68%,#ffb36b80 78%,#fff 84%,#ffb36b80 88%,transparent 94%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
+  animation:edgeRun 2.8s linear infinite}
+@keyframes edgeRun{to{--edge-a:360deg}}
+body.reduced .callout::before{animation:none;background:none}
+/* the cover: title, Start and Continue sit vertically centred on the left */
+#stage[data-layout=hero],#rail>#stage[data-layout=hero]{inset:auto;left:calc(var(--gap) + 56px);top:50%;bottom:auto;translate:0 -50%;width:min(520px,calc(100vw - 120px))}
+@media (max-width:700px){#stage[data-layout=hero],#rail>#stage[data-layout=hero]{left:28px;top:auto;bottom:34px;translate:none;width:calc(100vw - 56px)}}
+
+/* ---- case-file guidance (v3.3): the agent's card sits above the document controls; Review lights up when done */
+body:has(#documentNav:not([hidden])) #composer{bottom:calc(var(--gap) + 76px);padding-bottom:20px}
+#documentNav button.ready{background:var(--hot)!important;color:#fff!important;animation:readyPop 520ms var(--spring-pop) both}
+@keyframes readyPop{from{scale:.85}to{scale:1}}
+body:has(#composer:not(.empty):not(.folded)) #pageCount{opacity:0}
+/* unread feedback: a small orange dot on the tools button; form errors are visible */
+#railTools .tools-key.news::after{content:"";position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:var(--hot);box-shadow:0 0 0 2px var(--glass-solid);animation:readyPop 520ms var(--spring-pop) both}
+#composer .err{display:block;margin-top:8px;color:#c4312a;font:600 12.5px/1.4 Manrope,sans-serif}
+body[data-scene=model] #composer .err,body[data-scene=chair] #composer .err{color:#ff8f86}
+
+/* Speaker portraits: initials sit under the image and show only when no portrait file exists. */
+#composer .who-row{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+#composer .who-row .who{margin:0}
+#composer .avatar{position:relative;flex:none;width:36px;height:36px;border-radius:50%;overflow:hidden;background:color-mix(in srgb,var(--accent) 16%,transparent);display:grid;place-items:center;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.08)}
+#composer .avatar b{font:700 12px/1 Manrope,system-ui,sans-serif;letter-spacing:.04em;color:var(--accent)}
+#composer .avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:avatarIn .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes avatarIn{from{opacity:0;transform:scale(1.08)}to{opacity:1;transform:none}}
+body.reduced #composer .avatar img{animation:none}
+
+/* Portrait intro (main.js portraitIntro): composer waits, frozen at its first frame, until the face docks. */
+#composer.holding{opacity:0;pointer-events:none}
+#composer.holding *,#composer.holding *::before,#composer.holding *::after{animation-play-state:paused!important}
+#composer.holding.arriving{opacity:1;transition:opacity .38s cubic-bezier(.2,.8,.2,1) .2s}
+#composer.holding.arriving .avatar img{opacity:0}
+.portrait-hero{position:fixed;z-index:60;overflow:hidden;border-radius:32px;transform-origin:center;pointer-events:none;box-shadow:0 0 0 1px rgba(255,255,255,.55) inset,0 30px 80px -20px rgba(40,30,20,.35),0 8px 24px rgba(40,30,20,.12)}
+.portrait-hero img{width:100%;height:100%;object-fit:cover;display:block}
+
+.person-head{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.person-head h2{margin:0}
+.person-head .avatar{position:relative;flex:none;width:40px;height:40px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 16%,transparent)}
+.person-head .avatar b{font:700 12px/1 Manrope,system-ui,sans-serif;color:var(--accent)}
+.person-head .avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+
+/* v3.3 rail minimise: after the announce window every rail card folds to a small icon tab; hover/focus opens it. */
+#chapter .ch-text{transition:opacity 220ms var(--out) 120ms,max-width 520ms var(--spring);max-width:280px}
+body:not(.rail-announce) #rail>#chapter:not(:hover):not(:focus-within):not(.open){width:64px;padding:10px 12px}
+body:not(.rail-announce) #rail>#chapter:not(:hover):not(:focus-within):not(.open) .ch-text{opacity:0;max-width:0;transition:opacity 120ms var(--in),max-width 360ms var(--in)}
+.peek-icon{display:none}
+#stage .card.peek{position:relative;transition:height 520ms var(--spring),width 520ms var(--spring),padding 420ms var(--spring)}
+body:not(.rail-announce) #stage .card.peek:not(:hover):not(:focus-within){width:64px!important;height:64px!important;padding:0!important;margin-left:auto}
+body:not(.rail-announce) #stage .card.peek:not(:hover):not(:focus-within)>*{opacity:0!important;pointer-events:none}
+body:not(.rail-announce) #stage .card.peek:not(:hover):not(:focus-within)>.peek-icon{opacity:1!important;display:grid}
+.peek-icon{position:absolute;left:12px;top:12px;width:40px;height:40px;border-radius:50%;place-items:center;background:var(--primary);color:var(--on-primary);transition:opacity 200ms var(--out) 160ms}
+.peek-icon .ph{width:18px;height:18px;fill:currentColor}
+#stage .card.peek:hover>.peek-icon,#stage .card.peek:focus-within>.peek-icon{display:none}
+#rail #stage>.card.peek{margin-left:auto}
+/* v3.3 calm expand: no overshoot, no colour flash; the card opens first, the words follow; brief hover intent. */
+#rail>#chapter{--calm:cubic-bezier(.22,.8,.24,1);transition:width 380ms var(--calm) 70ms,padding 380ms var(--calm) 70ms,box-shadow 300ms}
+#rail>#chapter .ch-more{transition:grid-template-rows 380ms var(--calm) 120ms,opacity 260ms var(--out) 220ms}
+#rail>#chapter .ch-text{transition:opacity 220ms var(--out) 200ms,max-width 380ms var(--calm) 70ms}
+#rail>#chapter .ch-head:hover .ch-icon,#rail>#chapter .ch-head:focus-visible .ch-icon{background:var(--primary);scale:1}
+#rail>#chapter .ch-icon{transition:none}
+body:not(.rail-announce) #rail>#chapter:not(:hover):not(:focus-within):not(.open){transition:width 300ms var(--calm) 240ms,padding 300ms var(--calm) 240ms}
+body:not(.rail-announce) #rail>#chapter:not(:hover):not(:focus-within):not(.open) .ch-more{transition:grid-template-rows 280ms var(--calm) 160ms,opacity 120ms var(--in) 100ms}
+body:not(.rail-announce) #rail>#chapter:not(:hover):not(:focus-within):not(.open) .ch-text{transition:opacity 120ms var(--in) 100ms,max-width 300ms var(--calm) 240ms}
+#stage .card.peek{transition:width 380ms cubic-bezier(.22,.8,.24,1) 70ms,height 380ms cubic-bezier(.22,.8,.24,1) 70ms,padding 380ms cubic-bezier(.22,.8,.24,1) 70ms}
+#stage .card.peek>*{transition:opacity 240ms var(--out) 220ms}
+body:not(.rail-announce) #stage .card.peek:not(:hover):not(:focus-within){transition:width 300ms cubic-bezier(.22,.8,.24,1) 240ms,height 300ms cubic-bezier(.22,.8,.24,1) 240ms,padding 300ms cubic-bezier(.22,.8,.24,1) 240ms}
+body:not(.rail-announce) #stage .card.peek:not(:hover):not(:focus-within)>*{transition:opacity 120ms var(--in) 100ms}
+.peek-icon{display:grid!important;opacity:0}
+#stage .card.peek:hover>.peek-icon,#stage .card.peek:focus-within>.peek-icon{opacity:0!important;transition:opacity 100ms}
+.peek-icon{pointer-events:none}#rail>#chapter .ch-text{overflow:hidden}
+/* v3.3 input bar: [globe] field [mic] [send] in one glass pill, like a chat composer. */
+#composer:has(.ibar){padding-bottom:18px}
+#composer .ibar{display:flex;align-items:flex-end;gap:8px;margin-top:12px;padding:6px 6px 6px 8px;border-radius:26px;background:#ffffffa6;box-shadow:inset 0 0 0 1px var(--hair)}
+body[data-scene=model] #composer .ibar,body[data-scene=chair] #composer .ibar{background:#ffffff12;box-shadow:inset 0 0 0 1px #ffffff1f}
+#composer .ibar-globe{flex:none;width:38px;height:38px;border-radius:50%}
+#composer .ibar input,#composer .ibar textarea{flex:1;min-width:0!important;min-height:38px;max-height:24dvh;margin:0;padding:9px 4px;background:transparent!important;box-shadow:none!important;border:0;outline:none;resize:none;line-height:1.35}
+#composer .ibar-mic,#composer .ibar-send{flex:none;width:38px;height:38px;min-height:0;padding:0;border-radius:50%;display:grid;place-items:center;transition:background 180ms,scale 180ms var(--out),opacity 180ms}
+#composer .ibar-mic{background:transparent;color:var(--ink-2)}
+#composer .ibar-mic:hover,#composer .ibar-mic:focus-visible{background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--ink)}
+#composer .ibar-send:disabled{opacity:.35}
+#composer .ibar-mic .ph,#composer .ibar-send .ph{width:18px;height:18px;fill:currentColor}
+#composer .ibar-mic:active,#composer .ibar-send:active{scale:.92}
+#composer form>.row{margin-top:10px}
+
+/* The globe rides in the bar's left slot. */
+body.globe-inline #agent{left:var(--ax);top:var(--ay);bottom:auto;translate:-50% -50%;width:38px;height:38px;z-index:9;transition:opacity 260ms var(--out),scale 460ms var(--ios),width 420ms var(--ios),height 420ms var(--ios)}
+
+/* Voice mode: only the globe, larger, low-centre; the question above, the live transcript below. */
+body.voice-mode #agent{left:var(--ax);top:var(--ay);bottom:auto;translate:-50% -50%;width:136px;height:136px;z-index:40;
+  transition:left 560ms var(--ios),top 560ms var(--ios),width 560ms var(--ios),height 560ms var(--ios)}
+body.voice-mode #composer{opacity:0!important;pointer-events:none;transition:opacity 200ms var(--in)}
+body.voice-listening #agent{animation:voicePulse 1.6s ease-in-out infinite}
+@keyframes voicePulse{0%,100%{scale:1}50%{scale:1.05}}
+body.reduced.voice-listening #agent{animation:none}
+#voiceUI{position:fixed;z-index:41;left:var(--ax);top:calc(var(--ay) - 68px);translate:-50% -100%;width:min(520px,calc(100vw - 32px));text-align:center;pointer-events:none;opacity:0;transition:opacity 220ms var(--in)}
+body.voice-mode #voiceUI{opacity:1;transition:opacity 320ms var(--out) 260ms}
+#voiceUI .vq{margin:0;font:600 18px/1.35 var(--display,Manrope),system-ui,sans-serif;color:var(--ink)}
+#voiceUI .vt{position:fixed;left:50%;top:calc(100% + 150px);translate:-50% 0;width:100%;margin:0;font:500 15px/1.5 Manrope,system-ui,sans-serif;color:var(--ink-2);min-height:1.5em}
+#voiceUI .vrow{position:fixed;left:50%;top:calc(100% + 196px);translate:-50% 0;display:flex;gap:12px;pointer-events:auto}
+#voiceUI .vbtn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;padding:0;background:var(--glass,#ffffffcc);color:var(--ink);box-shadow:inset 0 0 0 1px var(--hair)}
+#voiceUI .vbtn.primary{background:var(--primary);color:var(--on-primary)}
+#voiceUI .vbtn .ph{width:18px;height:18px;fill:currentColor}
+#composer .ibar{width:100%;box-sizing:border-box}#composer form:has(.ibar){width:100%}#composer .ibar input{field-sizing:fixed;width:100%}#composer:has(.ibar){min-width:min(520px,calc(var(--fw) - 64px))}
+#voiceUI .vq{display:inline-block;padding:10px 18px;border-radius:999px;background:var(--glass,#fffffcd9);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);box-shadow:inset 0 0 0 1px var(--hair),0 10px 30px -12px #0003}#voiceUI .vt{text-shadow:0 1px 12px var(--page,#fff)}
+/* Round controls are exact circles: an older rule forced min-width:44px and made them ovals. */
+#composer .ibar-mic,#composer .ibar-send,#composer .ibar-globe{flex:0 0 38px;width:38px!important;min-width:38px!important;max-width:38px;height:38px;min-height:38px!important;aspect-ratio:1;padding:0!important;border-radius:50%!important}
+#composer .ibar{align-items:center}
+
+/* P08: one question, Claude-greeting style. */
+#composer h2.ask{margin:6px 0 16px;text-align:center;font:600 26px/1.15 var(--display,Afacad),system-ui,sans-serif;letter-spacing:-.01em;color:var(--ink);text-wrap:balance}
+#composer:has(h2.ask){overflow:visible}
+
+/* Input bar with tools: field on top, controls below (Claude composer). */
+#composer .ibar--tools{display:grid;grid-template-columns:38px auto 1fr 38px 38px;grid-template-areas:"f f f f f" "g p . m s";row-gap:6px;column-gap:8px;padding:10px 8px 8px;border-radius:24px;align-items:center}
+#composer .ibar--tools>textarea{grid-area:f;padding:6px 8px;min-height:44px}
+#composer .ibar--tools>.ibar-globe{grid-area:g}#composer .ibar--tools>.picker{grid-area:p}
+#composer .ibar--tools>.ibar-mic{grid-area:m}#composer .ibar--tools>.ibar-send{grid-area:s}
+
+/* Factor picker: a quiet pill with a caret; the menu rises above it. */
+#composer .picker{position:relative}
+#composer .pick{min-height:34px!important;padding:0 10px 0 14px!important;display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:transparent;color:var(--ink-2);font:600 13.5px Manrope,sans-serif;box-shadow:inset 0 0 0 1px var(--hair)}
+#composer .pick em{font-style:normal;color:var(--ink-3)}
+#composer .pick .ph{width:12px;height:12px;fill:currentColor;transition:rotate 260ms var(--ios)}
+#composer .picker.open .pick .ph{rotate:180deg}
+#composer .pick:hover,#composer .picker.open .pick{background:color-mix(in srgb,var(--ink) 7%,transparent);color:var(--ink)}
+#composer .pick.attn{color:var(--accent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent);animation:pickAttn 2.4s ease-in-out infinite}
+@keyframes pickAttn{0%,100%{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 0 0 0 color-mix(in srgb,var(--accent) 0%,transparent)}50%{box-shadow:inset 0 0 0 1px var(--accent),0 0 0 5px color-mix(in srgb,var(--accent) 16%,transparent)}}
+body.reduced #composer .pick.attn{animation:none}
+#composer .pick-menu{position:absolute;left:-8px;bottom:calc(100% + 12px);width:300px;max-height:min(380px,52dvh);overflow:auto;padding:6px;border-radius:18px;z-index:5;
+  background:var(--glass-strong,#fffffcf2);backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);box-shadow:inset 0 0 0 1px var(--hair),0 24px 60px -18px #0004;
+  opacity:0;scale:.96;translate:0 6px;transform-origin:20px 100%;pointer-events:none;transition:opacity 160ms var(--in),scale 200ms var(--in),translate 200ms var(--in)}
+#composer .picker.open .pick-menu{opacity:1;scale:1;translate:0 0;pointer-events:auto;transition:opacity 200ms var(--out),scale 320ms var(--ios),translate 320ms var(--ios)}
+body[data-scene=model] #composer .pick-menu{background:#1b1840f0}
+#composer .pick-head{margin:6px 10px 6px;font:600 11px/1 Manrope,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+#composer .pick-item{width:100%;min-height:0!important;padding:9px 10px!important;border-radius:12px!important;display:flex;align-items:center;justify-content:space-between;gap:12px;background:transparent!important;color:var(--ink);text-align:left}
+#composer .pick-item:hover,#composer .pick-item:focus-visible{background:color-mix(in srgb,var(--ink) 7%,transparent)!important;color:var(--ink)!important}
+#composer .pick-item span{display:flex;flex-direction:column;gap:2px;min-width:0}
+#composer .pick-item b{font:600 14px/1.25 Manrope,sans-serif}
+#composer .pick-item small{font:500 12px/1.3 Manrope,sans-serif;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#composer .pick-check{flex:none;width:20px;height:20px;display:grid;place-items:center;opacity:0;scale:.6;transition:opacity 160ms,scale 240ms var(--ios);color:var(--accent)}
+#composer .pick-check .ph{width:16px;height:16px;fill:currentColor}
+#composer .pick-item[aria-selected=true] .pick-check{opacity:1;scale:1}
+
+/* Field hints fade between messages. */
+#composer textarea::placeholder,#composer input::placeholder{transition:opacity 220ms var(--out)}
+#composer .hint-out::placeholder{opacity:0}
+#composer:has(.picker){overflow:visible!important}
+#composer:has(.picker.open){clip-path:none!important}
+#composer button.pick:not(.attn),#composer button.pick:not(.attn):hover,#composer button.pick:not(.attn):focus-visible{background:transparent;color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--hair)}
+#composer button.pick:hover,#composer .picker.open button.pick{background:color-mix(in srgb,var(--ink) 8%,transparent)!important;color:var(--ink)!important}
+#composer button.pick.attn:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)!important;color:var(--accent)!important}
+/* v3.3b: wider, slimmer composer; hairline rings. */
+#composer:has(.ibar--tools),#composer:has(.ibar){width:min(760px,calc(var(--fw) - 48px));min-width:0}
+#composer:has(.ibar--tools){padding:16px 18px 14px}
+#composer h2.ask{margin:2px 0 12px;font-size:24px}
+#composer .ibar--tools{padding:6px 8px 6px;row-gap:2px;border-radius:22px}
+#composer .ibar--tools>textarea{min-height:30px;padding:4px 8px}
+#composer .pick{min-height:30px!important}
+#composer .pick,#composer button.pick:not(.attn){box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--ink) 18%,transparent)!important}
+#composer .pick.attn{box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--accent) 45%,transparent)!important;animation:pickAttnThin 2.6s ease-in-out infinite}
+@keyframes pickAttnThin{0%,100%{box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--accent) 35%,transparent),0 0 0 0 transparent}50%{box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--accent) 70%,transparent),0 0 0 2px color-mix(in srgb,var(--accent) 8%,transparent)}}
+#composer .ibar{box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--ink) 14%,transparent)}
+#composer .pick-menu{box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--ink) 14%,transparent),0 20px 50px -20px #0004}
+#composer .pick-item:focus-visible,#composer .pick:focus-visible,#composer .ibar-mic:focus-visible,#composer .ibar-send:focus-visible{outline:1px solid color-mix(in srgb,var(--ink) 30%,transparent)!important;outline-offset:1px;box-shadow:none!important}
+#composer .pick-item:focus:not(:focus-visible){outline:none}
+#composer:has(.ibar){width:min(760px,calc(var(--fw) - 48px))!important;max-width:min(760px,calc(var(--fw) - 48px))!important}
+#composer button.pick:not(.attn):focus-visible,#composer button.pick:not(.attn):focus{background:transparent!important;color:var(--ink-2)!important}
+#composer button.pick:hover,#composer .picker.open button.pick{background:color-mix(in srgb,var(--ink) 8%,transparent)!important;color:var(--ink)!important}
+#composer .ibar-mic:hover,#composer .ibar-mic:focus-visible{background:color-mix(in srgb,var(--ink) 8%,transparent)!important;color:var(--ink)!important}
+#composer .ibar-send:hover,#composer .ibar-send:focus-visible{background:var(--primary)!important;color:var(--on-primary)!important;filter:brightness(1.08)}
+/* v3.3c shared action bar */
+#composer .ibar--tools{grid-template-areas:"f f f f f" "g p . m s"}
+#composer .ibar--tools>.ibar-hint{grid-area:f;margin:0;padding:6px 8px;min-height:30px;font:500 14.5px/1.35 Manrope,system-ui,sans-serif;color:var(--ink-3);transition:opacity 220ms var(--out);text-wrap:pretty}
+#composer .ibar-hint.hint-out{opacity:0}
+#composer .ibar--tools>.ibar-tools{grid-area:p;display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
+#composer .ibar--tools>.ibar-mic-gap{grid-area:m;width:38px}
+#composer .tool{min-height:30px!important;padding:0 12px!important;border-radius:999px!important;background:transparent!important;color:var(--ink-2)!important;font:600 13px Manrope,sans-serif;box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--ink) 18%,transparent)!important}
+#composer .tool:hover,#composer .tool:focus-visible{background:color-mix(in srgb,var(--ink) 8%,transparent)!important;color:var(--ink)!important}
+#composer .pick-item.long b{font-weight:500;white-space:normal;line-height:1.35}
+#composer .picker[data-picker=lever] .pick-menu{width:min(460px,calc(var(--fw) - 80px))}
+#composer .ibar-send[disabled]{opacity:.35;pointer-events:none}
+/* v3.3d option 1: pop-up cards open centred in the frame, above the composer. */
+#rail>#railPanel{position:fixed;left:var(--pcx,50%);top:var(--ptop,15vh);translate:-50% 0;width:min(520px,calc(var(--fw) - 80px));max-height:var(--pmaxh,60vh);
+  border-radius:24px!important;z-index:12;transform-origin:50% 40%;padding:22px 22px 20px;
+  box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--ink) 14%,transparent),0 30px 80px -24px #0005}
+#rail>#railPanel:not(.on){opacity:0;scale:.96}
+#rail>#railPanel.on{opacity:1;scale:1;translate:-50% 0;transition:opacity 220ms var(--out),scale 420ms var(--ios),top 420ms var(--ios)}
+#railPanel #closePanel{top:12px;right:12px}
+/* option 2: the composer steps aside, keeping GAP (20px) from the card. */
+body.composer-aside #composer{left:var(--ccx)!important;width:var(--cw)!important;max-width:var(--cw)!important;min-width:0!important;
+  transition:left 460ms var(--ios),width 460ms var(--ios),max-width 460ms var(--ios),clip-path 460ms var(--ios),opacity 180ms var(--out)}
+#composer{transition:left 460ms var(--ios),width 460ms var(--ios),clip-path 460ms var(--ios),opacity 180ms var(--out),visibility 0s}
+@media (max-width:700px){#rail>#railPanel{left:50%;width:calc(100vw - 20px)}}
+body.composer-aside:not(.globe-inline):not(.voice-mode) #agent{left:var(--ccx);transition:left 460ms var(--ios),opacity 260ms var(--out),scale 460ms var(--ios)}

@@ -1,0 +1,71 @@
+/* Current authority: light stage, quiet corner assistant. Overrides legacy styles.css. */
+:root{--ink:#252b29;--ink-2:#58625e;--ink-3:#69726e;--glass:rgba(255,255,252,.9);--dglass:var(--glass);--dedge:inset 0 0 0 1px #3f4a421a;--dfloat:0 12px 40px #2830291a;--float:var(--dfloat);--ease:cubic-bezier(.22,.8,.3,1)}
+body{background:#f4f3ee}#scrim,#aiGlow{display:none}button,.ic,.seg button,#closeDrawer{min-width:44px;min-height:44px}button:hover{transform:none}
+#stage[data-layout=hero]{inset:auto auto 38px 40px;width:min(440px,calc(100vw - 80px))}.hero{text-align:left;color:var(--ink)}.hero h1{font-size:clamp(32px,4vw,48px)}.hero small{color:var(--ink-2);font-size:10px}.hero .row{justify-content:flex-start;margin-top:18px}.hero button.primary{background:var(--ink);color:white}.hero button:not(.primary){background:var(--glass);color:var(--ink)}
+#agent{left:auto;right:22px;top:18px;bottom:auto;width:48px;height:48px;background:#ffffffc2;box-shadow:var(--dedge),0 4px 16px #263b2912;transition:transform 280ms var(--ease),opacity 200ms}
+#agent[data-phase=rest],#agent[data-phase=prompt]{transform:none;opacity:1}#agent[data-phase=working]{transform:scale(1.06)}#agent[data-phase=hidden]{transform:scale(.9);filter:none}#agent .hit{inset:0;min-width:44px;min-height:44px}#agent .hit:focus-visible{outline-color:#48765c}#agent .globe.strands-container{inset:-5px}
+#agentMenu{left:auto;right:22px;top:76px;bottom:auto;width:230px;background:var(--glass);box-shadow:var(--dedge),var(--dfloat);transform-origin:100% 0;text-align:left;filter:none}#agentMenu button{color:var(--ink);min-height:44px;padding:8px 12px}#agentMenu button:hover,#agentMenu button:focus-visible{background:#e9eee7;color:var(--ink)}
+#composer{left:auto;right:22px;top:82px;bottom:auto;width:min(380px,calc(100vw - 44px));max-height:calc(100dvh - 108px);transform:none;transform-origin:100% 0;text-align:left;padding:18px;border-radius:22px;background:var(--glass);backdrop-filter:blur(18px);box-shadow:var(--dedge),var(--dfloat);color:var(--ink);transition:opacity 220ms,transform 320ms var(--ease),visibility 0s}
+#composer.empty,#composer.folded{transform:translate(10px,-12px) scale(.94);filter:none;transition:opacity 120ms,transform 160ms cubic-bezier(.7,0,.84,0),visibility 0s 160ms}
+#composer p,#composer label{color:var(--ink);text-shadow:none;font-size:15px;font-weight:500;line-height:1.55}#composer .who{color:var(--ink);font-size:12px;font-weight:700;margin-bottom:10px}#composer .who span,#composer small{color:var(--ink-2);text-shadow:none;font-size:12px}
+#composer .row,#composer .choices{gap:8px;justify-content:flex-start}#composer .stack{gap:6px;align-items:stretch}#composer button{box-sizing:border-box;min-height:44px;min-width:44px;padding:9px 12px;border-radius:12px;align-items:center;background:#e9eee7;color:var(--ink);font-size:13px;text-shadow:none;font-weight:600}#composer button::before{content:none}#composer button:hover,#composer button:focus-visible{color:var(--ink);background:#dfe7dc}#composer button.primary,#composer button.selected{background:#334d3f;color:#fff}#composer button:focus-visible{outline:2px solid #48765c}
+#composer input,#composer textarea,#composer select,#composer form .row:has(input){background:#edf0e9e6;color:var(--ink);box-shadow:inset 0 0 0 1px #526a4f26;backdrop-filter:none;border-radius:14px;text-shadow:none}#composer input::placeholder,#composer textarea::placeholder{color:#69726e}#composer select{min-width:0;width:100%}#composer form{display:block}#composer form .row:has(input){padding:3px}#composer form .row:has(input) button{background:#334d3f;color:white;height:44px;padding:0 12px}#composer textarea{width:100%;min-height:112px}
+#stage[data-layout=side]{top:auto;bottom:24px;right:22px;width:min(380px,calc(100vw - 44px))}#stage[data-layout=side] .card{max-height:34dvh}#stage[data-layout=center]{inset:28px 430px 28px 28px;padding:0}
+.card,.card h2,.card p,.card strong,dialog,dialog h2,dialog p,dialog strong{color:var(--ink)}.card small,.card .muted,.kicker,dialog small,dialog .muted{color:var(--ink-2)}.card{background:var(--glass);padding:18px;border-radius:20px;box-shadow:var(--dedge),var(--dfloat);max-height:calc(100dvh - 56px)}.card h2{font-size:20px}.card p{font-size:14px}.card .headline{color:var(--ink)}.card .list button,.card button.plain{color:var(--ink)}.card .list button:hover{background:#e9eee7}.card .status-dot,.card .num,.card .seg button{color:var(--ink-2)}.card .seg button[aria-pressed=true]{background:#dce7d8;color:var(--ink)}.card .lines b,.card .lines span,.card .lines em{color:var(--ink)}.card .lines>div{border-color:#334d3f20}.card .debrief-grid div{background:#e9eee7}
+dialog{background:#fffffcf5;box-shadow:var(--dedge),var(--dfloat);width:min(560px,calc(100vw - 32px));border-radius:22px;animation:detailIn 240ms var(--ease)}dialog::backdrop{background:#e6e9e333;backdrop-filter:none}body.detail-open #composer,body.detail-open #stage,body.detail-open #documentNav,body.detail-open #stamps{visibility:hidden}dialog button:not(.primary){color:var(--ink);background:#e9eee7}dialog input,dialog textarea{background:#f0f2ec;color:var(--ink)}.reader .body{font:15px/1.7 Manrope,system-ui,sans-serif}.rise{animation:none}
+@keyframes detailIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}@keyframes cardIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.stamps{gap:6px}.stamp,.stamps.show .stamp,.stamps.show .stamp.a{box-sizing:border-box;min-height:44px;transform:none;border:1px solid #4b65572e;border-radius:10px;letter-spacing:0;text-transform:none;font:600 12px Manrope,sans-serif;color:#334d3f;text-shadow:none;background:#fffffaf0;filter:none}.stamp.f.on{color:#274833;background:#dcebdc}.stamp.a.on{color:#344d66;background:#e0eaf3}.stamp:focus-visible{outline:2px solid #334d3f}.page-count{color:#59635e;text-shadow:none}
+#documentNav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:12;display:flex;gap:4px;padding:5px;border-radius:18px;background:var(--glass);backdrop-filter:blur(16px);box-shadow:var(--dedge),var(--dfloat)}#documentNav[hidden]{display:none}#documentNav button{background:transparent;box-shadow:none;padding:0 12px;font-size:12px}#documentNav button:hover{background:#e9eee7}
+.xf{background:#f4f3ee;color:var(--ink);transition:opacity 250ms}.xf small{color:var(--ink-2)}body.no-webgl #stage{background:transparent}body[data-page=P03] #stage{inset:82px 24px 90px;width:auto;display:flex}
+@media(max-width:700px){#agent{right:14px;top:12px}#agentMenu{right:14px;top:70px}#composer{top:auto;bottom:18px;right:14px;width:calc(100vw - 28px);max-height:48dvh;padding:15px;transform-origin:100% 100%}#composer.empty,#composer.folded{transform:translateY(12px) scale(.97)}#composer p,#composer label{font-size:14px}#stage[data-layout=side]{right:14px;top:78px;bottom:auto;width:calc(100vw - 28px)}#stage[data-layout=side] .card{max-height:30dvh}#stage[data-layout=center]{inset:78px 14px auto;max-height:45dvh;padding:0}#stage[data-layout=center] .card{max-height:45dvh}#stage[data-layout=hero]{left:24px;bottom:32px;width:calc(100vw - 48px)}.list .title{font-size:12px}.list button{gap:7px;padding:8px}.list .status-dot{font-size:10px;white-space:normal}.list .num{display:none}#documentNav{bottom:12px;max-width:calc(100vw - 20px)}#documentNav button{padding:0 9px}.debrief-grid{grid-template-columns:1fr}}
+/* Explicitly replace inherited dark-theme foregrounds and undersized legacy buttons. */
+.card button,dialog button:not(#closeDrawer):not(.primary),.card button.primary,dialog button.primary,.card .seg button,.list button{box-sizing:border-box;min-height:44px;min-width:44px;padding:8px 12px;color:var(--ink);border-radius:12px;align-items:center}
+.card button:hover,.card button:focus-visible,dialog button:not(#closeDrawer):not(.primary):hover{color:var(--ink);background:#e9eee7}
+.card button::before,dialog button::before{content:none!important}.card button.primary,dialog button.primary{background:#334d3f;color:#fff}
+.card button:focus-visible,dialog button:focus-visible{outline-color:#48765c}
+#closeDrawer{min-height:44px;min-width:44px;color:var(--ink);background:#e9eee7}
+dialog h3,dialog label,dialog summary,.settings-row,.reader .body{color:var(--ink)}.reader .source{color:var(--ink-2)}.reader .flag{background:#f5edda;color:#62441f}
+.card .lines em.ok{color:#356345}.card .lines em.warn{color:#795117}.card .lines em.bad{color:#963e37}
+.meter{background:#334d3f20}.meter i{background:#587861}.card .debrief-grid small{color:var(--ink-2)}
+.nt{background:var(--glass);color:var(--ink)}.nt span{color:var(--ink-2)}.nt i{background:#334d3f}.nt button{min-height:44px}
+dialog[open]{animation:detailIn 240ms var(--ease)}dialog::backdrop{-webkit-backdrop-filter:none}
+#agent.globe-fallback .globe{inset:9px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#e2eecf,#7b9b7e 48%,#3d5d50);box-shadow:inset 0 0 0 1px #ffffff80}
+
+@media(max-width:700px){#stage[data-layout=center],#stage[data-layout=center] .card{max-height:36dvh}}
+
+/* ---- Scene pins (reference: Airbnb diorama price pins, Fuselab room labels). Labels stay upright; positions come
+   from markers.js each frame. Enter 220ms ease-out with a 40ms stagger; exit 120ms ease-in (faster than entry). */
+#pins{position:fixed;inset:0;pointer-events:none;z-index:3}
+.pin{position:fixed;left:0;top:0;width:0;height:0;padding:0;border:0;background:none;box-shadow:none;min-height:0;pointer-events:none;will-change:transform}
+.pin>span{position:absolute;left:0;opacity:0;transition:opacity 120ms cubic-bezier(.7,0,.84,0),scale 120ms cubic-bezier(.7,0,.84,0);transition-delay:0ms}
+.pin-dot{top:-5px;margin-left:-5px;width:10px;height:10px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 3px #fffffce6,0 2px 6px #2830293d;scale:.4}
+.pin-stem{bottom:4px;margin-left:-.5px;width:1px;height:22px;background:linear-gradient(#25302a00,#25302a99);scale:1 0;transform-origin:50% 100%}
+.pin-label{bottom:26px;translate:-50% 0;white-space:nowrap;display:flex;align-items:center;min-height:34px;padding:0 14px;border-radius:999px;font:600 13px/1 Manrope,system-ui,sans-serif;color:var(--ink);background:#fffffcd1;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--dedge),0 6px 18px #2830291f;scale:.85;transform-origin:50% 100%}
+.pin-label::after{content:"";position:absolute;inset:-6px -4px}          /* 44px hit area without a bigger pill */
+#pins.on .pin.on{pointer-events:auto}
+#pins.on .pin.on>span{opacity:1;scale:1;transition:opacity 220ms cubic-bezier(.16,1,.3,1),scale 220ms cubic-bezier(.16,1,.3,1);transition-delay:calc(var(--i,0) * 40ms)}
+.pin.on .pin-label{pointer-events:auto;cursor:pointer}
+.pin:hover .pin-label,.pin:focus-visible .pin-label{background:#fff;box-shadow:var(--dedge),0 8px 22px #28302929}
+.pin:focus-visible{outline:none}.pin:focus-visible .pin-label{outline:2px solid var(--ink);outline-offset:2px}
+
+/* A card grows out of its pin (origin set by markers.js) instead of a centred modal. */
+.pin-card{position:fixed;left:0;top:0;z-index:5;width:min(280px,calc(100vw - 24px));padding:16px 44px 14px 16px;border-radius:20px;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:var(--dedge),var(--dfloat);color:var(--ink);opacity:0;scale:.88;transition:opacity 120ms cubic-bezier(.7,0,.84,0),scale 120ms cubic-bezier(.7,0,.84,0)}
+.pin-card.on{opacity:1;scale:1;transition:opacity 180ms cubic-bezier(.16,1,.3,1),scale 240ms cubic-bezier(.16,1,.3,1)}
+.pin-card h3{margin:2px 0 6px;font:700 17px/1.25 Manrope,system-ui,sans-serif}.pin-card p{margin:0 0 8px;font:14px/1.5 Manrope,system-ui,sans-serif}
+.pin-card small{color:var(--ink-2);font-size:12px}.pin-card .kicker{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.pin-close{position:absolute;top:6px;right:6px;width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;background:none;box-shadow:none;color:var(--ink-2);font-size:20px}
+.pin-close:hover{background:#25302a12}
+
+/* ---- View capsule (reference: Bino's vertical zoom capsule). Always reachable, even while the conversation has
+   orbit disabled. Hidden on the title, during scene changes and while a document is held. */
+#viewDock{position:fixed;left:22px;top:50%;translate:0 -50%;z-index:4;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px;border-radius:28px;background:#fffffcc7;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:var(--dedge),0 8px 26px #2830291a;opacity:0;visibility:hidden;scale:.96;transition:opacity 120ms,scale 120ms,visibility 0s 120ms}
+body.scene-open #viewDock{opacity:1;visibility:visible;scale:1;transition:opacity 200ms cubic-bezier(.16,1,.3,1),scale 200ms cubic-bezier(.16,1,.3,1),visibility 0s}
+#viewDock button{width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;background:none;box-shadow:none;display:grid;place-items:center;color:var(--ink);transition:background 120ms}
+#viewDock button:hover{background:#25302a10}#viewDock button:active{background:#25302a1c;scale:.94}
+#viewDock svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#viewDock i{display:block;width:20px;height:1px;margin:3px 0;background:#25302a26}
+/* Narrow screens: a horizontal capsule in the free strip beside the globe, above the top result card (78px). */
+@media (max-width:700px){#viewDock{left:14px;top:12px;translate:none;flex-direction:row;padding:2px 5px}#viewDock i{width:1px;height:20px;margin:0 3px}}
+body.reduced .pin>span,body.reduced .pin-card,body.reduced #viewDock{transition-duration:0ms!important;transition-delay:0ms!important}
+@media (prefers-reduced-motion:reduce){.pin>span,.pin-card,#viewDock{transition-duration:0ms!important;transition-delay:0ms!important}}
+.pin:hover,.pin:focus{box-shadow:none}#viewDock button:hover,.pin-close:hover{transform:none;box-shadow:none}

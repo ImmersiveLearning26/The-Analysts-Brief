@@ -1,0 +1,944 @@
+The Analyst’s Brief: Simulation Script and Storyboard
+IRS 103 Introduction to African Politics ·
+
+Simulation summary and learning objectives
+You are a junior political analyst on the research unit of the National Dialogue Commission
+of Kalinda, a fictional African republic in crisis: a disputed election, identity-based clashes
+in the border town of Tamarind Crossing, rumours of an army mutiny and a corruption
+scandal. In one working week, you do what political analysts do in real life. You compile and
+check the background evidence, test the competing explanations for how Kalinda got here,
+appraise options for responding to today’s dispute, and brief the Chair. You grew up near
+the Crossing, and Dr Diallo asks you to note that as an interest in your file. Your work
+shapes how the Dialogue frames the crisis.
+Purpose: to develop the ability to carry out the core tasks of political analysis (sourcing
+evidence, testing explanations, appraising policy options and briefing a decision-maker).
+Developer creativity: the look of the research unit and the tools, period sound, transitions
+and the visual treatment of the Crossing, provided facts, rules and branch logic do not
+change.
+
+
+
+
+                    By the end, the learner
+#                   can…                            Weeks           Scene
+1                   Compile a sourced               1–3             S1
+                    background note on Africa’s
+                    geography, diversity,
+                    pre-colonial systems and
+                    colonial rule, and evaluate
+                    and set aside unreliable
+                    claims.
+2                   Test competing explanations 4–7                 S2
+                    for a state’s political
+                    trajectory (nationalism,
+                    independence,
+                    state-building, military
+                    intervention) against
+                    evidence, and identify the
+                    main drivers.
+3                   Appraise and test options       8–9             S3
+                    for responding to a
+    By the end, the learner
+#   can…                          Weeks   Scene
+    contemporary governance
+    and identity-based dispute,
+    and justify the trade-offs.
+4   Communicate findings and      1–9     S4
+    recommendations in a
+    concise oral briefing,
+    distinguishing what is
+    established from what is
+    uncertain.
+1 · Cover & Metadata
+Field                                   Summary
+Course/topic                            [Course code] · Introduction to
+                                        African Politics · Weeks 1–9 ·
+                                        Competency: analysing African
+                                        political challenges and advising on
+                                        responses
+Simulation title                        The Analyst’s Brief
+SME                                     [to complete]
+Designer / Builder                      [to complete]
+Date/version                            8th Oct 2026
+Target learners                         First-year university students
+Estimated duration                      20–25 minutes; untimed throughout
+Setting                                 The research unit and Chair’s office
+                                        of the National Dialogue
+                                        Commission, and the Crossing’s
+                                        school hall, in a fictional African
+                                        republic
+
+2 · Simulation Type Selector
+☒ Dialogue/branching ☒ Evidence-gathering/environment-emergent exploration ☒
+Instrumented testing ☒ Token/resource allocation ☒ Others: scenario modelling and oral
+briefing
+Tone, voice and reading level: British English; plain, professional wording; first-year
+university reading level; short, realistic dialogue. Colleagues speak like colleagues, not
+lecturers.
+
+3 · The Premise
+Element                                 Detail
+The setting/world                       Kalinda, a fictional African republic,
+                                        a week before the National Dialogue
+                                        opens. The Commission’s research
+                                        unit has a shared drive, a Trajectory
+                                        Model, a case archive and a Director
+                                        who needs answers by Friday.
+The learner’s role                      Junior political analyst, National
+                                        Dialogue Commission research unit.
+                                        You grew up near Tamarind
+                                        Crossing, and you declare it in your
+                                        file.
+Element                               Detail
+The problem/situation                 Everyone has a theory about why
+                                      Kalinda is in crisis. The Chair needs
+                                      a sourced background, a tested
+                                      explanation, a defensible response
+                                      and a clear briefing before Friday.
+The goal/objective                    Produce analysis the Commission
+                                      can rely on, and help the Dialogue
+                                      open in a way that does not deepen
+                                      the crisis.
+
+Cast (fictional; names are deliberately varied): Dr Amina Diallo, Director of the research
+unit (your supervisor) · Hon. Grace Mwangi, Chair of the National Dialogue · Nana Efua, an
+elder whose recorded oral history is one of the archive sources.
+Note: Kalinda and Tamarind Crossing are fictional composites. Real events are named only
+in the debrief record. No community is presented as inherently hostile.
+
+4 · State & Scoring Framework
+Accuracy/state strand                 What it measures and which scenes update it
+Strand 1: Sourcing the evidence       Whether the background rests on reliable
+                                      sources and sets aside unreliable claims.
+                                      Updated in S1.
+Strand 2: Explaining the trajectory   Whether the findings are supported by the
+                                      learner’s own model tests. Updated in S2.
+Strand 3: Responding today            Whether the response package keeps
+                                      evidence clear, participation broad, public
+                                      confidence high and tension easing. Updated
+                                      in S3.
+
+Each strand ends as Strong, Mixed or Fragile. Nothing is scored in numbers on screen. The
+oral briefing in S4 is unscored.
+Running variables (shown as words on the heads-up display): Political climate
+(Calm/Strained/Hostile), set from Strands 1 and 2 · Time budget (set in S3).
+Running log (the analyst’s notebook): pieces placed and claims set aside, model tests run
+and findings submitted, response levers and rationale, and the recorded briefing. Used only
+to tailor the debrief.
+
+5 · Structure & Flow
+Standard Miva shell: Miva University opening → optional intro sequence → title/landing
+page/student name → simulation beats → debrief/feedback. The opening shell does not
+count toward the scenes. Total: four scenes including landing and debrief (two simulation
+beats), below the five-scene maximum.
+S1-DESK-REVIEW → S2-EXPLANATIONS → S3-DIALOGUE-WEEK → S4-BRIEFING →
+End/Restart.
+ISP interaction map. Every interaction is Medium or High complexity; none is Low. Each
+type is used once.
+
+            ISP # and                                            What the learner does
+Scene       interaction       Complexity     Cognitive skill     and why
+S1          14 Jigsaw         Medium         Comprehension       Builds the Foundations
+            assembly                                             page from sourced
+                                                                 evidence pieces and sets
+                                                                 aside unreliable claims
+S2          40 Conditional    Medium         Problem-solving     Switches factors in the
+            simulator                                            Trajectory Model, reads
+                                                                 the results and writes
+                                                                 findings
+S3          38 Simulation     High           Creation            Builds and tests a
+            sandbox                                              response to today’s
+                                                                 dispute, adjusting five
+                                                                 levers and watching four
+                                                                 indicators change
+S4          25 Voice/speech   High           Creation            Records an oral briefing
+            input                                                for the Chair
+
+Build note: S3 (sandbox) and S4 (voice) are the heavy builds. S4 needs microphone
+permission and speech-to-text, with a typed alternative. S2 needs the rule engine and
+headline sets; S1 needs snap-to-fit jigsaw artwork.
+
+Scene 1 – The Desk Review
+                                       NODE S1-DESK-REVIEW – The Desk
+Field                                  Review
+Situation                              Monday, 08:30, the research unit:
+                                       shared screens, a kettle, a
+                                       rain-streaked window. Dr Diallo’s
+                                       voice note plays (transcript in
+                                       section 6): she needs a background
+                                       section she can trust. In the case
+                                       archive, a page frame called
+                                       Foundations has sixteen empty
+                                       places and a tray of eighteen cards.
+                                       Sixteen are sourced evidence pieces;
+                                       the other two are claims in
+                                       circulation. Each card shows its
+                                       source. Dr Diallo: “Use what is
+                                       reliable. Tell me what you set aside.”
+                                        NODE S1-DESK-REVIEW – The Desk
+Field                                   Review
+Interaction                             Jigsaw assembly (14). Drag each
+                                        evidence piece to its place on the
+                                        Foundations page; pieces snap in
+                                        when they fit and open a card. Drag
+                                        each claim either onto the page or to
+                                        the Set aside tray. “Open the case
+                                        notes” unlocks when at least
+                                        fourteen of the sixteen evidence
+                                        pieces are placed and both claims
+                                        have been placed or set aside.
+                                        Keyboard alternative: a list of cards
+                                        with “Place” and “Set aside” buttons.
+Response/indicator                      A placed evidence piece opens its
+                                        card and the page fills in. A claim set
+                                        aside shows a short note on why. A
+                                        claim forced onto the page sits
+                                        crooked and gets a margin flag from
+                                        Dr Diallo. Nothing is graded on
+                                        screen.
+Teaching content                        Africa’s geography, diversity and
+                                        origins (Week 1); pre-colonial
+                                        systems, trade and the slave trade
+                                        (Week 2); colonial rule, partition,
+                                        administration and boundaries
+                                        (Week 3); and the habit of checking
+                                        the source before using a claim.
+State change                            Log pieces placed and claims set
+                                        aside; set Strand 1.
+Goes to                                 S2-EXPLANATIONS
+
+
+
+
+Foundations page: sixteen evidence pieces (in page order)
+
+#             Piece and source                 Card text
+1             Where Kalinda lies · Survey      “Africa crosses the equator,
+              Department atlas                 with desert to the north and
+                                               south, rainforest at the
+                                               centre, savannah between,
+#   Piece and source                  Card text
+                                      and long coasts and great
+                                      rivers. Kalinda sits where
+                                      savannah meets forest and
+                                      coast.”
+2   Peoples and languages ·           “Africa has thousands of
+    National census, language table   languages and many
+                                      peoples. Kalinda has over
+                                      forty. Diversity is a political
+                                      resource and a challenge.”
+3   What African politics studies ·   “How power is won, used
+    Research unit definition note     and shared in African states,
+                                      and how societies and
+                                      outsiders shape it. Its states
+                                      and boundaries are recent;
+                                      its roots are old.”
+4   The long timeline · Commission “Old kingdoms and trade
+    chronology                     networks → slave trade and
+                                   colonial rule →
+                                   independence movements
+                                   → one-party and military
+                                   rule → multiparty politics.”
+5   The Old Kingdom’s council ·       “A king ruled through a
+    Oral history recorded 1958        council. Authority came
+    (Nana Efua’s grandmother)         from lineage, ritual and
+                                      consent.”
+6   The hill moot · Field notes,      “In the hills, elders and age
+    1950s                             groups decided by
+                                      discussion. No king ruled.”
+7   Caravans and canoes · Customs     “Caravans and canoes linked
+    and tolls register, 1840s         forest, savannah and coast.
+                                      Markets, tolls and treaties
+                                      managed relations between
+                                      communities.”
+8   The ledger · Shipping ledger,     “The slave trade drained
+    1790s                             people, armed some states
+                                      and weakened others.”
+9   The palm-oil cask · Merchant      “When the slave trade
+    house accounts, 1860s             ended, palm oil and
+                                      groundnuts replaced it,
+                                      tying the economy to
+                                      export.”
+#         Piece and source                   Card text
+10        The 1885 line · Treaty and         “European powers divided
+          boundary map, 1885                 Africa on paper, with little
+                                             knowledge of the peoples on
+                                             the ground. Colonial rule
+                                             spread across Kalinda by
+                                             treaty and force.”
+11        Direct rule in the port · Colonial “In the port city, colonial
+          gazette                            officers governed directly
+                                             through laws and courts.”
+12        Indirect rule in the interior ·    “In the interior, the colonial
+          District reports                   government ruled through
+                                             chiefs, who became its
+                                             agents.”
+13        Cash crops and forced labour ·     “Cash crops, taxes and
+          Tax and labour records;            forced labour served the
+          mission school registers           colony’s exports. Mission
+                                             schools produced a small
+                                             educated class.”
+14        The split communities ·            “The boundary cut the
+          Boundary commission report         Savannah Kingdom in two.
+                                             Families, markets and
+                                             shrines ended up in
+                                             different colonies, and the
+                                             Crossing became a border
+                                             town.”
+15        The chief at the rally · Press     “Chiefs still settle disputes,
+          photograph, last election          allocate land and are
+                                             courted by politicians.”
+16        Today’s headlines ·                “Disputed election. Army
+          Newspapers                         mutiny rumour. Corruption
+                                             scandal. Clashes at the
+                                             Crossing.”
+
+
+
+
+The two claims in circulation (cannot fit the page)
+Claim and source           If set aside                If forced onto the page
+“Ancient ethnic hatreds    Note: “No source is         The piece sits crooked.
+explain African            cited, and it treats        Dr Diallo’s margin flag:
+politics.” Newspaper       diversity as a cause.       “No evidence for this.
+column, no sources         The archive points to       Please remove it.”
+cited                      boundaries,
+                           institutions and
+                           exclusion.”
+“The interior had no       Note: “Written by a         The piece sits crooked.
+government before the      colonial officer            Dr Diallo’s margin flag:
+Europeans came.”           justifying colonial rule.   “Contradicted by the
+Colonial officer’s         The oral history and        oral history and field
+report, 1912               field notes show            notes. Please remove
+                           councils and moots.”        it.”
+
+Strand 1: Strong if both claims are set aside; Mixed if one is placed on the page; Fragile if
+both are.
+
+Scene 2 – Testing the Explanations
+                         NODE S2-EXPLANATIONS – Testing the
+Field                    Explanations
+Situation                 Wednesday, mid-morning. An email from Dr Diallo:
+                          “Three explanations are circulating in the press
+                          and at the Dialogue: Kalinda is unstable because it
+                          is too diverse; because of its colonial legacy; or
+                          because of the choices made after independence.
+                          The Chair wants to know which holds up. Use the
+                          case notes and the Trajectory Model, then send me
+                          your findings.” On screen: seven case notes, a
+                          model with seven switches, and the model’s base
+                          case, which is Kalinda’s actual history.
+Interaction               Conditional simulator (40). Read the case notes.
+                          Then switch any combination of the seven factors
+                          to its alternative and press “Run the model”, as
+                          often as you like. Each run shows the outcome for
+                          Kalinda’s first decade as five headlines. To finish,
+                          “Send findings”: choose up to three factors you
+                          would name as the main drivers of the coup and
+                          write one sentence on why (free text, stored).
+                          Keyboard alternative: checkboxes for the switches
+                          and a select list for each finding.
+Response/indicator        Each run shows five headlines and an outcome
+                          word on the heads-up display. After “Send
+                          findings” and a 3-second ritual (the email
+                        NODE S2-EXPLANATIONS – Testing the
+Field                   Explanations
+                        whooshes, a phone rings), Dr Diallo replies (table
+                        below). No Correct/Incorrect banner.
+Teaching content        Nationalism and the road to independence,
+                        including the apartheid file (Week 4);
+                        decolonisation, inherited challenges,
+                        nation-building and development (Week 5); forms
+                        of government, party systems and succession
+                        (Week 6); military intervention (Week 7); testing a
+                        popular claim against evidence (Weeks 8–9).
+State change            Log runs and findings; set Strand 2 and the
+                        Political climate.
+Goes to                 S3-DIALOGUE-WEEK
+
+Case notes (always available)
+
+Note                      Text
+1 Nationalism             “After the war, ex-servicemen, workers,
+                          students, the press and market women
+                          demanded a say. Their grievances were taxes,
+                          low crop prices, forced labour, racial
+                          discrimination and no vote. Methods ranged
+                          from petitions and strikes to boycotts and, in
+                          some places, armed struggle.”
+2 The Southern file       “To the south, a white-minority regime built
+                          apartheid: racial classification, pass laws,
+                          separate areas and no vote for the Black
+                          majority, formalised from 1948. Resistance
+                          used protest, strikes, boycotts and later armed
+                          struggle. Refugees crossed into the Crossing.”
+3 Independence            “Kalinda’s Congress was led from the south,
+                          with little support in the interior chiefdoms.
+                          Independence came in 1960. It brought a flag, a
+                          constitution and a colonial inheritance: an
+                          export economy, an army led by one region’s
+                          officers, administration built for extraction, and
+                          boundaries that split communities.”
+4 Nation-building and     “The government chose centralised
+development               administration and an export-led economy.
+                          Regional parties and the interior chiefdoms
+                          complained of exclusion.”
+Note                        Text
+5 Government and            “A presidency with no term limits was created.
+succession                  A one-party state was declared in Year 2, and
+                            the President kept the right to choose his
+                            successor.”
+6 The army and coups        “The army kept its colonial command and
+                            recruited largely from one region. In Year 6
+                            officers seized power by dawn broadcast; the
+                            constitution was suspended, parties were
+                            banned and rule by decree began. Early relief
+                            gave way to repression and decline. A return to
+                            civilian rule was promised, delayed and later
+                            negotiated.”
+7 Diversity                 “Kalinda has over forty communities. Some
+                            commentators say this explains its troubles.
+                            The unit has not tested that claim.”
+
+The Trajectory Model: seven factors
+
+                         As it happened (base
+Factor                   case)                       Alternative
+F1 Independence          A south-led regional        A broad front that
+movement                 movement                    reached the interior
+F2 Armed forces          The inherited colonial      Civilian oversight and
+                         command                     balanced, merit-based
+                                                     recruitment
+F3 Party system          A one-party state           A dominant party with
+                                                     a legal opposition
+F4 Economy               The inherited export        Diversification with
+                         economy                     support for farmers
+F5 National              Centralised                 Power-sharing and
+integration              administration              regional balance
+F6 Succession            The leader chooses his      Term limits and an
+                         successor                   open election
+F7 Diversity             Over forty communities      Only three
+                                                     communities
+
+Model points (hidden from the learner). L = legitimacy, M = civil–military balance, I =
+integration, D = development. Base case totals: L = −2, M = −3, I = −1, D = 0. Each switched
+factor adds its change to the totals.
+
+Factor switched                 ΔL           ΔM         ΔI          ΔD
+F1 broad front                  0            0          +1          0
+Factor switched                  ΔL            ΔM           ΔI            ΔD
+F2 civilian oversight and        0             +2           +2            0
+balanced recruitment
+F3 legal opposition              +1            +1           −1            0
+F4 diversification               0             0            0             +2
+F5 power-sharing                 +1            0            +2            0
+F6 term limits                   +2            +1           0             0
+F7 three communities             0             0            0             0
+
+Outcome rule (apply in order; first match wins). The Party system and Succession tests
+below use the factor’s state: F3 is “one-party” unless switched; F6 is “leader chooses”
+unless switched.
+  1.​    M is −2 or less → Coup
+  2.​    M = −1 and (L is 0 or less, or I is 0 or less) → Coup
+  3.​    L is −1 or less and I is −1 or less → Instability
+  4.​    F3 not switched or F6 not switched, and M is 0 or more → Personalised rule
+  5.​    D is −1 or less → Struggling rule
+  6.​    Otherwise → Consolidation
+All 128 switch combinations resolve. Instability and Struggling rule are not reachable from
+the base case, so the model shows three outcomes: Coup, Personalised rule and
+Consolidation. F7 changes nothing.
+Headlines by outcome
+
+Year          Coup                    Personalised rule          Consolidation
+Year 2        One party declared.     One party declared.        First elections held
+                                                                 peacefully.
+Year 4        Strikes and regional Opposition leaders            Crop prices fall; a
+              protests.            detained.                     farmers’ scheme
+                                                                 steadies incomes.
+Year 6        Dawn broadcast:         The press is               A regional dispute
+              the army has taken      licensed.                  is settled in talks.
+              power.
+Year 8        Parties banned;         The leader names           Army reforms are
+              rule by decree; the     his successor.             praised.
+              press censored.
+Year 10       A promised return Institutions are                 The President
+              to civilian rule slips. hollowed out; the          hands over after
+                                      party is the state.        an open election.
+Findings rule. A = F2 selected; B = number of F3 and F6 selected; Dv = F7 selected. Strand
+2: Strong if A and B is 1 or more, and Dv not selected. Fragile if A is not selected and B is 0.
+Otherwise Mixed.
+Dr Diallo’s reply
+
+Strand 2                    What the learner reads
+Strong                      “Your tests back this up. The army and the rules
+                            on power mattered most; diversity alone
+                            changed nothing in the model. I will use this.”
+Mixed                       “Part of this holds up. Run the model again with
+                            the army and the rules on power together, and
+                            see what changes.”
+Fragile                     “Your own runs do not support this. Please
+                            check them, especially anything you say about
+                            diversity.”
+
+Political climate (from Strands 1 and 2): Calm if neither is Fragile; Strained if one is;
+Hostile if both are. It appears in S3 as the first press reaction and sets the time budget.
+
+Scene 3 – The Dialogue Week
+Field                    NODE S3-DIALOGUE-WEEK – The Dialogue Week
+Situation                  Thursday morning, the Crossing’s school hall:
+                           rain on a tin roof, phones buzzing, residents filing
+                           in. The Electoral Commission has revised the
+                           boundaries of two Crossing districts. Residents
+                           fear weaker representation; officials cite new
+                           population figures; parties trade claims. A
+                           journalist wants the Dialogue’s findings, a rally is
+                           planned, a corruption allegation touches a
+                           Commission contractor, and the barracks are
+                           whispering. Hon. Mwangi opens by quoting your
+                           findings, and the press reaction plays on the radio
+                           (below). She says: “We have limited time and
+                           resources. Test the package before you bring it to
+                           the Dialogue.”
+Interaction                Simulation sandbox (38). Adjust five levers,
+                           each with three settings (listed below), in any
+                           combination. Press “Run the test” to see a short
+                           situation update and four indicators change, as
+                           often as you like, revising the levers between
+                           runs. A time budget limits how much the
+                           package can promise. “Submit to the Dialogue”
+                           unlocks when all five levers are set and you have
+                           written a short rationale (one or two sentences
+Field                    NODE S3-DIALOGUE-WEEK – The Dialogue Week
+                         naming the trade-offs and what remains
+                         uncertain; free text, stored and not marked).
+                         Keyboard alternative: select lists and arrow keys.
+Response/indicator       Each test shows a situation update, never a
+                         correctness message. After “Submit to the
+                         Dialogue” and a 4-second ritual (papers rustle,
+                         the Chair confers), the Dialogue reacts (table
+                         below). No Correct/Incorrect banner.
+Teaching content         Major challenges and colonial legacies in
+                         contemporary politics; instability, corruption and
+                         accountability; ethnicity, religion and political
+                         competition; elections and participation; identity,
+                         representation and national integration; the role
+                         of civil society (Weeks 8–9); the safeguards
+                         against military intervention (Week 7).
+State change             Log levers, rationale and every test; set Strand 3.
+Goes to                  S4-BRIEFING (all outcomes)
+
+Press reaction at the start (by Political climate). Calm: “The Commission’s careful,
+evidence-based framing is welcomed across the Crossing.” Strained: “Some groups question
+how the Commission has framed the crisis.” Hostile: “A talk-show host: ‘The Commission
+blames our communities.’ A rally is announced.”
+Levers and settings (what the learner sees; shown in random order)
+
+Lever              Setting 1          Setting 2            Setting 3
+L1 Evidence and    Publish what is A focused review        An expanded
+review             known and name of the boundary          independent
+                   the gaps        data and                review with a
+                                   consultation            longer timetable
+                                   records
+L2 Participation   An open public     Targeted             A continuing
+and dialogue       forum              consultations        dialogue with
+                                      with affected        published
+                                      groups, then a       submissions and
+                                      joint session        responses
+L3                 An immediate       A detailed report An early factual
+Communication      statement on       only after further update, a
+                   verified facts,    checks             scheduled report
+                   saying what is                        and a public
+                   uncertain                             channel for
+                                                         questions
+Lever                  Setting 1         Setting 2           Setting 3
+L4                     An independent    A parliamentary     An internal
+Accountability         anti-corruption   audit and open      inquiry by the
+                       agency with       hearings            executive
+                       asset
+                       declarations
+L5 Civil–military      Civilian          A written           A guard around
+safeguard              oversight,        commitment          key installations
+                       merit-based       from the army
+                       recruitment and   chief to stay out
+                       public            of the dispute
+                       assurances
+
+Points (hidden from the learner). EC = evidence clarity, P = participation, PC = public
+confidence, T = tension easing (a higher number means pressure is falling), Cost = time
+units.
+
+Setting                        EC        P           PC      T           Cost
+L1-1 Publish what is           +1        0           +1      0           0
+known
+L1-2 Focused review            +2        0           0       0           1
+L1-3 Expanded                  +2        0           −1      −1          3
+independent review
+L2-1 Open forum                0         +1          0       −1          1
+L2-2 Targeted                  0         +2          +1      0           2
+consultations, joint
+session
+L2-3 Continuing dialogue       +1        +2          0       +1          3
+L3-1 Immediate                 +1        0           +1      0           0
+statement
+L3-2 Detailed report only      +1        0           −1      −1          2
+L3-3 Update, report and        +1        +1          +1      +1          2
+public channel
+L4-1 Anti-corruption           +1        0           +2      0           3
+agency
+L4-2 Parliamentary audit       +1        0           +1      0           2
+and hearings
+L4-3 Internal inquiry          0         0           −2      −1          0
+L5-1 Civilian oversight        0         0           +1      +2          2
+and assurances
+Setting                     EC           P        PC         T          Cost
+L5-2 Army chief’s           0            0        0          +1         0
+commitment
+L5-3 Guard around           0            0        −1         −2         1
+installations
+
+Resolution rule. Add the points for each indicator. Time budget = 8, plus 1 if the Political
+climate is Calm, minus 1 if Hostile. If total Cost is above the budget, the package is
+overstretched: subtract 2 from PC and 2 from T. Levels: total of −1 or less = Low (for T,
+Rising); 0 to 2 = Medium (T: Steady); 3 or more = High (T: Easing). Strand 3: Strong if no
+indicator is Low or Rising; Mixed if one is; Fragile if two or more are. All 243 combinations
+resolve.
+Situation updates (one line per indicator at the extremes; Medium shows “Mixed
+results”)
+
+Indicator                 Low or Rising                High or Easing
+Evidence clarity          Claims and facts are         The Dialogue can show
+                          tangled together; no         what is established,
+                          one can say what is          what is claimed and
+                          known.                       what is unknown.
+Participation             The same voices              Residents, youth and
+                          dominate; the youth          women’s groups, and
+                          and women’s groups           local leaders all speak,
+                          are outside the room.        and the record shows
+                                                       it.
+Public confidence         People doubt the             People say they can see
+                          Dialogue’s fairness;         what the Dialogue is
+                          some demand it be            doing and why.
+                          replaced.
+Tension                   The rally grows; the         The rally is called off in
+                          barracks whisper             favour of talks; the
+                          louder; rumours              whispers fade.
+                          spread.
+
+Dialogue reaction
+
+Strand 3                        What the learner hears
+Strong                          Hon. Mwangi: “This is a response we can
+                                defend in public and carry out. The Dialogue
+                                will adopt it.”
+Mixed                           Hon. Mwangi: “We will take most of this
+                                forward. One concern goes back to you:” then
+                                the line for the Low or Rising indicator.
+Strand 3                     What the learner hears
+Fragile                      Hon. Mwangi: “This will not hold. We have to
+                             start again from the evidence.”
+
+Note. The four indicators are teaching devices, not forecasts of real political behaviour. No
+single lever guarantees success; the learner must consider how the settings work together.
+
+Scene 4 – Briefing the Chair
+Field                        NODE S4-BRIEFING – Briefing the Chair
+Situation                    Thursday evening, the Chair’s office: a desk
+                             lamp, a stack of papers, rain easing.
+                             Hon. Mwangi: “Sixty seconds. What do I tell the
+                             Dialogue in the morning?” A small recorder
+                             shows a red light.
+Interaction                  Voice/speech input (25). Record a briefing of
+                             about 60 seconds covering four things: (1)
+                             what the evidence shows about the roots of
+                             the crisis; (2) which factors mattered and
+                             which did not; (3) what you recommend for
+                             today and why; (4) what remains uncertain.
+                             Record as often as you like, then “Send to the
+                             Chair”. Keyboard alternative: type the briefing;
+                             no microphone is required.
+Response/indicator           A briefing check shows which of the four
+                             topics were detected (formative and unscored;
+                             speech-to-text can miss words). Then the
+                             Chair replies and the feedback memo opens:
+                             three strand descriptors, the explanations of
+                             why each outcome happened, the record and
+                             the forward view. No pass/fail.
+Teaching content             Communicating findings concisely and
+                             separating what is established from what is
+                             uncertain, the final step of any analytical task
+                             (Weeks 1–9).
+State change                 Store the briefing (with consent); show the
+                             forward view. Simulation ends. Restart
+                             available.
+Goes to                      End / Restart
+Briefing check (formative; the learner sees a tick or “not yet detected”)
+
+                                      Words or phrases that count (not
+Topic                                 exhaustive)
+Roots                                 colonial, boundary, independence,
+                                      history, kingdom, inherited
+Drivers                               army, officers, succession, party,
+                                      diversity, institutions
+Recommendation                        recommend, consultation, dialogue,
+                                      review, report, hotline, oversight
+Uncertainty                           uncertain, unclear, not sure, further
+                                      evidence, need to check, limits
+
+The Chair’s reply (by forward view)
+
+Forward view                          What the learner hears
+F1                                    Hon. Mwangi: “Clear, sourced and
+                                      honest about the gaps. That is what I
+                                      will take in.”
+F2                                    Hon. Mwangi: “Most of this is useful.
+                                      A few points need firming up before
+                                      the morning.”
+F3                                    Hon. Mwangi: “I cannot take this in
+                                      as it stands. Let us go back to the
+                                      evidence.”
+
+Why it happened (the desk review)
+
+Choice                                Explanation
+Both claims set aside                 An unsourced column and a colonial
+                                      officer’s self-serving report are not
+                                      evidence. Checking the source
+                                      before using a claim keeps a
+                                      background note defensible.
+A claim placed on the page            A weak claim in a background
+                                      section can mislead everyone who
+                                      builds on it, and it can stigmatise
+                                      communities.
+
+Why it happened (testing the explanations)
+
+Finding                               Explanation
+The army and the rules on power       In the model, a coup needed more
+(F2, F3, F6)                          than one factor to change: a
+Finding                            Explanation
+                                   balanced, civilian-overseen army
+                                   together with competition or term
+                                   limits. Institutions, not one cause,
+                                   did the work.
+Diversity (F7)                     Switching diversity changed
+                                   nothing. Diversity is not a cause by
+                                   itself; boundaries, exclusion and
+                                   institutions shape whether it
+                                   becomes conflict.
+The independence movement, the     They changed other outcomes, such
+economy and integration (F1, F4,   as integration and development, but
+F5)                                did not avert the coup on their own.
+
+Why it happened (the Dialogue week)
+
+Lever                              Explanation
+L1 Evidence and review             Showing what is known and what is
+                                   not builds trust faster than a long
+                                   review that leaves a vacuum.
+L2 Participation and dialogue      Open forums can be dominated by
+                                   loud voices; structured consultation
+                                   and continuing dialogue widen
+                                   participation but cost time.
+L3 Communication                   Early facts with honest uncertainty,
+                                   a scheduled report and a way to ask
+                                   questions work better than silence
+                                   or a late report.
+L4 Accountability                  Independent bodies and open
+                                   hearings raise confidence; an
+                                   inquiry by those under suspicion
+                                   lowers it.
+L5 Civil–military safeguard        Civilian oversight lowers the risk of
+                                   the barracks entering the dispute; a
+                                   loyal guard raises it.
+An overstretched package           Promising more than time and
+                                   resources allow damages confidence
+                                   and raises tension.
+What the record shows (SME to verify)
+
+Topic                             Real-world illustrations
+Background                        Kingdoms such as the Asante and
+                                  Oyo were centralised, while
+                                  societies such as the Igbo and Tiv
+                                  were decentralised. The Atlantic
+                                  slave trade drained populations and
+                                  armed some states; in the
+                                  nineteenth century palm oil and
+                                  groundnuts replaced it and tied
+                                  economies to export. The Berlin
+                                  Conference of 1884–85 set the rules
+                                  for partition. Britain used indirect
+                                  rule in Northern Nigeria and
+                                  Buganda; France favoured direct
+                                  administration. Boundaries cut
+                                  across peoples such as the Somali,
+                                  Ewe and Kongo.
+Independence and the state        Ghana became independent in 1957
+                                  after a mass movement of workers,
+                                  ex-servicemen, students and the
+                                  press. The Aba Women’s War of
+                                  1929 shows women’s protest.
+                                  Algeria and Kenya saw armed
+                                  struggles. Apartheid was formalised
+                                  in South Africa from 1948;
+                                  resistance included the Defiance
+                                  Campaign, Sharpeville in 1960 and
+                                  the 1976 Soweto uprising, and
+                                  apartheid ended in 1994.
+The army                          Many new states adopted one-party
+                                  systems in the 1960s (for example
+                                  Tanzania and Ghana). Early coups
+                                  include Togo in 1963 and Nigeria
+                                  and Ghana in 1966. Nigeria’s civil
+                                  war ran from 1967 to 1970.
+Today’s dispute                   Nigeria’s federal character principle
+                                  and Kenya’s devolution under its
+                                  2010 constitution are attempts at
+                                  integration. Independent electoral
+                                  commissions and anti-corruption
+                                  agencies exist in many states, with
+                                  mixed results.
+Done well and to improve (shown with the strand descriptors)
+
+Strand               Strong             Mixed               Fragile
+Sourcing the         You built the      One weak claim      Weak claims
+evidence             background on      reached the         shaped the
+                     reliable sources   page.               background.
+                     and set weak
+                     claims aside.
+Explaining the       Your findings      Part of your        Your findings
+trajectory           were backed by     findings held up.   were not
+                     your own tests.                        supported by
+                                                            your tests.
+Responding           Your package       One concern         Two or more
+today                kept evidence      stayed              concerns stayed
+                     clear,             unresolved.         unresolved.
+                     participation
+                     broad,
+                     confidence high
+                     and tension
+                     easing.
+
+Reflection prompts (free text, unscored)
+  1.​ Which finding or decision most changed what the Commission will say tomorrow,
+      and what evidence supports your view?
+  2.​ How could a political actor raise a legitimate concern about representation without
+      deepening exclusion or mistrust?
+  3.​ If you had one more week, what would you test or check, and what new information
+      would you need?
+Forward view (count the Strong strands): three = F1, two = F2, one or none = F3.
+  •​     F1: “The Dialogue opens in calm. The crisis is real, but each group sees a way
+         through it.”
+  •​     F2: “The Dialogue opens in tension. Some groups feel heard, and old grievances still
+         shape every exchange.”
+  •​     F3: “The Dialogue opens in distrust. The roots of the crisis run deep, and the old
+         patterns are repeating.”
+Closing line (Dr Diallo): “No analysis can promise a safe future. Good analysis can show
+what is known, what is not, and what to do next.”
+6 · Audio/Video Production Spec
+Production spec                        Detail
+Format & duration                      Interactive interface with short
+                                       voiced moments; under 3 minutes of
+                                       voiced audio in total.
+Voices required                        Dr Diallo (calm, warm,
+                                       authoritative); Hon. Mwangi
+                                       (measured, firm); Nana Efua (old,
+                                       warm, unhurried; recorded
+                                       oral-history quality). A mix of
+                                       African English accents; no
+                                       caricature.
+Visual style                           Realistic illustration of an office, a
+                                       case archive, a school hall and the
+                                       Chair’s room; clean, restrained
+                                       interface for the model and sandbox.
+                                       No images of real people or
+                                       identifiable communities.
+Accessibility                          Default-on subtitles (18 px
+                                       minimum, high contrast) for all
+                                       voiced content; transcripts available.
+Fixed vs. open                         Fixed: facts, rules, outcomes, lines.
+                                       Open: layout, transitions, ambient
+                                       sound, interface styling.
+
+Asset list (each supports the story, evidence or consequence)
+  •​   Case archive scene with the Foundations page, sixteen evidence pieces with source
+       labels, two claim cards and a Set aside tray.
+  •​   Case notes (seven), the Trajectory Model (seven switches) and three headline sets.
+  •​   The school hall; the sandbox with five levers, a four-indicator panel, a time-budget
+       bar and situation updates.
+  •​   The Chair’s office with a recorder interface, a typed alternative and the briefing
+       check.
+Full transcript
+[AUDIO CUE: a kettle, rain on a window, a phone buzzes once] DR DIALLO (S1 voice note):
+“Good morning. The Dialogue opens on Friday, and everyone has a theory about how we got
+here. I need three things from you this week: a background section I can trust, a test of the
+explanations people are offering, and a response we can defend. Start with the sources. Use
+what is reliable and tell me what you set aside. And please note in your file that you grew
+up near the Crossing. It is an interest, not a disqualification.”
+NANA EFUA (oral history, S1 piece 5): “My grandmother said the king never decided alone.
+The council spoke first.”
+[AUDIO CUE: a school hall murmur; rain easing] HON. MWANGI (S4): “Sixty seconds. What
+do I tell the Dialogue in the morning?”
+Voiced lines in S2 and S3 are as written in the scene tables; the closing line is as written
+above.
+
+7 · Debrief & Leaderboard
+  •​   How strands combine: there is no numeric score and no leaderboard. Each strand
+       ends Strong, Mixed or Fragile (S1, S2, S3). The number of Strong strands decides the
+       forward view: three = F1, two = F2, one or none = F3. The briefing in S4 is unscored.
+  •​   Worked example: in S1 the learner places all sixteen evidence pieces and sets both
+       claims aside → Strand 1 Strong. In S2 they switch F2 and F6 and run the model
+       (outcome: Personalised rule), then add F3 (outcome: Consolidation), switch F7 and
+       see no change, and send findings F2, F3 and F6 with no diversity → A is selected and
+       B is 2, Dv not selected → Strand 2 Strong. The Political climate is Calm. In S3 they set
+       L1-2, L2-2, L3-3, L4-2 and L5-2 (cost 1+2+2+2+2 = 9; budget 8+1 = 9, not
+       overstretched). EC = 2+0+1+1+0 = 4 High; P = 0+2+1+0+0 = 3 High; PC =
+       0+1+1+1+1 = 4 High; T = 0+0+1+0+2 = 3 Easing. No Low or Rising → Strand 3
+       Strong. Three Strong strands → F1.
+  •​   Displayed but not scored: the real-world record, the reflection prompts, the
+       rationale, the briefing and its check, the number of tests run.
+  •​   Assessment dimensions (formative): sourcing and evidence use (S1); causal
+       reasoning and testing claims (S2); options appraisal and justification (S3); clear,
+       honest communication (S4). If a grade is needed later, assess the reasoning and
+       justification, not a single fixed answer.
+  •​   Backend (Supabase or Firebase): student ID, session ID, timestamps per scene,
+       pieces placed and claims set aside, every model run and the findings, lever settings
+       and every test with indicator values, rationale, reflection responses and the briefing
+       (audio stored only with the learner’s consent, with a typed alternative),
+       forward-view code. Facilitator dashboard: cohort distribution of strands and
+       forward views; the most common claim placed; the most-tested factors and levers;
+       completion rates. No individual ranking.
+
+8 · Accessibility Requirements
+  •​   ☒ Default-on subtitles for all voiced content, minimum 18 px, high contrast.
+  •​   ☒ Keyboard or tap/click alternative for every drag/hold gesture: a card list with
+       “Place” and “Set aside” buttons (S1); checkboxes for the model switches and select
+       lists for findings (S2); select lists and arrow keys for each lever (S3); a typed briefing
+       instead of a recording (S4).
+  •​   ☒ Text-label equivalents for diagrams: every piece, factor and lever has a text label
+       and alt text.
+  •​   ☒ Accessible labelling for data-entry fields (findings, rationale, reflections, typed
+       briefing); no timers are used.
+  •​   ☒ Minimum 44 px touch targets throughout.
+  •​   ☒ Meaning is never carried by colour alone (indicator changes also appear as
+       words); no flashing effects.
+  •​   ☒ No real ethnic or religious group is used as shorthand for political behaviour.
+  •​   ☒ Microphone use is optional, with a clear consent prompt; recordings can be
+       deleted by the learner.
+  •​   ☒ Test with keyboard-only navigation and a screen reader before release.
+
+9 · Branching map and edge cases
+  •​   S1 → S2 (single path; Strand 1 is Strong, Mixed or Fragile).
+  •​   S2: all 128 switch combinations resolve to Coup, Personalised rule or Consolidation;
+       the findings set Strand 2 and the Political climate → S3.
+  •​   S3: 243 lever combinations resolve to Strong, Mixed or Fragile → S4.
+  •​   S4 → End / Restart.
+Every screen is reachable, every path ends in a defined outcome, and no path is a dead end.
+A weak finding or a rejected package is a consequence, not a failure screen.
+Edge cases: “Open the case notes”, “Send findings”, “Submit to the Dialogue” and “Send to
+the Chair” stay inactive until their conditions are met, with an inline tooltip explaining why.
+A piece that does not fit a place bounces back. The model and the sandbox allow unlimited
+runs and keep a history. A learner who sends findings without running the model is asked
+once to run it; they may proceed. If the microphone is unavailable or declined, the typed
+briefing is offered. Global Undo reverses unsubmitted choices only; submitted decisions
+stand. No timers, so doing nothing leaves the story waiting.
+

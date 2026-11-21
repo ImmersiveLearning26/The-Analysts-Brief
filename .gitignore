@@ -1,0 +1,17 @@
+# dependencies and builds
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.DS_Store
+.claude/settings.local.json
+.env*
+
+# Blender working files: over GitHub's 100 MB limit (keep locally or use Git LFS)
+*.blend
+*.blend1
+Analysts_Brief_Claude_Kit/assets/source/office_-_assets.glb
+
+# local backups
+_backup_*/
+*.bak

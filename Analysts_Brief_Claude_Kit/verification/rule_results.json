@@ -1,0 +1,27 @@
+{
+  "modelCombinations": 128,
+  "counts": {
+    "Coup": 76,
+    "Personalised rule": 32,
+    "Consolidation": 20
+  },
+  "responseChecks": 729,
+  "hallCounts": {
+    "Calm": {
+      "Strong": 108,
+      "Mixed": 70,
+      "Fragile": 65
+    },
+    "Strained": {
+      "Strong": 96,
+      "Mixed": 73,
+      "Fragile": 74
+    },
+    "Hostile": {
+      "Strong": 84,
+      "Mixed": 72,
+      "Fragile": 87
+    }
+  },
+  "sourceExampleMismatchHandled": true
+}

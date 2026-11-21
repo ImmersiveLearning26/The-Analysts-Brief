@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "analysts-brief-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "Analysts_Brief_Claude_Kit/web", "run", "dev"],
+      "port": 5180
+    }
+  ]
+}

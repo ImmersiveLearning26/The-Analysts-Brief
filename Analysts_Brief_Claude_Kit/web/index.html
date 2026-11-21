@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>The Analyst’s Brief</title>
+    <meta name="description" content="An interactive spatial simulation for IRS 103: Introduction to African Politics." />
+    <link rel="preload" href="/fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/spatial.css" />
+    <link rel="stylesheet" href="/src/v3.css" />
+  </head>
+  <body data-scene="office">
+    <div id="frame" aria-hidden="true"></div>
+    <canvas id="world" aria-hidden="true"></canvas>
+    <div id="fade" class="xf" aria-hidden="true"><div><small id="fadeKicker"></small><strong id="fadeTitle"></strong><em id="fadeSub"></em></div></div>
+    <div id="pins" role="group" aria-label="Places in the scene"></div>
+    <nav id="viewDock" aria-label="Model view">
+      <button type="button" class="ib" data-action="viewIn" data-icon="zoomIn" aria-label="Zoom in"></button>
+      <button type="button" class="ib" data-action="viewOut" data-icon="zoomOut" aria-label="Zoom out"></button>
+      <i aria-hidden="true"></i>
+      <button type="button" class="ib" data-action="viewFront" data-icon="front" aria-label="Front view"></button>
+      <button type="button" class="ib" data-action="viewTop" data-icon="top" aria-label="Top view"></button>
+      <button type="button" class="ib" data-action="viewReset" data-icon="iso" aria-label="Isometric view"></button>
+    </nav>
+    <aside id="rail">
+      <nav id="railTools" aria-label="Tools"></nav>
+      <section id="chapter" class="card" aria-live="polite"></section>
+      <section id="railPanel" class="card" aria-label="Details" hidden><button id="closePanel" type="button" class="ib" data-icon="close" aria-label="Close"></button><div id="drawerBody"></div></section>
+      <main id="stage"></main>
+    </aside>
+
+    <!-- the case file, while held: two stamps at the page's edge and a quiet page count; nothing else -->
+    <div id="stamps" class="stamps" role="group" aria-label="Tag this source" hidden>
+      <button type="button" class="stamp f mark-tag" data-action="tag" data-arg="foundations" aria-pressed="false" aria-label="Foundations">
+        <svg class="mark-svg" viewBox="0 0 32 32" aria-hidden="true"><path pathLength="100" d="M16.4 5.6c6.1.1 10.5 4.6 10.2 10.7-.3 5.9-5 10.1-10.9 9.9C9.8 26 5.5 21.5 5.8 15.7 6.1 9.8 10.6 5.4 16.6 6.2" fill="none" stroke="#2f6bff" stroke-width="3" stroke-linecap="round"/></svg>
+        <span class="tip">Foundations</span></button>
+      <button type="button" class="stamp a mark-tag" data-action="tag" data-arg="aside" aria-pressed="false" aria-label="Set aside">
+        <svg class="mark-svg" viewBox="0 0 32 32" aria-hidden="true"><path pathLength="100" d="M8.2 8.4 23.8 24M24.2 8.1 8 24.3" fill="none" stroke="#e0352b" stroke-width="3.2" stroke-linecap="round"/></svg>
+        <span class="tip">Set aside</span></button>
+    </div>
+    <p id="pageCount" class="page-count" aria-hidden="true" hidden></p>
+    <nav id="documentNav" aria-label="Document controls" hidden><button data-action="doc" data-arg="-1" aria-label="Previous document">←</button><button data-action="readText">Read text</button><button data-action="doc" data-arg="1" aria-label="Next document">→</button><button data-action="reviewSources">Review</button><button data-action="putBack" aria-label="Close folder">×</button></nav>
+    <article id="reader" class="sr" aria-live="off"></article>
+
+    <!-- the agent: a globe bottom-left, subtitles beside it, a small menu above it -->
+    <div id="scrim" aria-hidden="true"></div>
+    <section id="composer" class="empty" aria-label="Conversation"></section>
+    <div id="agent" data-phase="hidden">
+      <div class="globe"></div>
+      <button id="agentButton" class="hit" type="button" aria-label="Show conversation" aria-expanded="false"></button>
+    </div>
+    <div id="agentMenu" class="agent-menu" role="menu" hidden></div>
+    <canvas id="aiGlow" aria-hidden="true"></canvas>
+
+<div id="orizon" hidden aria-hidden="true">
+      <div class="oz">
+        <svg class="oz-emblem" viewBox="0 0 200 200"><g class="oz-spin"><path class="oz-a1" d="M53.16 144.02A70 70 0 1 1 146.84 144.02" pathLength="100"/><path class="oz-a2" d="M52.49 125.27A58 58 0 1 1 147.51 125.27" pathLength="100"/></g><path class="oz-a3" d="M61.89 155.43A74 74 0 0 0 138.11 155.43" pathLength="100"/></svg>
+        <strong class="oz-word">Kalinda</strong>
+        <small class="oz-kicker">The teaching model</small>
+        <ol class="oz-years"><li>Year 2</li><li>4</li><li>6</li><li>8</li><li>10</li></ol>
+      </div>
+    </div>
+    <p id="live" class="sr" role="status" aria-live="polite"></p>
+    <div id="toast" class="nt" role="status"></div>
+    <dialog id="drawer"><button id="closeDrawer" type="button" aria-label="Close"></button></dialog>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
