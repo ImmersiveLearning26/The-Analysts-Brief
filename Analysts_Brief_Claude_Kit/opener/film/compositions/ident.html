@@ -1,0 +1,20 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    #ident-panel { position: absolute; inset: 0; background: var(--navy, #1f3a5f); display: grid; place-items: center; }
+    #ident-mask { width: 460px; height: 143px; overflow: hidden; }
+    #ident-logo { display: block; width: 460px; height: 143px; }
+  </style>
+  <div id="root" data-composition-id="ident" data-width="1920" data-height="1080">
+    <div id="ident-panel">
+      <div id="ident-mask"><img id="ident-logo" src="assets/brand/miva.svg" alt="Miva Open University" /></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // the official mark rises out of its own baseline, holds, then the navy lifts away onto the film's warm white
+    tl.fromTo("#ident-logo", { yPercent: 14, scale: 0.97 }, { yPercent: 0, scale: 1, duration: 0.8, ease: "power3.out" }, 0);
+    tl.fromTo("#ident-panel", { yPercent: 0 }, { yPercent: -100, duration: 0.4, ease: "power3.in" }, 1.98);
+    window.__timelines["ident"] = tl;
+  </script>
+</template>

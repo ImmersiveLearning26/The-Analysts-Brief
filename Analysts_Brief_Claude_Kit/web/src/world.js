@@ -566,7 +566,7 @@ export function createWorld({ canvas, layout, onHotspot, onInspect, onError = co
   function frame() {
     const dt = Math.min(clock.getDelta(), 0.05);
     resize();
-    {
+    if (frameRect.w > 0 && frameRect.h > 0 && innerWidth > 0 && innerHeight > 0) {   // a 0×0 frame (hidden pane, mid-layout) would divide by zero and leave NaN stuck in frameView
       const W = innerWidth, H = innerHeight, f = frameRect;
       const insp = inspector.active;
       inspector.frameNdc = { cx: ((f.x + f.w / 2) / W) * 2 - 1, cy: 1 - ((f.y + f.h / 2) / H) * 2, w: f.w / W * 2, h: f.h / H * 2 };
@@ -576,6 +576,7 @@ export function createWorld({ canvas, layout, onHotspot, onInspect, onError = co
       const freeW = f.w - freeL - freeR;
       const tz = insp ? 1 : Math.min(1, freeH / f.h, freeW / f.w * (freeL ? 1.5 : 1.3));   // the cover's office may run under the title's margin
       const tx = W / 2 - (f.x + freeL + freeW / 2), ty = H / 2 - (f.y + freeH / 2);
+      if (!Number.isFinite(frameView.x + frameView.y + frameView.z)) Object.assign(frameView, { x: tx, y: ty, z: tz });
       const k = reduced || !frameView.init ? 1 : 1 - Math.exp(-dt * 9);      // ~350ms settle, eased, interruptible
       frameView.x += (tx - frameView.x) * k; frameView.y += (ty - frameView.y) * k; frameView.z += (tz - frameView.z) * k; frameView.init = true;
       camera.zoom = frameView.z;

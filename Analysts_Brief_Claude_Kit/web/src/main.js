@@ -798,6 +798,7 @@ function evidenceCheck() {
 // ---------------------------------------------------------------- actions
 const actions = {
   voice() { voiceMode(); },
+  replayIntro() { close(); playOpener(true); },
   start() { if (state.resumePage && state.resumePage !== "P00") modal(`<h2>Start a new run?</h2><p>This replaces the saved run.</p>${b("Start new run", "newRun", "", "primary")}`); else go("P01"); },
   newRun() { close(); state = fresh(); go("P01"); },
   resume() { go(state.resumePage); },
@@ -849,7 +850,7 @@ const actions = {
   viewFront() { world?.view("front"); },
   viewOut() { world?.view("out"); },
   feedback() { if (state.feedback) { state.feedbackSeen = true; save(); railTools(); modal(state.feedback); } },
-  settings() { modal(`<h2>Settings</h2><label class="settings-row">Reduced motion<input type="checkbox" data-setting="reduced" ${state.settings.reduced ? "checked" : ""}></label><label class="settings-row">Sound<input type="checkbox" data-setting="sound" ${state.settings.sound ? "checked" : ""}></label><label class="settings-row">Captions<input type="checkbox" data-setting="captions" ${state.settings.captions ? "checked" : ""}></label><div class="row">${b(paused ? "Resume" : "Pause", "pause")}</div><p class="muted">Voice recordings are not produced yet; all speech is shown as text.</p>`); },
+  settings() { modal(`<h2>Settings</h2><label class="settings-row">Reduced motion<input type="checkbox" data-setting="reduced" ${state.settings.reduced ? "checked" : ""}></label><label class="settings-row">Sound<input type="checkbox" data-setting="sound" ${state.settings.sound ? "checked" : ""}></label><label class="settings-row">Captions<input type="checkbox" data-setting="captions" ${state.settings.captions ? "checked" : ""}></label><div class="row">${b(paused ? "Resume" : "Pause", "pause")}${b("Replay intro", "replayIntro")}</div><p class="muted">Voice recordings are not produced yet; all speech is shown as text.</p>`); },
   readText() { modal(readerHTML(state.doc) + row(b("Add to Foundations", "tagClose", "foundations", "primary"), b("Set aside", "tagClose", "aside"))); },
   tagClose(v) { close(); actions.tag(v); },
   reviewDoc(i) { state.doc = +i; go("P03"); },
@@ -1161,7 +1162,37 @@ function reserveSpace() {
 new ResizeObserver(() => reserveSpace()).observe(panel);
 
 // ---------------------------------------------------------------- boot
+// ---- the opener film. Plays once per saved run on this device (the sandbox keeps its own flag), never under reduced
+// motion; ?opener=1 forces it, ?opener=0 turns it off. Settings → Replay intro plays it again. It never blocks the app:
+// the title screen and the 3D world load underneath, and a missing or failed file simply closes it.
+const OPENER_KEY = KEY + "-opener-seen";
+function playOpener(force = false) {
+  const el = $("#opener"), video = $("#openerVideo"), skip = $("#openerSkip"), q = new URLSearchParams(location.search).get("opener");
+  let seen = false; try { seen = localStorage.getItem(OPENER_KEY) === "1"; } catch {}
+  if (!el || q === "0" || (!force && q !== "1" && (seen || state.settings.reduced))) return Promise.resolve();
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = () => {
+      if (done) return; done = true;
+      try { localStorage.setItem(OPENER_KEY, "1"); } catch {}
+      removeEventListener("keydown", onKey);
+      el.classList.add("out");
+      setTimeout(() => { el.hidden = true; el.classList.remove("out", "ending"); video.pause(); video.removeAttribute("src"); video.load(); resolve(); }, 440);
+      $("#stage")?.querySelector("button")?.focus({ preventScroll: true });
+    };
+    const onKey = (e) => { if (e.key === "Escape" || e.key === "Enter" || e.key === " ") { e.preventDefault(); finish(); } };
+    el.hidden = false; el.classList.remove("out", "ending");
+    video.src = "/opener/opener.mp4"; video.currentTime = 0;
+    video.onended = finish; video.onerror = finish;
+    video.ontimeupdate = () => { if (video.duration && video.currentTime > video.duration - 4) el.classList.add("ending"); };
+    skip.onclick = finish; addEventListener("keydown", onKey);
+    video.play().catch(finish);                       // muted autoplay is allowed; if a browser still refuses, go straight to the title
+    skip.focus({ preventScroll: true });
+  });
+}
+
 async function boot() {
+  playOpener();
   try {
     world = createWorld({ canvas: $("#world"), layout, onHotspot: hotspot, onInspect, onError: ({ name }) => console.warn("asset failed", name) });
     world.setReduced(state.settings.reduced);

@@ -15,3 +15,8 @@ Analysts_Brief_Claude_Kit/assets/source/office_-_assets.glb
 # local backups
 _backup_*/
 *.bak
+
+# generated copies and HyperFrames scratch (rebuilt by npm run assets / hyperframes)
+Analysts_Brief_Claude_Kit/web/public/opener/
+Analysts_Brief_Claude_Kit/opener/film/.hyperframes/
+Analysts_Brief_Claude_Kit/opener/film/renders/

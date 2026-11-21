@@ -1,0 +1,33 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    /* One giant word per room, centred, behind the 3D model (this layer sits under the world canvas), so the model
+       stands in front of the lettering. Orange on warm white, warm white on indigo and dusk: heavy contrast either way. */
+    .room { position: absolute; left: 0; right: 0; top: 150px; text-align: center; opacity: 0; }
+    .room .kicker { display: inline-block; font: 800 30px/1 var(--body, "Manrope"), sans-serif; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--ink, #1d2321); margin-bottom: 6px; }
+    .room .word { display: block; font: 700 600px/0.8 var(--display, "Afacad"), sans-serif; letter-spacing: -0.035em;
+      text-transform: uppercase; color: #e05a00; white-space: nowrap; }
+    .room.dark .kicker { color: #ffffff; }
+    .room.dark .word { color: var(--warm, #f4f3ee); }
+    #room-hall .word { font-size: 420px; }
+  </style>
+  <div id="root" data-composition-id="rooms" data-width="1920" data-height="1080">
+    <div id="room-read" class="room"><div class="kicker">The evidence</div><div class="word">Read</div></div>
+    <div id="room-test" class="room dark"><div class="kicker">The model</div><div class="word">Test</div></div>
+    <div id="room-hall" class="room"><div class="kicker">The hall</div><div class="word">Respond</div></div>
+    <div id="room-brief" class="room dark"><div class="kicker">The briefing</div><div class="word">Brief</div></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // [id, in, out] in seconds local to this scene (which starts at 5 s). The word arrives with the room; the wash hides its exit.
+    const ROOMS = [["#room-read", 0.05, 3.55], ["#room-test", 4.1, 7.65], ["#room-hall", 8.1, 11.15], ["#room-brief", 11.6, 14.75]];
+    for (const [id, tin, tout] of ROOMS) {
+      tl.fromTo(id, { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "none" }, tin);
+      tl.fromTo(id + " .word", { y: 80, scale: 0.94 }, { y: 0, scale: 1, duration: 0.6, ease: "power3.out" }, tin);
+      tl.fromTo(id + " .kicker", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, tin + 0.18);
+      tl.to(id, { opacity: 0, duration: 0.2, ease: "power2.in" }, tout);
+    }
+    window.__timelines["rooms"] = tl;
+  </script>
+</template>

@@ -1,0 +1,24 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    #hook-line { position: absolute; left: 0; right: 0; top: 330px; text-align: center; font: 700 150px/1 var(--display, "Afacad"), sans-serif;
+      letter-spacing: -0.03em; color: var(--ink, #1d2321); white-space: nowrap; }
+    #hook-line .ch { display: inline-block; white-space: pre; }
+  </style>
+  <div id="root" data-composition-id="hook" data-width="1920" data-height="1080">
+    <div id="hook-line" data-var-text="hookLine">Kalinda is in crisis.</div>
+  </div>
+  <script>
+    const line = document.querySelector("#hook-line");
+    const vars = (window.__hyperframes && window.__hyperframes.getVariables && window.__hyperframes.getVariables()) || {};
+    const text = vars.hookLine || line.textContent;
+    line.textContent = "";
+    for (const c of text) { const s = document.createElement("span"); s.className = "ch"; s.textContent = c; line.appendChild(s); }
+    const chars = line.querySelectorAll(".ch");
+    const tl = gsap.timeline({ paused: true });
+    // the globe says it: one character every 2 frames, each landing in 3 frames
+    chars.forEach((c, i) => tl.fromTo(c, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.1, ease: "power2.out" }, 0.55 + i * (2 / 30)));
+    tl.to("#hook-line", { opacity: 0, y: -16, duration: 0.27, ease: "power2.in" }, 2.2);
+    window.__timelines["hook"] = tl;
+  </script>
+</template>

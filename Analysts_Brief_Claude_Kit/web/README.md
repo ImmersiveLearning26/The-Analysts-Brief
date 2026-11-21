@@ -17,3 +17,7 @@ Models are copied from `../blender/production/export/` by `npm run assets`. `pub
 Read `../handoff/CONTINUE_IN_CLAUDE.md`. New visual authority is `src/spatial.css`; camera/cutaway controls are in `src/spatial.js`, integrated into `src/world.js`. The front-facing reading sequence is in `src/inspector.js`. The agent is compact, upper-right and quiet. `src/glow.js` is unused legacy code.
 
 Current verification: production build, exact rule suite and offline transform regressions pass. Browser visual checks, real imported-asset animation, mobile layout and microphone recording are outstanding. Historical browser verification of the previous build is not evidence for these changes.
+
+## Opener film (Miva shell)
+
+`npm run assets` copies `../opener/The_Analysts_Brief_Opener.mp4` (rendered from `../opener/film` with HyperFrames) to `public/opener/opener.mp4`. It plays once per saved run before the title screen (`playOpener()` in `src/main.js`): skippable (button, Esc, Enter, Space), never under reduced motion, and Settings → Replay intro plays it again. `?opener=1` forces it, `?opener=0` turns it off. A missing or failed file goes straight to the title.

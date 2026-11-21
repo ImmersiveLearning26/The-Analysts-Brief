@@ -19,4 +19,11 @@ for (const f of ["office.glb", "casefile.glb", "kalinda.glb", "hall.glb", "chair
 }
 const dec = path.join(web, "node_modules/three/examples/jsm/libs/draco/gltf");
 for (const f of readdirSync(dec)) cpSync(path.join(dec, f), path.join(draco, f));
+// The opener film (rendered from ../opener/film with HyperFrames). Optional: the app skips the intro if it is missing.
+const opener = path.resolve(web, "../opener/The_Analysts_Brief_Opener.mp4");
+if (existsSync(opener)) {
+  mkdirSync(path.join(web, "public/opener"), { recursive: true });
+  const dst = path.join(web, "public/opener/opener.mp4");
+  if (!existsSync(dst) || statSync(dst).mtimeMs < statSync(opener).mtimeMs) cpSync(opener, dst);
+}
 console.log("assets ready:", readdirSync(models).join(", "));

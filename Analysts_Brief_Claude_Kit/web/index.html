@@ -64,6 +64,11 @@
     <p id="live" class="sr" role="status" aria-live="polite"></p>
     <div id="toast" class="nt" role="status"></div>
     <dialog id="drawer"><button id="closeDrawer" type="button" aria-label="Close"></button></dialog>
+    <!-- Miva shell: the opener film plays once before the title screen (skippable; skipped under reduced motion) -->
+    <div id="opener" hidden>
+      <video id="openerVideo" muted playsinline preload="auto" aria-label="The Analyst’s Brief, introduction film"></video>
+      <button id="openerSkip" type="button">Skip intro</button>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
