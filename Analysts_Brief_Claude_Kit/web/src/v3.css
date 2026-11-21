@@ -696,7 +696,7 @@ body.voice-mode #voiceUI{opacity:1;transition:opacity 320ms var(--out) 260ms}
 
 /* Input bar with tools: field on top, controls below (Claude composer). */
 #composer .ibar--tools{display:grid;grid-template-columns:38px auto 1fr 38px 38px;grid-template-areas:"f f f f f" "g p . m s";row-gap:6px;column-gap:8px;padding:10px 8px 8px;border-radius:24px;align-items:center}
-#composer .ibar--tools>textarea{grid-area:f;padding:6px 8px;min-height:44px}
+#composer .ibar--tools>textarea,#composer .ibar--tools>input{grid-area:f;padding:6px 8px;min-height:44px}
 #composer .ibar--tools>.ibar-globe{grid-area:g}#composer .ibar--tools>.picker{grid-area:p}
 #composer .ibar--tools>.ibar-mic{grid-area:m}#composer .ibar--tools>.ibar-send{grid-area:s}
 
@@ -738,7 +738,7 @@ body[data-scene=model] #composer .pick-menu{background:#1b1840f0}
 #composer:has(.ibar--tools){padding:16px 18px 14px}
 #composer h2.ask{margin:2px 0 12px;font-size:24px}
 #composer .ibar--tools{padding:6px 8px 6px;row-gap:2px;border-radius:22px}
-#composer .ibar--tools>textarea{min-height:30px;padding:4px 8px}
+#composer .ibar--tools>textarea,#composer .ibar--tools>input{min-height:30px;padding:4px 8px}
 #composer .pick{min-height:30px!important}
 #composer .pick,#composer button.pick:not(.attn){box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--ink) 18%,transparent)!important}
 #composer .pick.attn{box-shadow:inset 0 0 0 .5px color-mix(in srgb,var(--accent) 45%,transparent)!important;animation:pickAttnThin 2.6s ease-in-out infinite}
@@ -784,8 +784,86 @@ body.composer-aside:not(.globe-inline):not(.voice-mode) #agent{left:var(--ccx);t
 #opener.out{opacity:0;pointer-events:none}
 #opener.ending{background:#f4f3ee}                     /* the film ends on warm white: the title screen continues it */
 #opener video{width:100%;height:100%;object-fit:contain;background:transparent}
-#openerSkip{position:absolute;right:24px;bottom:24px;min-height:44px;padding:0 18px;border-radius:999px;border:0;cursor:pointer;
+#openerSkip,#openerSound{position:absolute;right:24px;bottom:24px;min-height:44px;padding:0 18px;border-radius:999px;border:0;cursor:pointer;
   font:600 14px/1 Manrope,system-ui,sans-serif;color:#1d2321;background:#ffffffd9;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   box-shadow:0 0 0 1px #ffffff80,0 8px 24px #0000002e;opacity:.85;transition:opacity 160ms var(--out),scale 160ms var(--out)}
-#openerSkip:hover,#openerSkip:focus-visible{opacity:1;scale:1.04}
+#openerSkip:hover,#openerSkip:focus-visible,#openerSound:hover,#openerSound:focus-visible{opacity:1;scale:1.04}
 #openerSkip:focus-visible{outline:2px solid #ff7a1a;outline-offset:3px}
+#openerSound{right:150px}
+
+
+/* ================================================================ P01 welcome bubble: the conversation comes first */
+body.welcome-mode #voiceUI .vrow,body.welcome-mode #voiceUI .vt,body.welcome-mode #voiceUI .vq{display:none}   /* the globe says the question */
+#voiceUI .vin{position:fixed;left:50%;top:calc(100% + 150px);translate:-50% 0;width:min(420px,calc(100vw - 32px));display:grid;
+  grid-template-columns:1fr 44px 44px;gap:6px;align-items:center;padding:6px 6px 6px 18px;border-radius:999px;pointer-events:auto;
+  background:var(--glass,#fffffcd9);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);
+  box-shadow:inset 0 0 0 1px var(--hair),0 16px 40px -16px #0004;
+  opacity:0;scale:.6;transform-origin:50% -120px;transition:opacity 260ms var(--out),scale 420ms var(--ios)}
+#voiceUI .vin.in{opacity:1;scale:1}
+#voiceUI .vin.absorb{opacity:0;scale:.08;transition:opacity 380ms var(--in),scale 440ms var(--ios)}   /* back into the bubble */
+#voiceUI .vin input,#voiceUI .vin input:focus,#voiceUI .vin input:focus-visible{-webkit-appearance:none;appearance:none;min-width:0;height:44px;margin:0;border:0;border-radius:999px;background:transparent;box-shadow:none;outline:0;
+  font:600 18px/1.2 Manrope,system-ui,sans-serif;color:var(--ink);padding:0 4px}
+#voiceUI .vin button{width:44px;height:44px;border-radius:50%;border:0;display:grid;place-items:center;padding:0;cursor:pointer;background:var(--chip,#1d23210d);color:var(--ink)}
+#voiceUI .vin .vin-send{background:var(--primary);color:var(--on-primary)}
+#voiceUI .vin button .ph,#voiceUI .vin button svg{width:18px;height:18px;fill:currentColor}
+#voiceUI .vin:focus-within{box-shadow:inset 0 0 0 1px #ff7a1a99,0 16px 40px -16px #0004}   /* a thin highlight, never a heavy border */
+#voiceUI .vin button:focus-visible{outline:1px solid #ff7a1a99;outline-offset:2px}
+#voiceUI .vin-help{position:absolute;left:18px;top:calc(100% + 8px);font:500 13px/1.3 Manrope,system-ui,sans-serif;color:var(--ink-2)}
+body.reduced #voiceUI .vin{transition:none}
+
+
+/* ================================================================ dialogue cards: the line shows, rests, returns */
+#composer .say{overflow:hidden;transition:max-height 420ms var(--ios),opacity 260ms var(--out),margin 420ms var(--ios)}
+#composer.rest .say{max-height:0!important;opacity:0;margin:0}
+body.reduced #composer .say{transition:none}
+
+
+/* ================================================================ P03 sorting folders + the sheet's flight */
+#trays{position:fixed;right:28px;top:50%;translate:0 -50%;width:150px;height:min(440px,62vh);z-index:24;pointer-events:none;
+  opacity:0;scale:.92;transition:opacity 320ms var(--out),scale 420ms var(--ios)}
+#trays.on{opacity:1;scale:1}
+#trays[hidden]{display:block!important;visibility:hidden}
+#trays canvas{position:absolute;inset:0;width:100%;height:100%}
+#trays .tray-hit{position:absolute;left:12%;width:76%;height:36%;border:0;border-radius:18px;background:transparent;box-shadow:none;cursor:pointer;pointer-events:auto}
+#trays .tray-hit:hover{background:transparent;box-shadow:none}
+#trays .tray-hit[data-tray=foundations]{top:6%}
+#trays .tray-hit[data-tray=aside]{bottom:6%}
+#trays .tray-hit:focus-visible{outline:1px solid #ff7a1a99;outline-offset:2px}
+.fly{position:fixed;z-index:60;pointer-events:none;perspective:1400px;transform-origin:50% 25%}
+.fly>div{position:absolute;left:0;width:100%;height:50%;background:#fbf9f4}
+.fly-top{top:0;overflow:hidden}   /* no overflow clip on the folding half: it would flatten the 3D and show the print mirrored */
+.fly-bot{top:50%;transform-origin:50% 0;transform-style:preserve-3d;background:transparent;box-shadow:0 1px 0 #0000000d}
+.fly canvas{display:block;width:100%;height:100%;backface-visibility:hidden}
+.fly-bot i{position:absolute;inset:0;background:linear-gradient(#efeae0,#f8f5ee);transform:rotateX(180deg);backface-visibility:hidden}
+.fly svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.fly rect{fill:none;stroke:var(--c);stroke-width:1.5;vector-effect:non-scaling-stroke;stroke-dasharray:100;stroke-dashoffset:100}   /* thin, never bold */
+.tray-list{display:grid;gap:6px;margin-top:10px}
+.tray-list button{display:flex;gap:10px;align-items:baseline;text-align:left;padding:10px 14px;border-radius:14px;min-height:44px;background:var(--chip,#1d23210d);color:var(--ink);border:0;cursor:pointer;font:500 14px/1.35 Manrope,system-ui,sans-serif}
+.tray-list button b{font-weight:700;color:var(--ink-3)}
+.tray-list button:hover,.tray-list button:focus-visible{background:var(--chip-hover,#1d232117)}
+@media (max-width:700px){#trays{right:8px;width:96px;height:300px}}
+
+
+/* ================================================================ title screen (P00): two panels on a grid
+   Left: a white panel with the title centred on it and the object reel above and below. Right: the office on a soft
+   grey stage (the reference's colour split), turning without ever leaving its frame. */
+:root{--tp-w:clamp(340px,33vw,520px)}
+#titlePanel{display:none;position:fixed;z-index:0;left:var(--gap);top:var(--gap);bottom:var(--gap);width:var(--tp-w);border-radius:var(--r-frame);
+  background:#faf9f6;box-shadow:inset 0 0 0 1px #1d23210d,0 1px 2px #1d23210a;overflow:hidden}   /* soft off-white, not stark */
+#titlePanel canvas{position:absolute;inset:0;width:100%;height:100%}
+#titlePanel .reel-cap{position:absolute;left:50%;top:auto;bottom:calc(14% + 6px);translate:-50% 0;transition:opacity 200ms var(--out);font:700 11px/1 Manrope,system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--ink-3,#868c88);white-space:nowrap;opacity:0;pointer-events:none}
+body[data-page=P00] #titlePanel{display:block}
+body[data-page=P00] #frame{left:calc(var(--gap) * 2 + var(--tp-w));right:var(--gap);background:#f2f1ed;box-shadow:inset 0 0 0 1px #1d23210d}   /* near-white warm grey: one step from the panel */
+body[data-page=P00] #rail>#stage[data-layout=hero]{inset:auto;position:fixed;left:calc(var(--gap) + var(--tp-w) / 2);top:calc(var(--gap) + 56px);bottom:auto;translate:-50% 0;
+  width:calc(var(--tp-w) - 72px);z-index:3}
+body[data-page=P00] .hero{text-align:center}
+body[data-page=P00] .hero small{white-space:normal;line-height:1.6;text-wrap:balance}
+body[data-page=P00] .hero h1{font-size:clamp(40px,3.6vw,60px);margin-bottom:20px}
+body[data-page=P00] .hero .row{justify-content:center}
+@media (max-width:700px){
+  :root{--tp-w:calc(100vw - var(--gap) * 2)}
+  body[data-page=P00] #titlePanel{bottom:auto;height:52dvh}
+  body[data-page=P00] #frame{left:var(--gap);top:calc(52dvh + var(--gap) * 2)}
+  body[data-page=P00] #rail>#stage[data-layout=hero]{left:50%;top:calc(var(--gap) + 28px);bottom:auto;translate:-50% 0;width:calc(100vw - 72px)}
+}

@@ -3,8 +3,11 @@
 import { content as C } from "@kit/app/content.mjs";
 import * as E from "@kit/app/engine.mjs";
 import layout from "@kit/blender/layout.json";
+import { voiceIds, norm } from "./voice-lines.js";
 import { createWorld } from "./world.js";
 import { createMarkers } from "./markers.js";
+import { createTrays } from "./trays.js";
+import { createReel } from "./reel.js";
 import { icon } from "./icons.js";
 import "@fontsource-variable/afacad/wght.css";          // titles and headers (Manrope stays for body text)
 import "@fontsource-variable/afacad/wght-italic.css";
@@ -21,7 +24,7 @@ const DEV = new URLSearchParams(location.search).get("dev") === "1";
 const fresh = () => ({
   version: 1, page: "P00", name: "", interest: false, tags: {}, doc: 0, filter: "all", selected: [], runs: [], year: 0,
   findings: [], why: "", choices: {}, lever: 0, hallRuns: [], rationale: "", brief: "", reflection: ["", "", ""],
-  settings: { sound: true, captions: true, reduced: matchMedia("(prefers-reduced-motion: reduce)").matches },
+  settings: { sound: true, voice: true, captions: true, reduced: matchMedia("(prefers-reduced-motion: reduce)").matches },
   order: C.levers.map((l) => [...l.options].sort(() => Math.random() - 0.5).map((o) => o.id)), strands: [],
 });
 let state = fresh();
@@ -31,7 +34,7 @@ try {
 } catch { /* first run */ }
 
 let busy = false, paused = false, recorder, stream, recordingURL = "", audioBlob;
-let world = null, markers = null;
+let world = null, markers = null, trays = null, reel = null;
 // The current task's pins only. A pin does what clicking its object does (see hotspot()).
 function pinsFor(p) {
   const kal = (n, q) => ({ id: `institution:${n}`, label: n, kicker: "Institution", title: n, line: INSTITUTIONS[n],
@@ -179,6 +182,50 @@ function levelMeter(source, ctx) {   // feeds the globe from any audio node; ret
   return () => { cancelAnimationFrame(raf); orb.level(0); try { source.disconnect(an); } catch {} };
 }
 let voiceCtx = null;
+
+// ---------------------------------------------------------------- character voice lines (public/audio/<id>.mp3)
+// A spoken line is matched by its on-screen text, so the composer copy stays the single source.
+const linePlayer = { el: null, src: null, stopMeter: () => {}, token: 0 };
+function stopLine(fade = 120) {
+  const a = linePlayer.el; linePlayer.token++;
+  linePlayer.stopMeter(); linePlayer.stopMeter = () => {}; orb.listen(false);
+  if (!a || a.paused) return;
+  const v0 = a.volume, t0 = performance.now();
+  const src = a.src;
+  const step = (n) => { if (a.src !== src) return; const k = Math.max(0, Math.min(1, (n - t0) / fade)); a.volume = Math.max(0, Math.min(1, v0 * (1 - k))); if (k < 1) requestAnimationFrame(step); else { a.pause(); a.volume = 1; } };
+  requestAnimationFrame(step);
+}
+function playIds(ids, fallbackText, delay) {
+  stopLine();
+  if (!ids.length) return;
+  const token = linePlayer.token;
+  const fallback = () => { if (token === linePlayer.token) orb.speak(Math.min(6000, 200 + norm(fallbackText).split(" ").length * 320)); };
+  if (state.settings.sound === false || state.settings.voice === false) return;
+  setTimeout(() => {
+    if (token !== linePlayer.token) return;
+    let i = 0;
+    const next = () => {
+      if (token !== linePlayer.token) return;
+      if (i >= ids.length) { linePlayer.stopMeter(); linePlayer.stopMeter = () => {}; orb.level(0); orb.listen(false); return; }
+      let a = linePlayer.el;
+      if (!a) { a = linePlayer.el = new Audio(); a.preload = "auto"; }
+      a.volume = 1; a.src = `${import.meta.env.BASE_URL}audio/${ids[i++]}.mp3`;
+      a.onended = next; a.onerror = () => { linePlayer.stopMeter(); fallback(); };
+      try {
+        const c = ctxNow();
+        if (!linePlayer.src) { linePlayer.src = c.createMediaElementSource(a); linePlayer.src.connect(c.destination); }
+        linePlayer.stopMeter(); linePlayer.stopMeter = levelMeter(linePlayer.src, c); orb.listen(true);
+      } catch {}
+      a.play().catch(() => { linePlayer.stopMeter(); fallback(); });
+    };
+    next();
+  }, delay);
+}
+function voiceLine(root, delay = 620) {
+  const p = [...root.querySelectorAll("p:not(.who):not(.muted)")].find((el) => voiceIds(el.textContent).length);
+  if (!p) return;
+  playIds(voiceIds(p.textContent), p.textContent, state.settings.reduced ? 0 : delay);
+}
 const ctxNow = () => { voiceCtx ??= new (window.AudioContext || window.webkitAudioContext)(); voiceCtx.resume?.(); return voiceCtx; };
 // Reads the question: a generated clip (public/audio/<id>.mp3, made later in Lovable) or, until then, the browser's voice.
 function speakQuestion(text, id) {
@@ -201,6 +248,53 @@ function placeVoiceGlobe() {
   const f = $("#frame").getBoundingClientRect(), root = document.documentElement.style;
   root.setProperty("--ax", `${f.left + f.width / 2}px`); root.setProperty("--ay", `${f.bottom - Math.min(240, f.height * .3)}px`);
 }
+// ---- P01 welcome: the conversation bubble comes first. The globe asks for a name, a glass field rises under it,
+// and on submit the field shrinks back into the bubble before the story moves on. The composer form underneath
+// stays the fallback (and receives the name), so nothing depends on this layer.
+let welcomeRun = null;
+async function welcomeMode() {
+  if (welcomeRun || voiceRun) return;
+  const form = panel.querySelector('form[data-form="identity"]'); if (!form) return;
+  const ui = voiceUI(), q = form.dataset.question || "Welcome. What should we call you?";
+  let done = false, rec = null, silence = 0;
+  const pill = document.createElement("form"); pill.className = "vin"; pill.setAttribute("aria-label", "Your name");
+  pill.innerHTML = `<input name="welcomeName" maxlength="60" autocomplete="given-name" placeholder="Your name" aria-label="Your name" value="${esc(state.name)}"><button type="button" class="vin-voice" aria-label="Say your name">${icon("mic")}</button><button class="vin-send primary" aria-label="Continue">${icon("send")}</button><small class="vin-help" aria-live="polite"></small>`;
+  const input = pill.querySelector("input"), help = pill.querySelector(".vin-help");
+  const stop = (keep) => {
+    if (done) return; done = true; clearTimeout(silence); try { rec?.stop(); } catch {}
+    voiceRun?.cancelSpeech?.(); orb.listen(false);
+    document.body.classList.remove("voice-mode", "welcome-mode", "voice-listening"); pill.remove(); welcomeRun = null;
+    if (!keep) dockGlobe();
+  };
+  welcomeRun = { stop };
+  ui.querySelector(".vq").textContent = q; ui.querySelector(".vt").textContent = "";
+  cancelAnimationFrame(dockRaf); document.body.classList.remove("globe-inline");
+  placeVoiceGlobe(); document.body.classList.add("voice-mode", "welcome-mode"); orb.place("prompt");
+  await new Promise((r) => setTimeout(r, state.settings.reduced ? 0 : 480));
+  if (done) return;
+  await speakQuestion(q, form.dataset.voice);
+  if (done) return;
+  ui.append(pill); setTimeout(() => pill.classList.add("in"), 20);
+  setTimeout(() => input.focus({ preventScroll: true }), state.settings.reduced ? 0 : 260);
+  pill.querySelector(".vin-voice").onclick = () => {          // say it instead of typing
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { help.textContent = "Voice answers aren't available in this browser. Type your name instead."; return; }
+    try { rec?.stop(); } catch {}
+    rec = new SR(); rec.lang = "en-GB"; rec.interimResults = true; orb.listen(true); document.body.classList.add("voice-listening");
+    rec.onresult = (e) => { input.value = [...e.results].map((r) => r[0].transcript).join(" ").trim(); clearTimeout(silence); silence = setTimeout(() => { try { rec.stop(); } catch {} }, 1600); };
+    rec.onend = rec.onerror = () => { orb.listen(false); document.body.classList.remove("voice-listening"); input.focus({ preventScroll: true }); };
+    try { rec.start(); } catch { orb.listen(false); }
+  };
+  pill.onsubmit = (e) => {
+    e.preventDefault();
+    const n = input.value.trim();
+    if (!n) { help.textContent = "Enter a name of 1 to 60 characters."; input.focus(); return; }
+    form.querySelector("#name").value = n.slice(0, 60);
+    pill.classList.add("absorb"); orb.speak(500);                    // the field folds back into the bubble
+    setTimeout(() => { stop(true); form.requestSubmit(); }, state.settings.reduced ? 0 : 460);
+  };
+}
+
 async function voiceMode() {
   const form = panel.querySelector("form"), field = form?.querySelector("textarea, input[name]");
   if (!form || !field || voiceRun) return;
@@ -301,13 +395,13 @@ const HINTS = {
     : ["Open Conditions and change one, then run the test", "Each test replays Kalinda from year 2 to 10"],
   result: () => ["Compare it with what happened, or change conditions", "Ready? Write your findings →"],
   lever: () => { const l = C.levers[state.lever], v = state.choices[l.id]; const o = v && l.options.find((o) => o.id === v); return o ? [o.text] : ["Open Options and choose one"]; },
-  rationale: () => ["Name a trade-off you accepted…", "What are you still unsure about?", "Or tap the mic and say it"],
-  brief: () => ["What should the Chair say first?", "Keep it to about sixty seconds…", "Or tap the mic and say it"],
-  identity: () => ["Your name", "Or tap the mic and say it"],
+  rationale: () => ["Name a trade-off you accepted…", "What are you still unsure about?", "Or tap the waves and say it"],
+  brief: () => ["What should the Chair say first?", "Keep it to about sixty seconds…", "Or tap the waves and say it"],
+  identity: () => ["Your name", "Or tap the waves and say it"],
   file: () => [`${Object.keys(state.tags).length} of 18 sources tagged`, "Open the file to read and tag each source →"],
   findings: () => state.findings.length
-    ? ["Now say why, using your tests…", "Which test showed it?", "Or tap the mic and say it"]
-    : ["Choose up to three factors below ↓", "Then say why, using your tests…", "Or tap the mic and say it"],
+    ? ["Now say why, using your tests…", "Which test showed it?", "Or tap the waves and say it"]
+    : ["Choose up to three factors below ↓", "Then say why, using your tests…", "Or tap the waves and say it"],
 };
 const fieldHint = (k) => HINTS[k]?.()[0] || "";
 let hintTimer = 0, hintIdx = 0;
@@ -373,9 +467,29 @@ const dot = (tag) => `<span class="status-dot ${tag || ""}">${tag === "foundatio
 // The conversation: subtitles beside the globe. New words rise in softly; options are plain text under the line.
 let lastSub = "", focusedPage = null;
 let textMode = false;
+// A character's line stays long enough to read, then folds away so only its actions remain, and comes back after a
+// pause in case the learner wants to read it again. It holds while the voice is playing or the pointer is on the card.
+let sayTimer = 0;
+function cycleSay() {
+  clearTimeout(sayTimer); panel.classList.remove("rest");
+  const p = panel.querySelector(":scope > p:not(.who):not(.muted)");
+  if (!p || !panel.querySelector(".who, .who-row") || !panel.querySelector("button")) return;
+  p.classList.add("say");
+  const words = p.textContent.trim().split(/\s+/).length;
+  const READ = Math.min(14000, Math.max(6000, 1200 + words * 330)), REST = 7000;
+  const busyNow = () => panel.matches(":hover") || (linePlayer.el && !linePlayer.el.paused);
+  const show = () => { p.style.maxHeight = p.scrollHeight + "px"; panel.classList.remove("rest"); sayTimer = setTimeout(hide, READ); };
+  const hide = () => {
+    if (busyNow()) { sayTimer = setTimeout(hide, 1000); return; }
+    p.style.maxHeight = p.scrollHeight + "px"; void p.offsetHeight;        // from its measured height, so it animates
+    panel.classList.add("rest"); sayTimer = setTimeout(show, REST);
+  };
+  p.style.maxHeight = "none"; sayTimer = setTimeout(hide, READ + 620);   // 620 ms: the words stream in first
+}
 function composer(html) {
   const changed = html !== lastSub; lastSub = html;
   if (changed) panel.innerHTML = html; panel.classList.toggle("empty", !html);
+  if (changed) cycleSay();
   if (html && changed) panel.classList.remove("folded");
   document.body.classList.toggle("talking", !!html && !panel.classList.contains("folded"));
   orb.reduced = state.settings.reduced;
@@ -386,6 +500,7 @@ function composer(html) {
     panel.querySelectorAll(".who, p:not(.who), .opts, form > *:not(.sr)").forEach((el) => { el.style.setProperty("--d", "0ms"); el.classList.add("rise"); });
   }
   if (changed && html) portraitIntro();
+  if (changed) { if (html) voiceLine(panel); else stopLine(); }
   dockGlobe();
   const quiet = busy || state.page === "P00";      // the title screen and scene changes have no globe
   requestAnimationFrame(() => orb.place(html ? (panel.classList.contains("folded") ? "rest" : "prompt") : (quiet ? "hidden" : "rest"), { activate: changed }));
@@ -395,7 +510,7 @@ const railPanel = $("#railPanel");
 let panelReturn = null, panelTimer = 0;
 function modal(html) {
   closeMenu(); snapshotDrafts(); clearTimeout(panelTimer);
-  $("#drawerBody").innerHTML = html;
+  $("#drawerBody").innerHTML = html; voiceLine($("#drawerBody"), 300);
   if (railPanel.hidden || !railPanel.classList.contains("on")) {
     panelReturn = document.activeElement; railPanel.hidden = false;
     railPanel.classList.remove("on"); void railPanel.offsetWidth; railPanel.classList.add("on");
@@ -489,7 +604,7 @@ function ensureAsset(name) {
   return (loading[name] ||= loadAsset(name).finally(() => { if (!world.assets[name]) delete loading[name]; }));
 }
 async function loadAsset(name) {
-  const urls = { office: "office.glb", casefile: "casefile.glb", kalinda: "kalinda.glb", hall: "hall.glb", chair: "chair_office_props.glb" };
+  const urls = { office: "office.glb", casefile: "casefile.glb", kalinda: "kalinda.glb", hall: "office_room.glb", chair: "chair_office_props.glb" };
   const place = name === "casefile" ? world.cv(layout.office.folder_position) : name === "kalinda" ? world.cv(layout.office.map_position) : null;
   const a = await world.load(name, "/models/" + urls[name], place);
   if (!a) { status(`Part of the scene could not load (${name}). Text controls still work.`, "retryAssets"); return null; }
@@ -501,6 +616,7 @@ async function loadAsset(name) {
   if (name === "chair") world.prepareChairProps();
   world.setMood(currentScene);
   if (!world.inspector.active) world.pose(CAMERA[state.page], 0); // a late-loading model must obey the current place's visibility
+  if (name === "office" && state.page === "P00") world.titleSwing(true);   // fit the turning office now that it can be measured
   return a;
 }
 
@@ -542,12 +658,48 @@ function paintCase() {
 const inspecting = () => textMode || (!!world?.inspector.active && !["out","returning"].includes(world.inspector.state));
 const TOUCH = matchMedia("(hover: none)").matches;
 let hudRAF = 0, hoverFile = false, introUntil = 0;
+// ---- a marked sheet goes into its folder: a thin stroke traces its edge in the folder's colour, the sheet folds in
+// half, then shrinks into the folder like a window minimising to the Dock. A DOM stand-in drawn from the sheet's own
+// texture does the flight while the 3D sheet hides; the next source comes up as it lands. Returns false if it cannot.
+function flyToTray(kind) {
+  const W = world, a = W?.caseAnchor(), pg = W?.inspector.pages?.[W.inspector.pageIdx]?.o, img = pg?.material?.map?.image;
+  if (!trays || !a || !img || state.settings.reduced) { trays?.bump(kind); return false; }
+  const x0 = a.left.x, y0 = a.top.y, w = a.top.x - a.left.x, h = a.bottom.y - a.top.y;
+  if (!(w > 30 && h > 30)) { trays.bump(kind); return false; }
+  const color = kind === "aside" ? "#e0483a" : "#2f6bd8", T = trays.rect(kind);
+  const g = document.createElement("div"); g.className = "fly"; g.setAttribute("aria-hidden", "true");
+  g.style.cssText = `left:${x0}px;top:${y0}px;width:${w}px;height:${h}px;--c:${color}`;
+  g.innerHTML = `<div class="fly-top"><canvas></canvas></div><div class="fly-bot"><canvas></canvas><i></i></div><svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><rect x=".6" y=".6" width="${w - 1.2}" height="${h - 1.2}" rx="1.5" pathLength="100"/></svg>`;
+  const dpr = Math.min(devicePixelRatio, 2);
+  g.querySelectorAll("canvas").forEach((c, i) => {
+    c.width = Math.round(w * dpr); c.height = Math.round(h / 2 * dpr);
+    const x = c.getContext("2d"), sh = img.height / 2;
+    x.drawImage(img, 0, i * sh, img.width, sh, 0, 0, c.width, c.height);
+  });
+  document.body.append(g); pg.visible = false;
+  const ease = "cubic-bezier(.32,.72,0,1)";
+  g.querySelector("rect").animate([{ strokeDashoffset: 100 }, { strokeDashoffset: 0 }], { duration: 420, easing: "cubic-bezier(.16,1,.3,1)", fill: "forwards" });
+  g.querySelector(".fly-bot").animate([{ transform: "rotateX(0deg)" }, { transform: "rotateX(-180deg)" }], { duration: 320, delay: 470, easing: "cubic-bezier(.65,0,.35,1)", fill: "forwards" });
+  g.querySelector("svg").animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, delay: 470, fill: "forwards" });
+  const cx = x0 + w / 2, cy = y0 + h / 4, dx = T.x + T.w / 2 - cx, dy = T.y + T.h / 2 - cy, s = Math.max(.04, T.w / w);
+  // the genie: width collapses ahead of height, then it drops into the folder
+  const fly = g.animate([
+    { transform: "translate(0,0) scale(1,1)", opacity: 1 },
+    { transform: `translate(${dx * .3}px,${dy * .18}px) scale(${Math.max(s, .55)},.92)`, opacity: 1, offset: .35 },
+    { transform: `translate(${dx}px,${dy}px) scale(${s},${s * .9})`, opacity: .15 },
+  ], { duration: 540, delay: 820, easing: "cubic-bezier(.45,0,.55,1)", fill: "forwards" });
+  fly.onfinish = () => {
+    trays.bump(kind); g.remove();
+    const ip = W.inspector; if (ip.pages?.[ip.pageIdx]?.o === pg) pg.visible = true;   // the last sheet stays to be read
+  };
+  return true;
+}
 function caseHUD() {
   const on = state.page === "P03" && inspecting() && !textMode && world?.inspector.state === "held";
   $("#documentNav").hidden = state.page !== "P03" || !inspecting();
   $("#documentNav [data-arg=\"-1\"]").disabled = state.doc === 0;
   $("#documentNav [data-arg=\"1\"]").disabled = state.doc === C.evidence.length-1;
-  stampsEl.hidden = !on; countEl.hidden = !on;
+  stampsEl.hidden = !on; countEl.hidden = !on; trays?.show(on);
   cancelAnimationFrame(hudRAF);
   if (!on) return;
   const tag = state.tags[C.evidence[state.doc].id];
@@ -612,6 +764,7 @@ function onInspect(ev) {
 // ---------------------------------------------------------------- navigation
 async function go(page) {
   if (busy) return;
+  stopLine();
   if (paused) { paused=false; orb.paused=false; world?.setPaused(false); }
   const from = state.page;
   busy = true; document.body.classList.add("busy");
@@ -632,7 +785,8 @@ let heroStrands = null, recStrands = null, meterRAF = 0, audioCtx = null;
 let lastPeekKey = "";
 function render() {
   renderPage();
-  if (state.page === "P00") requestAnimationFrame(() => world?.titleSwing(true)); else world?.titleSwing(false);
+  if (state.page === "P00") requestAnimationFrame(() => world?.titleSwing(true)); else { world?.titleSwing(false); hoverOff(true); }
+  reel?.show(state.page === "P00");
   panel.querySelectorAll('.stack[role=radiogroup] button').forEach((b) => { b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(b.classList.contains("selected"))); });
   // info cards (not tasks) announce, then shrink to their heading; hovering or focusing reopens them
   const peek = ["P05", "P07", "P13"].includes(state.page) && stage.dataset.layout === "side";
@@ -672,6 +826,8 @@ function renderPage() {
 
     composer(""); orb.place("hidden");
   }
+  if (p !== "P01") welcomeRun?.stop(false);
+  if (p === "P01") setTimeout(() => { if (state.page === "P01" && !busy) welcomeMode(); }, 0);
   if (p === "P01") composer(`<h2 class="ask">Welcome. What should we call you?</h2><form data-form="identity" data-voice="q_identity" data-question="Welcome. What should we call you?" data-hints="identity">${abar({ field: `<input id="name" name="name" maxlength="60" value="${esc(state.name)}" required autocomplete="given-name" aria-label="Your name" placeholder="Your name">`, send: { submit: true, label: "Continue" } })}<small id="nameHelp"></small></form>`);
   if (p === "P02") {
     composer(!state.interest
@@ -807,7 +963,9 @@ const actions = {
   go,
   tag(value) {
     if (busy) return;
-    const e = C.evidence[state.doc]; const wasUndecided = !state.tags[e.id]; state.tags[e.id] = value; save();
+    const e = C.evidence[state.doc]; const wasUndecided = !state.tags[e.id];
+    const flew = !textMode && flyToTray(value);          // stroke, fold, then into the blue or red folder
+    state.tags[e.id] = value; save();
     paintCase(); caseHUD();
     if (textMode) render();
     window.dispatchEvent(new CustomEvent("analyst:tag", { detail: { id: e.id, value } }));
@@ -825,7 +983,19 @@ const actions = {
       // the last open decision gets Diallo's word; after that, each re-mark brings up the next sourced piece set aside
       const n = nextSourcedAside(at);
       if (wasUndecided || n < 0 || n === at) evidenceCheck(); else goToDoc(n);
-    }, state.settings.reduced ? 0 : 650);
+    }, state.settings.reduced ? 0 : flew ? 1400 : 650);
+  },
+  /** A folder was clicked: list what is in it, so a source can be taken back out and marked again. */
+  openTray(kind) {
+    const items = C.evidence.map((e, i) => [e, i]).filter(([e]) => state.tags[e.id] === kind);
+    const name = kind === "aside" ? "Set aside" : "Foundations";
+    modal(`<span class="kicker">${kind === "aside" ? "Red folder" : "Blue folder"}</span><h2>${name}</h2>${items.length ? `<p class="muted">Take a source back out to read it and mark it again.</p><div class="tray-list">${items.map(([e, i]) => `<button type="button" data-action="pullOut" data-arg="${i}"><b>${String(i + 1).padStart(2, "0")}</b> ${esc(e.title)}</button>`).join("")}</div>` : `<p class="muted">Nothing in this folder yet.</p>`}`);
+  },
+  pullOut(i) {
+    i = Number(i); const e = C.evidence[i]; if (!e) return;
+    close(); delete state.tags[e.id]; save();             // out of the folder: unmarked until it is marked again
+    if (state.doc === i) { world?.inspector.turnTo(i); paintCase(); caseHUD(); } else goToDoc(i);
+    announce(`${e.title} taken out of the folder. Mark it again.`);
   },
   doc(dir) {
     if (busy || !inspecting()) return;
@@ -850,7 +1020,7 @@ const actions = {
   viewFront() { world?.view("front"); },
   viewOut() { world?.view("out"); },
   feedback() { if (state.feedback) { state.feedbackSeen = true; save(); railTools(); modal(state.feedback); } },
-  settings() { modal(`<h2>Settings</h2><label class="settings-row">Reduced motion<input type="checkbox" data-setting="reduced" ${state.settings.reduced ? "checked" : ""}></label><label class="settings-row">Sound<input type="checkbox" data-setting="sound" ${state.settings.sound ? "checked" : ""}></label><label class="settings-row">Captions<input type="checkbox" data-setting="captions" ${state.settings.captions ? "checked" : ""}></label><div class="row">${b(paused ? "Resume" : "Pause", "pause")}${b("Replay intro", "replayIntro")}</div><p class="muted">Voice recordings are not produced yet; all speech is shown as text.</p>`); },
+  settings() { modal(`<h2>Settings</h2><label class="settings-row">Reduced motion<input type="checkbox" data-setting="reduced" ${state.settings.reduced ? "checked" : ""}></label><label class="settings-row">Sound<input type="checkbox" data-setting="sound" ${state.settings.sound ? "checked" : ""}></label><label class="settings-row">Voice<input type="checkbox" data-setting="voice" ${state.settings.voice !== false ? "checked" : ""}></label><label class="settings-row">Captions<input type="checkbox" data-setting="captions" ${state.settings.captions ? "checked" : ""}></label><div class="row">${b(paused ? "Resume" : "Pause", "pause")}${b("Replay intro", "replayIntro")}</div><p class="muted">Characters speak their lines aloud; the words stay on screen.</p>`); },
   readText() { modal(readerHTML(state.doc) + row(b("Add to Foundations", "tagClose", "foundations", "primary"), b("Set aside", "tagClose", "aside"))); },
   tagClose(v) { close(); actions.tag(v); },
   reviewDoc(i) { state.doc = +i; go("P03"); },
@@ -957,8 +1127,8 @@ document.addEventListener("input", (e) => {
 });
 document.addEventListener("change", (e) => {
   if (e.target.dataset.setting) {
-    state.settings[e.target.dataset.setting] = e.target.checked;
-    orb.reduced = state.settings.reduced; world?.setReduced(state.settings.reduced);
+    state.settings[e.target.dataset.setting] = e.target.checked; if (!state.settings.voice || !state.settings.sound) stopLine();
+    orb.reduced = state.settings.reduced; world?.setReduced(state.settings.reduced); if (trays) trays.reduced = state.settings.reduced; if (reel) reel.reduced = state.settings.reduced;
     document.body.classList.toggle("reduced", state.settings.reduced); save();
   }
 });
@@ -1036,7 +1206,7 @@ function streamWords() {
   requestAnimationFrame(() => requestAnimationFrame(() => {
     if (busy) return;
     orb.place("working");
-    setTimeout(() => { if (orb.phase === "working" && !busy) orb.place("prompt"); orb.speak(Math.min(2600, 200 + words * 34)); }, 560);
+    setTimeout(() => { if (orb.phase === "working" && !busy) orb.place("prompt"); if (!(voiceIds(line.textContent).length && state.settings.sound !== false && state.settings.voice !== false)) orb.speak(Math.min(2600, 200 + words * 34)); }, 560);
   }));
 }
 
@@ -1063,7 +1233,20 @@ document.addEventListener("change", (e) => { if (e.target.id === "factor" && FAC
 function noteInput() { lastInput = performance.now(); if (touring) { touring = false; directing++; markers?.closeCard(); world?.home(700); } }
 for (const ev of ["pointerdown", "keydown", "wheel"]) addEventListener(ev, noteInput, true);
 addEventListener("pointermove", (e) => { if (Math.abs(e.movementX) + Math.abs(e.movementY) > 2) noteInput(); }, true);
+// In the office room (the hall) the quiet-spell tour drifts between its rooms: conference table, meeting room, work area.
+async function hallTour() {
+  touring = true; const run = ++directing;
+  for (const name of ["HALL_PlanningTable", "HALL_Room_Meeting", "HALL_Room_Work"]) {
+    if (!touring || run !== directing) return;
+    const obj = world.node("hall", name); if (!obj) continue;
+    await world.focusOn(obj, { closer: .5, duration: 1700 });
+    if (!touring || run !== directing) return;
+    await sleep(3400);
+  }
+  if (touring && run === directing) { await world.home(1400); touring = false; lastInput = performance.now(); }
+}
 async function tour() {
+  if (SCENE(state.page) === "hall") return hallTour();
   const list = pinsFor(state.page); if (!list.length) return;
   touring = true; const run = ++directing;
   for (const it of list) {
@@ -1152,8 +1335,7 @@ function reserveSpace() {
   const open = !panel.classList.contains("empty") && !panel.classList.contains("folded");
   if (open) bottom = Math.max(0, f.bottom - panel.getBoundingClientRect().top + 28);
   else if ($("#agent").dataset.phase !== "hidden" && !inspecting()) bottom = 96;   // keep the folded globe off the floor
-  const hero = state.page === "P00" && !narrow && stage.querySelector(".hero");
-  if (hero) left = hero.getBoundingClientRect().right - f.left + 24;   // the office sits right, large; the title keeps its margin
+  // P00: the title has its own white panel beside the frame, so the office needs no reserve
   let right = 0;
   if (!narrow && state.page !== "P00" && railReserved()) right = Math.max(0, f.right - $("#rail").getBoundingClientRect().left + 16);
   world.setReserve({ bottom, left, right });
@@ -1161,11 +1343,54 @@ function reserveSpace() {
 }
 new ResizeObserver(() => reserveSpace()).observe(panel);
 
+// ---------------------------------------------------------------- the title screen's reel and hover previews
+// The reel shows things from the whole story, in story order; hovering a piece of the office shows it there instead.
+async function fillReel() {
+  if (!reel) return;
+  await ensureAsset("casefile");
+  const file = world?.node("casefile", "CASEFILE_Root");
+  if (file) reel.setDefault(file, "The case file");          // the default piece; hovering the office swaps it
+}
+const OFFICE_NAMES = { FURN_Desk_EvidenceReview: "The desk", FURN_Chair_Officer: "Your chair", FURN_Chair_Visitor: "Visitor’s chair",
+  FURN_Table_Records: "Records table", FURN_WasteBin: "Waste bin", PROP_DeskLamp_Office: "Desk lamp", PROP_FileBoxes_Records: "File boxes",
+  PROP_Mug_Coffee: "Coffee mug", PROP_Notepad: "Notepad", PROP_PencilStand: "Pencils", PROP_PowerStrip_Records: "Power strip",
+  PROP_Records_Workstation: "Records computer", STORAGE_Bookcase_CaseFiles: "Case-file bookcase", STORAGE_Cabinet_Low: "Low cabinet",
+  STORAGE_Cabinet_Wall: "Wall cabinet", STORAGE_MetalShelf_CaseFiles: "Archive shelves", STORAGE_Sideboard_South: "Sideboard",
+  DECOR_Plant_Cactus: "Cactus", DECOR_Book_Loose_01: "Books", DECOR_Book_Loose_02: "Books", CASEFILE_Root: "The case file" };
+// node names end ".001" in the file; three.js drops the dot, so strip an optional dot and three digits
+const officeLabel = (o) => { const k = o.name.replace(/\.?\d{3}$/, ""); return OFFICE_NAMES[k] || k.replace(/^[A-Z]+_/, "").replace(/_/g, " "); };
+let hovered = null, hoverTimer = 0, hoverRaf = 0;
+function hoverOff(now) {
+  clearTimeout(hoverTimer); if (!hovered) return;
+  const done = () => { hovered = null; world?.highlight(null); reel?.preview(null); $("#world").style.cursor = ""; };
+  if (now) done(); else hoverTimer = setTimeout(done, 450);
+}
+addEventListener("pointermove", (e) => {
+  if (state.page !== "P00" || busy || !world || !reel || hoverRaf) return;
+  hoverRaf = requestAnimationFrame(() => {
+    hoverRaf = 0;
+    const f = $("#frame").getBoundingClientRect(), inside = e.clientX > f.left && e.clientX < f.right && e.clientY > f.top && e.clientY < f.bottom;
+    const o = inside && !e.target.closest?.("#stage, button") ? world.pickAt(e.clientX, e.clientY) : null;
+    if (!o) { hoverOff(); return; }
+    clearTimeout(hoverTimer);
+    if (o === hovered) return;
+    hovered = o; reel.preview(o, officeLabel(o)); world.highlight(o); $("#world").style.cursor = "default";   // copy before the glow is applied
+  });
+});
+
 // ---------------------------------------------------------------- boot
 // ---- the opener film. Plays once per saved run on this device (the sandbox keeps its own flag), never under reduced
 // motion; ?opener=1 forces it, ?opener=0 turns it off. Settings → Replay intro plays it again. It never blocks the app:
 // the title screen and the 3D world load underneath, and a missing or failed file simply closes it.
 const OPENER_KEY = KEY + "-opener-seen";
+// Opener music bed (public/audio/opener_music.mp3): plays with the muted film; follows the Sound setting.
+let openerMusic = null;
+function musicFade(a, ms = 500) {
+  if (!a || a.paused) return;
+  const v0 = a.volume, t0 = performance.now();
+  const step = (n) => { const k = Math.max(0, Math.min(1, (n - t0) / ms)); a.volume = Math.max(0, v0 * (1 - k)); if (k < 1) requestAnimationFrame(step); else a.pause(); };
+  requestAnimationFrame(step);
+}
 function playOpener(force = false) {
   const el = $("#opener"), video = $("#openerVideo"), skip = $("#openerSkip"), q = new URLSearchParams(location.search).get("opener");
   let seen = false; try { seen = localStorage.getItem(OPENER_KEY) === "1"; } catch {}
@@ -1175,7 +1400,7 @@ function playOpener(force = false) {
     const finish = () => {
       if (done) return; done = true;
       try { localStorage.setItem(OPENER_KEY, "1"); } catch {}
-      removeEventListener("keydown", onKey);
+      removeEventListener("keydown", onKey); musicFade(openerMusic); $("#openerSound")?.remove();
       el.classList.add("out");
       setTimeout(() => { el.hidden = true; el.classList.remove("out", "ending"); video.pause(); video.removeAttribute("src"); video.load(); resolve(); }, 440);
       $("#stage")?.querySelector("button")?.focus({ preventScroll: true });
@@ -1186,7 +1411,16 @@ function playOpener(force = false) {
     video.onended = finish; video.onerror = finish;
     video.ontimeupdate = () => { if (video.duration && video.currentTime > video.duration - 4) el.classList.add("ending"); };
     skip.onclick = finish; addEventListener("keydown", onKey);
-    video.play().catch(finish);                       // muted autoplay is allowed; if a browser still refuses, go straight to the title
+    video.play().catch(finish);
+    if (state.settings.sound !== false) {
+      openerMusic ??= new Audio(`${import.meta.env.BASE_URL}audio/opener_music.mp3`);
+      const m = openerMusic; m.currentTime = 0; m.volume = .8;
+      m.play().catch(() => {                          // sound blocked until a click: offer a button
+        if ($("#openerSound")) return;
+        skip.insertAdjacentHTML("beforebegin", `<button id="openerSound" type="button">Sound on</button>`);
+        $("#openerSound").onclick = (e) => { e.currentTarget.remove(); m.currentTime = video.currentTime; m.play().catch(() => {}); skip.focus({ preventScroll: true }); };
+      });
+    }                       // muted autoplay is allowed; if a browser still refuses, go straight to the title
     skip.focus({ preventScroll: true });
   });
 }
@@ -1196,6 +1430,8 @@ async function boot() {
   try {
     world = createWorld({ canvas: $("#world"), layout, onHotspot: hotspot, onInspect, onError: ({ name }) => console.warn("asset failed", name) });
     world.setReduced(state.settings.reduced);
+    reel = createReel({ canvas: $("#reelCanvas"), panel: $("#titlePanel") }); reel.reduced = state.settings.reduced;
+    trays = createTrays({ url: "/models/folders.glb", onPick: (k) => actions.openTray(k) }); trays.reduced = state.settings.reduced;
     markers = createMarkers({ world, layer: $("#pins"), onPick: (id) => hotspot(id),
       shouldShow: () => !busy && !paused && !inspecting() && !drawer.open && state.page !== "P00",
       frame: () => {           // the empty part of the preview: above the conversation when it is open
@@ -1212,6 +1448,7 @@ async function boot() {
     await ensureAsset("office");
     await ensureAsset("casefile");
     ensureAsset("kalinda");                    // initial set (kit budget), finishes in the background
+    fillReel();
   }
   if (DEV) devNav();
 }
@@ -1241,6 +1478,6 @@ function devNav() {
   select.innerHTML = Array.from({ length: 15 }, (_, i) => `<option>P${String(i).padStart(2, "0")}</option>`).join("");
   select.onchange = () => { state.name ||= "Preview analyst"; state.interest = true; state.weather ||= "Calm"; go(select.value); };
   document.body.append(select);
-  window.__ab = { get state() { return state; }, world: () => world, go, actions };
+  window.__ab = { get state() { return state; }, world: () => world, reel: () => reel, go, actions };
 }
 boot();

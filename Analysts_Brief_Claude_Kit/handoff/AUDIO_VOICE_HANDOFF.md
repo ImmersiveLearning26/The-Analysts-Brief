@@ -1,6 +1,6 @@
 # Character voice audio: handoff for Lovable
 
-**Status (2026-11-21):** the design and wiring are specified here, but no audio has been generated yet. We couldn't generate it in Claude Code because the ElevenLabs account has an unpaid invoice. Lovable should generate the audio and wire it up once the build is complete.
+**Status (2026-11-21, done):** Lovable generated every line in §4 plus the opener music bed. The files are in `web/public/audio/` (23 mp3s), the text-to-clip map is `web/src/voice-lines.js`, and the player, globe pulse, Voice toggle and opener music are wired in `web/src/main.js`.
 
 ---
 

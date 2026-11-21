@@ -11,7 +11,7 @@ const draco = path.join(web, "public/draco");
 mkdirSync(models, { recursive: true });
 mkdirSync(draco, { recursive: true });
 
-for (const f of ["office.glb", "casefile.glb", "kalinda.glb", "hall.glb", "chair_office_props.glb", "office_env.hdr"]) {
+for (const f of ["office.glb", "casefile.glb", "kalinda.glb", "hall.glb", "office_room.glb", "folders.glb", "chair_office_props.glb", "office_env.hdr"]) {
   const src = path.join(exportDir, f);
   if (!existsSync(src)) throw new Error(`Missing ${src}: run blender/production/export_glb.py first`);
   const dst = path.join(models, f);

@@ -20,3 +20,9 @@ _backup_*/
 Analysts_Brief_Claude_Kit/web/public/opener/
 Analysts_Brief_Claude_Kit/opener/film/.hyperframes/
 Analysts_Brief_Claude_Kit/opener/film/renders/
+Analysts_Brief_Claude_Kit/opener/film/.thumbnails/
+
+# drop copies at the project root (already copied into the kit: assets/source/new, blender/production/export, web/public/audio)
+/office_room.glb
+/folders.glb
+/The-Analysts-Brief.zip

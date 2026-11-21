@@ -27,7 +27,8 @@ const MOODS = {
   office: { env: .8, exposure: 1.05, windows: .45, ceil: .55, hemi: .5, sun: 2.5, lamp: 1.4, bg: 0xf4f3ee, contrast: 1.08, sat: 1.02, vig: 0, tint: [1, 1, 1] },
   model:  { env: .8, exposure: 1.05, windows: .45, ceil: .55, hemi: .5, sun: 2.5, lamp: 0, bg: 0xf4f3ee, contrast: 1.08, sat: 1.02, vig: 0, tint: [1, 1, 1] },
   // the hall carries baked lighting: less added light so the walls do not blow out
-  hall:   { env: .38, exposure: .98, windows: .3, ceil: .3, hemi: .3, sun: 1.1, lamp: 0, bg: 0xf4f3ee, contrast: 1.1, sat: 1.04, vig: 0, tint: [1, .99, .97] },
+  // the hall is now the open-plan office room (office_room.glb): unbaked, so it takes the studio look like the office
+  hall:   { env: .85, exposure: 1.05, windows: 0, ceil: 0, hemi: .55, sun: 2.4, lamp: 0, bg: 0xf4f3ee, contrast: 1.08, sat: 1.02, vig: 0, tint: [1, 1, 1] },
   // Thursday evening: dusk outside, the desk lamp as the key light, cool window spill
   chair:  { env: .32, exposure: 1.0, windows: 1.1, ceil: .16, hemi: .24, sun: 0, lamp: 3.4, bg: 0x12111a, contrast: 1.12, sat: 1.0, vig: 0, tint: [1, .97, .93] },
 };
@@ -259,10 +260,40 @@ export function createWorld({ canvas, layout, onHotspot, onInspect, onError = co
 
   // ---- the cover: the camera swings slowly around the office so each side is seen (stops on any other page)
   let swing = null;
+  // The distance is the worst case over the whole ±50° swing, so no corner of the room ever leaves the frame.
   function titleSwing(on) {
     if (!on) { swing = null; return; }
+    const prev = swing, root = assets.office?.root;
     const c = spatial.controls.target.clone(), sph = new THREE.Spherical().setFromVector3(camera.position.clone().sub(c));
-    swing = { c, r: sph.radius, phi: sph.phi, th: sph.theta, t: 0 };
+    const phi = prev?.phi ?? sph.phi, th = prev?.th ?? sph.theta;
+    let r = sph.radius;
+    if (root) {
+      const box = visibleBounds(root); box.getCenter(c);
+      const t14 = Math.tan(THREE.MathUtils.degToRad(14)), PAD = .84;              // the room fills at most 84% of the frame
+      const kV = t14 * (frameRect.h / innerHeight) * PAD, kH = t14 * (frameRect.w / innerHeight) * PAD;
+      const rel = new THREE.Vector3(), up0 = new THREE.Vector3(0, 1, 0);
+      r = 0;
+      for (let a = -50; a <= 50; a += 5) {
+        const dir = new THREE.Vector3().setFromSphericalCoords(1, phi, th + THREE.MathUtils.degToRad(a)), fwd = dir.clone().negate();
+        const right = new THREE.Vector3().crossVectors(fwd, up0).normalize(), up = new THREE.Vector3().crossVectors(right, fwd);
+        for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
+          rel.set(x, y, z).sub(c); const along = rel.dot(dir);
+          r = Math.max(r, along + Math.abs(rel.dot(up)) / kV, along + Math.abs(rel.dot(right)) / kH);
+        }
+      }
+    }
+    swing = { c, r, phi, th, t: prev?.t ?? 0 };
+  }
+  /** The story object under the pointer on the title screen (an office piece or the case file), or null. */
+  function pickAt(x, y) {
+    if (inspector.active) return null;
+    setRay(x, y);
+    const hit = ray.intersectObjects(scene.children, true).find((h) => { for (let o = h.object; o; o = o.parent) if (!o.visible) return false; return true; });
+    for (let o = hit?.object; o; o = o.parent) {
+      if (o.name === "CASEFILE_Root") return o;
+      if (o.parent?.name === "OFFICE_ER_Root") return /^(ARCH_|ENV_)/.test(o.name) ? null : o;
+    }
+    return null;
   }
 
   // ---- loading
@@ -275,6 +306,7 @@ export function createWorld({ canvas, layout, onHotspot, onInspect, onError = co
       // the office's sand plaster normal map reads as stains under the studio key light: clean matte plaster, set before
       // cutaway() so the cut shader is attached to the material actually used
       if (name === "office") root.traverse((o) => { if (o.isMesh && o.material?.name === "MAT_Wall_Sand") { const m = o.material.clone(); m.normalMap = null; m.color.set(0xe3d5c0); m.roughness = .95; o.material = m; } });
+      if (name === "hall") prepareOfficeRoom(root);
       scene.add(root); cutaway(root, name);
       if (name === "office") {
         thickenWalls(root);
@@ -291,6 +323,46 @@ export function createWorld({ canvas, layout, onHotspot, onInspect, onError = co
       return null;
     }
   }
+  // ---- the office room (office_room.glb, Sketchfab "Office Room" by golukumar): a 49 m building in inches. Only its
+  // open-topped half is used: scale to metres, drop the closed half's triangles (so bounds, framing and shadows see one
+  // room), centre it on the origin, and add invisible anchors for the pin and the idle tour.
+  function prepareOfficeRoom(root) {
+    root.scale.setScalar(0.0254); root.updateMatrixWorld(true);
+    const CUT = -950 * 0.0254, v = new THREE.Vector3();
+    root.traverse((o) => {
+      if (!o.isMesh) return;
+      const g = o.geometry, pos = g.attributes.position;
+      const idx = g.index ? g.index.array : Array.from({ length: pos.count }, (_, i) => i);
+      const inside = new Uint8Array(pos.count);
+      for (let i = 0; i < pos.count; i++) inside[i] = v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld).z <= CUT ? 1 : 0;
+      const keep = [];
+      for (let t = 0; t < idx.length; t += 3) if (inside[idx[t]] || inside[idx[t + 1]] || inside[idx[t + 2]]) keep.push(idx[t], idx[t + 1], idx[t + 2]);
+      if (!keep.length) { o.visible = false; o.geometry = new THREE.BufferGeometry(); return; }
+      if (keep.length === idx.length) return;
+      const remap = new Int32Array(pos.count).fill(-1); let n = 0;              // compact the vertices so bounds are right
+      for (const i of keep) if (remap[i] < 0) remap[i] = n++;
+      const out = new THREE.BufferGeometry();
+      for (const [key, attr] of Object.entries(g.attributes)) {
+        const arr = new attr.array.constructor(n * attr.itemSize);
+        for (let i = 0; i < pos.count; i++) if (remap[i] >= 0) for (let k = 0; k < attr.itemSize; k++) arr[remap[i] * attr.itemSize + k] = attr.array[i * attr.itemSize + k];
+        out.setAttribute(key, new THREE.BufferAttribute(arr, attr.itemSize, attr.normalized));
+      }
+      out.setIndex(keep.map((i) => remap[i]));
+      for (const gr of g.groups) out.addGroup(gr.start, gr.count, gr.materialIndex);
+      g.dispose(); o.geometry = out;
+    });
+    root.updateMatrixWorld(true);
+    const b = visibleBounds(root), c = b.getCenter(new THREE.Vector3()), s = b.getSize(new THREE.Vector3());
+    root.position.set(-c.x, -b.min.y, -c.z); root.updateMatrixWorld(true);
+    const z0 = b.min.z - c.z, at = (f, y = .78) => new THREE.Vector3(0, y, z0 + s.z * f);
+    const anchor = (name, p, w = 1.2) => {     // a tiny box that draws nothing, so Box3/focus and projection work
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, .05, w), new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false }));
+      m.name = name; m.position.copy(root.worldToLocal(p.clone())); m.scale.setScalar(1 / 0.0254); root.add(m); return m;
+    };
+    officeRoomAnchors = [anchor("HALL_PlanningTable", at(.25)), anchor("HALL_Room_Meeting", at(.5), 2.4), anchor("HALL_Room_Work", at(.78), 2.4)];
+  }
+  let officeRoomAnchors = [];
+
   function node(asset, name) { return assets[asset]?.root.getObjectByName(name) || null; }
 
   // ---- highlight: a warm glow on the object being pointed at (materials are swapped, never edited in place,
@@ -315,7 +387,7 @@ export function createWorld({ canvas, layout, onHotspot, onInspect, onError = co
     poseName = name;
     tween?.resolve?.();
     const key = name === "CAM_Model" ? "kalinda" : name === "CAM_Hall" ? "hall" : "office";
-    const fitted = spatial.fit(assets[key]?.root, frameRect, key === "hall" ? 1.3 : key === "kalinda" ? 1.35 : 1);   // thin T hall and the flat map with a tall mast fill little of their boxes
+    const fitted = spatial.fit(assets[key]?.root, frameRect, key === "hall" ? 1.02 : key === "kalinda" ? 1.35 : 1);   // the long office room fills its box; the flat map with a tall mast does not
     const to=fitted.position, tmp=camera.clone(); tmp.position.copy(to); tmp.lookAt(fitted.center); tmp.fov=28; tmp.updateProjectionMatrix();
     if (!duration || reduced) {
       camera.position.copy(to); camera.quaternion.copy(tmp.quaternion); camera.fov=28; camera.updateProjectionMatrix(); tween=null;
@@ -452,13 +524,17 @@ export function createWorld({ canvas, layout, onHotspot, onInspect, onError = co
   function setMood(name) {
     mood = name;
     const m = MOODS[name];
-    scene.environment = officeEnv && name !== "hall" ? officeEnv : roomEnv;
+    scene.environment = officeEnv || roomEnv;
     inspector.stage.environment = scene.environment;
     scene.environmentIntensity = officeEnv ? m.env : m.env * 0.5;
     renderer.toneMappingExposure = m.exposure;
     scene.background = null;   // m.bg is painted by the page behind the transparent canvas
     windows.forEach((l) => { l.intensity = m.windows; l.color.set(name === "chair" ? 0x5d74b8 : 0xd9e8ff); });
-    ceil.intensity = m.ceil; ceil.position.copy(cv(name === "hall" ? [-0.4, 0, 2.6] : [0, 0.9, 2.7])); hemi.intensity = m.hemi; sun.intensity = m.sun; sun.castShadow = m.sun > 0;
+    ceil.intensity = m.ceil; ceil.position.copy(cv([0, 0.9, 2.7])); hemi.intensity = m.hemi; sun.intensity = m.sun; sun.castShadow = m.sun > 0;
+    // the office room is ~9 x 24 m: a wider shadow frustum there, the desk-sized one everywhere else
+    const wide = name === "hall", sc = sun.shadow.camera;
+    sun.position.copy(wide ? new THREE.Vector3(-6, 14, 9) : cv([-1.2, -4.5, 3.6])); sun.target.position.copy(wide ? new THREE.Vector3(0, 0, 0) : cv([0, 0.3, 0.75]));
+    Object.assign(sc, wide ? { left: -14, right: 14, top: 14, bottom: -14, near: 1, far: 40 } : { left: -4, right: 4, top: 4, bottom: -4, near: 0.5, far: 14 }); sc.updateProjectionMatrix(); dirtyShadows();
     lampSpot.intensity = m.lamp;
     grade.uniforms.contrast.value = m.contrast; grade.uniforms.sat.value = m.sat; grade.uniforms.vig.value = m.vig;
     grade.uniforms.tint.value.set(...m.tint);
@@ -554,6 +630,7 @@ export function createWorld({ canvas, layout, onHotspot, onInspect, onError = co
     canvas.style.clipPath = `inset(${rect.y}px ${W - rect.x - rect.w}px ${H - rect.y - rect.h}px ${rect.x}px round ${rect.r}px)`;
     inspector.frac = { w: rect.w / W, h: rect.h / H };
     if (!inspector.active) pose(poseName, 0);
+    if (swing) titleSwing(true);                     // the frame changed: re-fit the turning office
   }
   /** Space the page needs inside the frame (px): the conversation at the bottom, the title on the left. */
   function setReserve(r) { reserve = { bottom: Math.max(0, r.bottom || 0), left: Math.max(0, r.left || 0), right: Math.max(0, r.right || 0) }; }
@@ -646,6 +723,6 @@ export function createWorld({ canvas, layout, onHotspot, onInspect, onError = co
 
   return { THREE, scene, camera, renderer, assets, inspector, cv, load, node, pose, setMood, setRecording, project,
     prepareKalinda, prepareChairProps, setPaused, setReduced, setBlur, inspectCase, paintPages, caseAnchor, dispose,
-    view, setFrame, setReserve, highlight, focusOn, home, simulate, orbit, simShow, titleSwing,
+    view, setFrame, setReserve, highlight, focusOn, home, simulate, orbit, simShow, titleSwing, pickAt,
     get caseState() { return caseState; } };
 }

@@ -17,7 +17,7 @@ import market from "@phosphor-icons/core/assets/bold/storefront-bold.svg?raw";
 import scroll from "@phosphor-icons/core/assets/bold/scroll-bold.svg?raw";
 import close from "@phosphor-icons/core/assets/bold/x-bold.svg?raw";
 import sparkle from "@phosphor-icons/core/assets/bold/sparkle-bold.svg?raw";
-import mic from "@phosphor-icons/core/assets/bold/microphone-bold.svg?raw";
+import mic from "@phosphor-icons/core/assets/bold/waveform-bold.svg?raw";   // the voice-conversation button (was a microphone)
 import send from "@phosphor-icons/core/assets/bold/arrow-up-bold.svg?raw";
 import caretDown from "@phosphor-icons/core/assets/bold/caret-down-bold.svg?raw";
 import tag from "@phosphor-icons/core/assets/bold/tag-bold.svg?raw";

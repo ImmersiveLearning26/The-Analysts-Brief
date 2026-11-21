@@ -98,10 +98,11 @@ export function thickenWalls(root) {
   const mat = new THREE.MeshStandardMaterial({ color: 0xeee8de, roughness: .92, metalness: 0 });
   const g = new THREE.Group(); g.name = "SPATIAL_WallSection";
   const slab = (w, h, d, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; g.add(m); };
-  slab(X + 2 * t, H, t, min.x + X / 2, min.y + H / 2, min.z - t / 2);          // back wall along x
-  slab(t, H, Z, min.x - t / 2, min.y + H / 2, min.z + Z / 2);                  // back wall along z
-  slab(X + 2 * t, sill, t, min.x + X / 2, min.y + sill / 2, max.z + t / 2);    // front sills
-  slab(t, sill, Z + t, max.x + t / 2, min.y + sill / 2, min.z + Z / 2 + t / 2);
+  const e = .006;                                                              // set back from the wall planes: flush faces z-fight (the patchy squares)
+  slab(X + 2 * t, H, t, min.x + X / 2, min.y + H / 2, min.z - t / 2 - e);      // back wall along x
+  slab(t, H, Z, min.x - t / 2 - e, min.y + H / 2, min.z + Z / 2);              // back wall along z
+  slab(X + 2 * t, sill, t, min.x + X / 2, min.y + sill / 2, max.z + t / 2 + e);    // front sills
+  slab(t, sill, Z + t, max.x + t / 2 + e, min.y + sill / 2, min.z + Z / 2 + t / 2);
   root.parent.attach(g); root.attach(g);                                       // keep world placement, follow the room
   return g;
 }
