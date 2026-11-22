@@ -1,0 +1,72 @@
+{
+  "ballot_box": {
+    "w": 785,
+    "h": 877,
+    "ratio": 0.8951
+  },
+  "banknotes": {
+    "w": 913,
+    "h": 735,
+    "ratio": 1.2422
+  },
+  "barracks_gate": {
+    "w": 957,
+    "h": 897,
+    "ratio": 1.0669
+  },
+  "border_barrier": {
+    "w": 935,
+    "h": 410,
+    "ratio": 2.2805
+  },
+  "boundary_marker": {
+    "w": 397,
+    "h": 855,
+    "ratio": 0.4643
+  },
+  "case_folder": {
+    "w": 891,
+    "h": 766,
+    "ratio": 1.1632
+  },
+  "census_clipboard": {
+    "w": 645,
+    "h": 954,
+    "ratio": 0.6761
+  },
+  "contract": {
+    "w": 621,
+    "h": 852,
+    "ratio": 0.7289
+  },
+  "government_building": {
+    "w": 737,
+    "h": 794,
+    "ratio": 0.9282
+  },
+  "houses": {
+    "w": 923,
+    "h": 376,
+    "ratio": 2.4548
+  },
+  "magnifier": {
+    "w": 839,
+    "h": 835,
+    "ratio": 1.0048
+  },
+  "notice_board": {
+    "w": 718,
+    "h": 895,
+    "ratio": 0.8022
+  },
+  "radio_mast": {
+    "w": 240,
+    "h": 969,
+    "ratio": 0.2477
+  },
+  "scales": {
+    "w": 804,
+    "h": 883,
+    "ratio": 0.9105
+  }
+}

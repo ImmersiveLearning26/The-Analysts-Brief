@@ -4,6 +4,7 @@ import { content as C } from "@kit/app/content.mjs";
 import * as E from "@kit/app/engine.mjs";
 import layout from "@kit/blender/layout.json";
 import { voiceIds, norm } from "./voice-lines.js";
+import { glossify, OUTCOME_MEANING, FACTOR_MEANING } from "./glossary.js";
 import { createWorld } from "./world.js";
 import { createMarkers } from "./markers.js";
 import { createTrays } from "./trays.js";
@@ -18,7 +19,10 @@ const $ = (s) => document.querySelector(s);
 const stage = $("#stage"), panel = $("#composer"), drawer = $("#drawer"), reader = $("#reader"), stampsEl = $("#stamps"), countEl = $("#pageCount"), menuEl = $("#agentMenu");
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 // ?sandbox keeps a separate saved run, so testing never overwrites the learner's own progress (same browser, same site)
-const KEY = new URLSearchParams(location.search).has("sandbox") ? "analysts-brief-sandbox" : "analysts-brief-prod-v1";
+// ?playtest=<learner ID> (playtest kit): a separate saved run per learner, so a real run is never touched, with a log
+// of when each page was reached. ?sandbox keeps its own run too, for testing.
+const PLAYTEST = (new URLSearchParams(location.search).get("playtest") || "").replace(/[^A-Za-z0-9-]/g, "").slice(0, 12);
+const KEY = PLAYTEST ? `analysts-brief-playtest-${PLAYTEST}` : new URLSearchParams(location.search).has("sandbox") ? "analysts-brief-sandbox" : "analysts-brief-prod-v1";
 const DEV = new URLSearchParams(location.search).get("dev") === "1";
 
 const fresh = () => ({
@@ -185,7 +189,7 @@ let voiceCtx = null;
 
 // ---------------------------------------------------------------- character voice lines (public/audio/<id>.mp3)
 // A spoken line is matched by its on-screen text, so the composer copy stays the single source.
-const linePlayer = { el: null, src: null, stopMeter: () => {}, token: 0 };
+const linePlayer = { el: null, src: null, stopMeter: () => {}, token: 0, onStart: null };
 function stopLine(fade = 120) {
   const a = linePlayer.el; linePlayer.token++;
   linePlayer.stopMeter(); linePlayer.stopMeter = () => {}; orb.listen(false);
@@ -216,10 +220,63 @@ function playIds(ids, fallbackText, delay) {
         if (!linePlayer.src) { linePlayer.src = c.createMediaElementSource(a); linePlayer.src.connect(c.destination); }
         linePlayer.stopMeter(); linePlayer.stopMeter = levelMeter(linePlayer.src, c); orb.listen(true);
       } catch {}
-      a.play().catch(() => { linePlayer.stopMeter(); fallback(); });
+      const id = ids[i - 1];
+      a.play().then(() => linePlayer.onStart?.(id)).catch(() => { linePlayer.stopMeter(); fallback(); });
     };
     next();
   }, delay);
+}
+// ---------------------------------------------------------------- map films inside a character's card
+// A short motion graphic (rendered with HyperFrames from ../films/<id>) plays inside the card the first time the
+// line is heard, in step with the voice: the card widens, the film runs, then it folds back to the words and the
+// buttons. After that a Replay button brings it back. Reduced motion and data saver never autoplay it.
+const FILMS = {
+  diallo_p02: { voice: "diallo_p02_brief", label: "Animated map of Kalinda: the disputed election, clashes at the Crossing, mutiny rumours and the corruption scandal" },
+  mwangi_p09: { voice: "mwangi_p09_hall", label: "Animated map of Kalinda: two district boundaries move, residents fear weaker representation, officials cite a new census" },
+};
+function filmHTML(id) {
+  const f = FILMS[id]; if (!f) return "";
+  const base = `${import.meta.env.BASE_URL}films/${id}`;
+  return `<figure class="film" data-film="${id}"><video muted playsinline preload="none" poster="${base}_poster.jpg" data-src="${base}_film.mp4" aria-label="${esc(f.label)}"></video>` +
+    `<button type="button" class="film-btn" data-action="filmPause" aria-label="Pause the map film">${icon("pause")}</button></figure>`;
+}
+function filmLite() { return state.settings.reduced || !!navigator.connection?.saveData; }
+function filmParts() { const fig = panel.querySelector("figure.film"); return fig ? { fig, v: fig.querySelector("video"), id: fig.dataset.film } : null; }
+function setupFilm() {
+  const f = filmParts(); if (!f) return;
+  state.films ??= {};
+  if (state.films[f.id] || filmLite()) { filmReplayButton(); return; }
+  state.films[f.id] = true; save();                 // first time only, even if the learner moves on mid-film
+  playFilm(false);
+}
+function playFilm(withVoice) {
+  const f = filmParts(); if (!f) return;
+  const { fig, v, id } = f, voice = FILMS[id].voice;
+  panel.querySelector(".film-replay")?.remove();
+  if (!v.src) v.src = v.dataset.src;
+  v.currentTime = 0; v.pause();
+  panel.classList.add("film-open"); fig.classList.remove("paused"); filmBtn(false);
+  requestAnimationFrame(() => requestAnimationFrame(reserveSpace));
+  let started = false;
+  const go = () => { if (started || !panel.contains(v)) return; started = true; v.currentTime = 0; v.play().catch(() => endFilm()); };
+  linePlayer.onStart = (clip) => { if (clip === voice) go(); };
+  const voiceOn = state.settings.sound !== false && state.settings.voice !== false;
+  setTimeout(go, voiceOn ? 1600 : 500);              // no voice (or it failed): run the film on its own
+  if (withVoice) voiceLine(panel, 0);
+  v.onended = () => endFilm();
+}
+function endFilm() {
+  const f = filmParts(); if (!f) return;
+  f.v.pause(); panel.classList.remove("film-open"); linePlayer.onStart = null;
+  filmReplayButton(); requestAnimationFrame(() => requestAnimationFrame(reserveSpace));
+}
+function filmBtn(paused) {
+  const b = panel.querySelector(".film-btn"); if (!b) return;
+  b.innerHTML = icon(paused ? "play" : "pause"); b.setAttribute("aria-label", paused ? "Play the map film" : "Pause the map film");
+}
+function filmReplayButton() {
+  const head = panel.querySelector(".who-row, .who"); if (!head || panel.querySelector(".film-replay")) return;
+  head.insertAdjacentHTML("beforeend", `<button type="button" class="say-toggle film-replay" data-action="filmReplay" aria-label="Replay the map film">${icon("play")}<span>Map</span></button>`);
 }
 function voiceLine(root, delay = 620) {
   const p = [...root.querySelectorAll("p:not(.who):not(.muted)")].find((el) => voiceIds(el.textContent).length);
@@ -355,11 +412,11 @@ const PICKERS = {
     toggle(id) { if (state.findings.includes(id)) state.findings = state.findings.filter((x) => x !== id); else if (state.findings.length < 3) state.findings.push(id); else announce("Choose up to three factors."); },
     chosen: () => state.findings, sendReady: () => state.findings.length > 0 },
   conditions: { multi: true, head: "Change a condition", empty: "Conditions",
-    items: () => C.factors.map((f) => ({ id: f.id, title: f.title, sub: state.selected.includes(f.id) ? f.alternative : f.base, on: state.selected.includes(f.id) })),
+    items: () => C.factors.map((f) => ({ id: f.id, title: f.title, sub: state.selected.includes(f.id) ? f.alternative : f.base, note: FACTOR_MEANING[f.id], on: state.selected.includes(f.id) })),
     toggle(id) { state.selected = state.selected.includes(id) ? state.selected.filter((x) => x !== id) : [...state.selected, id]; },
     chosen: () => state.selected, sendReady: () => true },
   lever: { multi: false, head: "Choose one", empty: "Options",
-    items: () => { const l = C.levers[state.lever]; return state.order[state.lever].map((id) => { const o = l.options.find((o) => o.id === id); return { id, title: o.text, on: state.choices[l.id] === id }; }); },
+    items: () => { const l = C.levers[state.lever]; return state.order[state.lever].map((id) => { const o = l.options.find((o) => o.id === id); return { id, title: o.text, sub: `${o.points[4]} unit${o.points[4] === 1 ? "" : "s"} of time`, on: state.choices[l.id] === id }; }); },
     toggle(id) { state.choices[C.levers[state.lever].id] = id; },
     chosen: () => { const v = state.choices[C.levers[state.lever].id]; return v ? [v] : []; }, sendReady: () => !!state.choices[C.levers[state.lever].id],
     label: () => "Option", },
@@ -372,7 +429,7 @@ function pickLabel(key) {
 }
 function menuPicker(key) {
   const P = PICKERS[key];
-  const items = P.items().map((x) => `<button type="button" role="option" class="pick-item${x.sub ? "" : " long"}" aria-selected="${x.on}" data-action="pickItem" data-arg="${key}|${x.id}"><span><b>${esc(x.title)}</b>${x.sub ? `<small>${esc(x.sub)}</small>` : ""}</span><i class="pick-check">${icon("check")}</i></button>`).join("");
+  const items = P.items().map((x) => `<button type="button" role="option" class="pick-item${x.sub ? "" : " long"}" aria-selected="${x.on}" data-action="pickItem" data-arg="${key}|${x.id}"><span><b>${esc(x.title)}</b>${x.note ? `<small class="pick-note">${esc(x.note)}</small>` : ""}${x.sub ? `<small>${esc(x.sub)}</small>` : ""}</span><i class="pick-check">${icon("check")}</i></button>`).join("");
   return `<div class="picker" data-picker="${key}"><button type="button" class="pick${P.chosen().length ? "" : " attn"}" data-action="pickerToggle" aria-haspopup="listbox" aria-expanded="false"><span class="pick-label">${pickLabel(key)}</span>${icon("caretDown")}</button>
     <div class="pick-menu" role="listbox" aria-multiselectable="${P.multi}" aria-label="${esc(P.head)}"><p class="pick-head">${esc(P.head)}</p>${items}</div></div>`;
 }
@@ -394,7 +451,7 @@ const HINTS = {
     ? [`${state.selected.length} condition${state.selected.length === 1 ? "" : "s"} changed. Run the test →`, "Open Conditions to change more"]
     : ["Open Conditions and change one, then run the test", "Each test replays Kalinda from year 2 to 10"],
   result: () => ["Compare it with what happened, or change conditions", "Ready? Write your findings →"],
-  lever: () => { const l = C.levers[state.lever], v = state.choices[l.id]; const o = v && l.options.find((o) => o.id === v); return o ? [o.text] : ["Open Options and choose one"]; },
+  lever: () => { const t = timeUsed(); return [`Time used: ${t.used} of ${t.budget} units${t.used > t.budget ? " (over budget)" : ""}`]; },
   rationale: () => ["Name a trade-off you accepted…", "What are you still unsure about?", "Or tap the waves and say it"],
   brief: () => ["What should the Chair say first?", "Keep it to about sixty seconds…", "Or tap the waves and say it"],
   identity: () => ["Your name", "Or tap the waves and say it"],
@@ -403,18 +460,15 @@ const HINTS = {
     ? ["Now say why, using your tests…", "Which test showed it?", "Or tap the waves and say it"]
     : ["Choose up to three factors below ↓", "Then say why, using your tests…", "Or tap the waves and say it"],
 };
+/** Units of time the chosen response options use so far, against this run's budget (as the engine counts them). */
+function timeUsed() {
+  const used = C.levers.reduce((n, l) => n + (l.options.find((o) => o.id === state.choices[l.id])?.points[4] || 0), 0);
+  const w = state.weather || "Calm";
+  return { used, budget: w === "Calm" ? 9 : w === "Hostile" ? 7 : 8 };
+}
 const fieldHint = (k) => HINTS[k]?.()[0] || "";
-let hintTimer = 0, hintIdx = 0;
-function refreshHintLine() { const h = panel.querySelector(".ibar-hint[data-hint-line]"); if (h) { hintIdx = 0; h.textContent = HINTS[h.dataset.hintLine]?.()[0] || h.textContent; } }
-setInterval(() => {   // the field's placeholder carries the instructions, one at a time
-  if (document.body.classList.contains("voice-mode")) return;
-  const line = panel.querySelector(".ibar-hint[data-hint-line]");
-  const form = panel.querySelector("form[data-hints]"), f = form?.querySelector("textarea,input[name]");
-  const key = line?.dataset.hintLine || (f && !f.value ? form.dataset.hints : "");
-  const list = HINTS[key]?.() || []; if (list.length < 2) return;
-  const el = line || f; el.classList.add("hint-out");
-  clearTimeout(hintTimer); hintTimer = setTimeout(() => { hintIdx = (hintIdx + 1) % list.length; if (line) line.textContent = list[hintIdx]; else f.placeholder = list[hintIdx]; el.classList.remove("hint-out"); }, 220);
-}, 3400);
+function refreshHintLine() { const h = panel.querySelector(".ibar-hint[data-hint-line]"); if (h) { h.textContent = HINTS[h.dataset.hintLine]?.()[0] || h.textContent; } }
+// The field's placeholder shows its first hint and stays put (WCAG 2.2.2: no text that changes on a timer).
 
 // ---- layout guard (v3.3d) -----------------------------------------------------------------------------
 // Option 1: pop-up cards (#railPanel) open centred in the frame, in the space above the composer.
@@ -467,29 +521,19 @@ const dot = (tag) => `<span class="status-dot ${tag || ""}">${tag === "foundatio
 // The conversation: subtitles beside the globe. New words rise in softly; options are plain text under the line.
 let lastSub = "", focusedPage = null;
 let textMode = false;
-// A character's line stays long enough to read, then folds away so only its actions remain, and comes back after a
-// pause in case the learner wants to read it again. It holds while the voice is playing or the pointer is on the card.
-let sayTimer = 0;
+// A character's line stays on screen until the learner acts (WCAG 2.2.2: nothing disappears on a timer). A small
+// Hide control beside the speaker folds the line away for anyone who wants the space; Show brings it back.
 function cycleSay() {
-  clearTimeout(sayTimer); panel.classList.remove("rest");
-  const p = panel.querySelector(":scope > p:not(.who):not(.muted)");
-  if (!p || !panel.querySelector(".who, .who-row") || !panel.querySelector("button")) return;
-  p.classList.add("say");
-  const words = p.textContent.trim().split(/\s+/).length;
-  const READ = Math.min(14000, Math.max(6000, 1200 + words * 330)), REST = 7000;
-  const busyNow = () => panel.matches(":hover") || (linePlayer.el && !linePlayer.el.paused);
-  const show = () => { p.style.maxHeight = p.scrollHeight + "px"; panel.classList.remove("rest"); sayTimer = setTimeout(hide, READ); };
-  const hide = () => {
-    if (busyNow()) { sayTimer = setTimeout(hide, 1000); return; }
-    p.style.maxHeight = p.scrollHeight + "px"; void p.offsetHeight;        // from its measured height, so it animates
-    panel.classList.add("rest"); sayTimer = setTimeout(show, REST);
-  };
-  p.style.maxHeight = "none"; sayTimer = setTimeout(hide, READ + 620);   // 620 ms: the words stream in first
+  panel.classList.remove("rest");
+  const p = panel.querySelector(":scope > p:not(.who):not(.muted)"), head = panel.querySelector(".who-row, .who");
+  if (!p || !head || !panel.querySelector("button")) return;
+  p.classList.add("say"); p.id ||= "sayLine";
+  head.insertAdjacentHTML("beforeend", `<button type="button" class="say-toggle" data-action="toggleSay" aria-controls="${p.id}" aria-expanded="true">Hide</button>`);
 }
 function composer(html) {
   const changed = html !== lastSub; lastSub = html;
   if (changed) panel.innerHTML = html; panel.classList.toggle("empty", !html);
-  if (changed) cycleSay();
+  if (changed) { glossify(panel); cycleSay(); }   // terms marked before the words stream in
   if (html && changed) panel.classList.remove("folded");
   document.body.classList.toggle("talking", !!html && !panel.classList.contains("folded"));
   orb.reduced = state.settings.reduced;
@@ -500,7 +544,7 @@ function composer(html) {
     panel.querySelectorAll(".who, p:not(.who), .opts, form > *:not(.sr)").forEach((el) => { el.style.setProperty("--d", "0ms"); el.classList.add("rise"); });
   }
   if (changed && html) portraitIntro();
-  if (changed) { if (html) voiceLine(panel); else stopLine(); }
+  if (changed) { linePlayer.onStart = null; panel.classList.remove("film-open"); if (html) voiceLine(panel); else stopLine(); if (html) setupFilm(); }
   dockGlobe();
   const quiet = busy || state.page === "P00";      // the title screen and scene changes have no globe
   requestAnimationFrame(() => orb.place(html ? (panel.classList.contains("folded") ? "rest" : "prompt") : (quiet ? "hidden" : "rest"), { activate: changed }));
@@ -510,7 +554,7 @@ const railPanel = $("#railPanel");
 let panelReturn = null, panelTimer = 0;
 function modal(html) {
   closeMenu(); snapshotDrafts(); clearTimeout(panelTimer);
-  $("#drawerBody").innerHTML = html; voiceLine($("#drawerBody"), 300);
+  $("#drawerBody").innerHTML = html; glossify($("#drawerBody")); voiceLine($("#drawerBody"), 300);
   if (railPanel.hidden || !railPanel.classList.contains("on")) {
     panelReturn = document.activeElement; railPanel.hidden = false;
     railPanel.classList.remove("on"); void railPanel.offsetWidth; railPanel.classList.add("on");
@@ -737,7 +781,7 @@ async function openCaseFile() {
     if (state.page !== "P03" || !inspecting()) return;
     if (C.evidence.every((_, i) => decided(i))) evidenceCheck();
     else if (!Object.keys(state.tags).length && !state.hintSeen)
-      composer(`${speaker("Dr Amina Diallo", "Research Director")}<p>Read each source. Mark it with a blue O to keep it in Foundations, or a red X to set it aside. The next one comes up by itself.</p>${row(b("Got it", "hideHint", "", "primary"))}`);
+      composer(`${speaker("Dr Amina Diallo", "Research Director")}<p>Read each source. Mark it with a blue O to keep it in Foundations, or a red X to set it aside. The next one comes up by itself. Keep what a reliable source backs up; set aside claims nobody can back up.</p>${row(b("Got it", "hideHint", "", "primary"))}`);
   }, state.settings.reduced ? 300 : 1900);
 }
 function untilIdle() {
@@ -767,9 +811,9 @@ async function go(page) {
   stopLine();
   if (paused) { paused=false; orb.paused=false; world?.setPaused(false); }
   const from = state.page;
-  busy = true; document.body.classList.add("busy");
+  busy = true; document.body.classList.add("busy"); actedHere = false;
   try {
-    state.page = page; save();
+    state.page = page; logVisit(page); save();
     if (from === "P03" && page !== "P03") await closeCaseFile();
     composer(""); orb.place("hidden");                // the conversation steps away while the scene moves
     if (from === "P00") await fadeTo("Monday morning", "The Commission · Research unit", async () => { world?.setBlur(0); await enterScene(page); });
@@ -785,7 +829,7 @@ let heroStrands = null, recStrands = null, meterRAF = 0, audioCtx = null;
 let lastPeekKey = "";
 function render() {
   renderPage();
-  if (state.page === "P00") requestAnimationFrame(() => world?.titleSwing(true)); else { world?.titleSwing(false); hoverOff(true); }
+  if (state.page === "P00") requestAnimationFrame(() => world?.titleSwing(!motionPaused)); else { world?.titleSwing(false); hoverOff(true); }
   reel?.show(state.page === "P00");
   panel.querySelectorAll('.stack[role=radiogroup] button').forEach((b) => { b.setAttribute("role", "radio"); b.setAttribute("aria-checked", String(b.classList.contains("selected"))); });
   // info cards (not tasks) announce, then shrink to their heading; hovering or focusing reopens them
@@ -813,6 +857,7 @@ function renderPage() {
   const p = state.page, scene = SCENE(p);
   heroStrands?.destroy(); heroStrands = null;
   document.body.dataset.scene = scene; document.body.classList.toggle("reduced", state.settings.reduced);
+  document.body.classList.toggle("no-captions", state.settings.captions === false);   // subtitles on by default
   stage.innerHTML = "";
   stage.dataset.layout = p === "P00" ? "hero" : ["P04", "P14"].includes(p) ? "center" : "side";
   world?.setBlur(0);
@@ -832,7 +877,7 @@ function renderPage() {
   if (p === "P02") {
     composer(!state.interest
       ? `${speaker("Your file", "Junior analyst")}<p>You grew up near Tamarind Crossing. Analysts declare their connections.</p>${row(b("Declare this connection", "declare", "", "primary"))}`
-      : `${speaker("Dr Amina Diallo", "Research Director")}<p>Kalinda faces a disputed election, clashes at the Crossing, rumours of an army mutiny and a corruption scandal. Check the evidence, test the causes, then recommend a response.</p>${row(b("Open the case file", "go", "P03", "primary"), b("Full transcript", "transcript"))}`);
+      : `${speaker("Dr Amina Diallo", "Research Director")}${filmHTML("diallo_p02")}<p>Kalinda faces a disputed election, clashes at the Crossing, rumours of an army mutiny and a corruption scandal. Check the evidence, test the causes, then recommend a response.</p>${row(b("Open the case file", "go", "P03", "primary"), b("Full transcript", "transcript"))}`);
   }
   if (p === "P03") {
     if (inspecting()) {
@@ -852,19 +897,21 @@ function renderPage() {
     composer(`${speaker("Dr Amina Diallo", "Research Director")}<p>${E.evidenceReady(state.tags) ? "Good. Build the background on these." : "Not yet. I need at least fourteen sourced pieces in Foundations, and a decision on both claims."}</p>${row(E.evidenceReady(state.tags) ? b("Open case notes", "commitEvidence", "", "primary") : "", b("Back to the file", "go", "P03"))}`);
   }
   if (p === "P05") {
-    stage.innerHTML = `<div class="card"><span class="kicker">Kalinda as it happened · Year ${2 + state.year * 2}</span><p class="headline">${C.headlines.Coup[state.year]}</p><div class="meter" aria-hidden="true"><i style="width:${(state.year + 1) * 20}%"></i></div>${row(state.year > 0 ? b("Earlier", "year", "-1") : "", state.year < 4 ? b("Later", "year", "1") : "", b("Case notes", "caseNotes"))}</div>`;
-    composer(`<h2 class="ask">What would you like to change?</h2>${abar({ hint: fieldHint("model"), hints: "model", tools: menuPicker("conditions") + tool("Write findings", "go", "P08"), send: { action: "runModel", label: "Run test" } })}`);
+    stage.innerHTML = `<div class="card"><span class="kicker">Kalinda as it happened · Year ${2 + state.year * 2}</span><p class="headline">${C.headlines.Coup[state.year]}</p><p class="meaning">Outcome: coup. ${esc(OUTCOME_MEANING.Coup)}</p><div class="meter" aria-hidden="true"><i style="width:${(state.year + 1) * 20}%"></i></div>${row(state.year > 0 ? b("Earlier", "year", "-1") : "", state.year < 4 ? b("Later", "year", "1") : "", b("Case notes", "caseNotes"))}</div>`;
+    const guide = !state.modelGuided && !state.runs.length
+      ? `<div class="coach" role="note"><p><b>Your first test.</b> Open Conditions, change the Economy, then run the test to see what follows.</p>${row(b("Show me", "guideShow", "", "primary"), b("Let me explore", "guideSkip"))}</div>` : "";
+    composer(`${guide}<h2 class="ask">What would you like to change?</h2>${abar({ hint: fieldHint("model"), hints: "model", tools: menuPicker("conditions") + tool("Write findings", "go", "P08"), send: { action: "runModel", label: "Run test" } })}`);
   }
   if (p === "P06") { composer(""); stage.innerHTML = `<p class="sr">Running the model</p>`; }
   if (p === "P07") {
     const run = state.runs[state.runView ?? state.runs.length - 1] || E.trajectory([]);
-    stage.innerHTML = `<article class="card"><span class="kicker">Your test · ${esc(run.outcome)} · Year ${2 + state.year * 2}</span><p class="headline">${run.headlines[state.year]}</p><div class="meter" aria-hidden="true"><i style="width:${(state.year + 1) * 20}%"></i></div>${row(state.year > 0 ? b("Earlier", "year", "-1") : "", state.year < 4 ? b("Later", "year", "1") : "")}</article>`;
+    stage.innerHTML = `<article class="card"><span class="kicker">Your test · ${esc(run.outcome)} · Year ${2 + state.year * 2}</span><p class="headline">${run.headlines[state.year]}</p><p class="meaning">${esc(run.outcome)}: ${esc(OUTCOME_MEANING[run.outcome] || "")}</p><p class="compare-line"><span>As it happened</span><b>Coup</b><span>Your test</span><b>${esc(run.outcome)}</b><span>You changed</span><b>${esc(run.selected.map((id) => C.factors.find((f) => f.id === id)?.title || id).join(", ") || "nothing")}</b></p><div class="meter" aria-hidden="true"><i style="width:${(state.year + 1) * 20}%"></i></div>${row(state.year > 0 ? b("Earlier", "year", "-1") : "", state.year < 4 ? b("Later", "year", "1") : "")}</article>`;
     composer(`<h2 class="ask">This test ended in ${esc(run.outcome.toLowerCase())}.</h2>${abar({ hint: fieldHint("result"), hints: "result", tools: tool("Change conditions", "go", "P05") + tool("Compare", "compare"), send: { action: "go", arg: "P08", label: "Write findings" } })}`);
   }
   if (p === "P08") {
     composer(`<h2 class="ask">Which factors best explain what happened?</h2><form data-form="findings" data-voice="q_findings" data-question="Which factors best explain what happened? Choose up to three, then say why, using your tests." data-hints="findings">${abar({ field: `<textarea id="why" name="why" rows="1" aria-label="Why these factors?" placeholder="${esc(fieldHint("findings"))}" required maxlength="800">${esc(state.why)}</textarea>`, tools: factorPicker(), send: { submit: true, label: "Send findings", disabled: !state.findings.length } })}</form>`);
   }
-  if (p === "P09") composer(`${speaker("Hon. Grace Mwangi", "Commission Chair")}<p>Two district boundaries have changed. Residents fear weaker representation; officials cite new population figures. Test a response we can explain and carry out.</p>${row(b("Situation details", "hallDetails"), b("Plan response", "go", "P10", "primary"))}`);
+  if (p === "P09") composer(`${speaker("Hon. Grace Mwangi", "Commission Chair")}${filmHTML("mwangi_p09")}<p>Two district boundaries have changed. Residents fear weaker representation; officials cite new population figures. Test a response we can explain and carry out.</p>${row(b("Situation details", "hallDetails"), b("Plan response", "go", "P10", "primary"))}`);
   if (p === "P10") {
     const l = C.levers[state.lever];
     composer(`<h2 class="ask">${esc(l.title)}</h2>${abar({ hint: fieldHint("lever"), hints: "lever", tools: menuPicker("lever") + (state.lever > 0 ? tool("Previous", "lever", "-1") : ""), send: { action: "lever", arg: "1", label: state.lever === 4 ? "Review package" : "Next", disabled: !state.choices[l.id] } })}`);
@@ -895,6 +942,7 @@ function renderPage() {
     stage.innerHTML = `<article class="card wide"><span class="kicker">Thursday night · Debrief</span><h2>Your analyst’s brief</h2><p>${C.forward[f]}</p><ol class="pkg-list result debrief">${["Sourcing evidence", "Explaining causes", "Responding today"].map((t, i) => { const v = state.strands[i] || "Not submitted"; const c = /strong/i.test(v) ? "ok" : /mixed/i.test(v) ? "warn" : /fragile|weak/i.test(v) ? "bad" : ""; return `<li><span class="num">0${i + 1}</span><div><span class="lever">${t}</span></div><em class="badge ${c}">${esc(v)}</em></li>`; }).join("")}</ol><p>${C.chair[f]}</p>${row(b("Why it happened", "whyResults"), b("Reflect", "reflect"), b("Your record", "download"))}</article>`;
     composer(`${speaker("Dr Amina Diallo", "Research Director")}<p>No analysis can promise a safe future. Good analysis can show what is known, what is not, and what to do next.</p>${b("Restart simulation", "restart")}`);
   }
+  glossify(stage);
   if (p !== "P03") $("#documentNav").hidden=true;
   announce(p === "P06" ? "Running the model" : ((p === "P00" ? "" : PLACE[scene] + ". ") + (stage.textContent || panel.textContent)).slice(0, 220));
   requestAnimationFrame(() => {
@@ -1012,6 +1060,30 @@ const actions = {
   zoom(d) { world?.inspector.zoomBy(Number(d) > 0 ? 1.35 : 1 / 1.35); },
   zoomPage() { world?.inspector.focusPage(); },
   reviewSources() { state.readyNoted = true; go("P04"); },
+  motionPause() {
+    motionPaused = !motionPaused;
+    if (motionPaused) { if (touring) { touring = false; directing++; markers?.closeCard(); world?.home(500); } world?.titleSwing(false); }
+    else if (state.page === "P00") world?.titleSwing(true);
+    document.querySelectorAll(".motion-pause").forEach((b) => {
+      b.setAttribute("aria-pressed", String(motionPaused)); b.setAttribute("aria-label", motionPaused ? "Resume motion" : "Pause motion");
+      b.innerHTML = icon(motionPaused ? "play" : "pause") + `<span class="tip" aria-hidden="true">${motionPaused ? "Resume motion" : "Pause motion"}</span>`;
+    });
+    announce(motionPaused ? "Motion paused." : "Motion resumed.");
+  },
+  filmPause() {
+    const f = filmParts(); if (!f) return;
+    const pause = !f.v.paused;
+    if (pause) { f.v.pause(); linePlayer.el && !linePlayer.el.paused && linePlayer.el.pause(); }
+    else { f.v.play().catch(() => {}); linePlayer.el?.paused && linePlayer.el.currentTime > 0 && !linePlayer.el.ended && linePlayer.el.play().catch(() => {}); }
+    f.fig.classList.toggle("paused", pause); filmBtn(pause);
+  },
+  filmReplay() { playFilm(true); },
+  toggleSay() {
+    const p = panel.querySelector(".say"), btn = panel.querySelector(".say-toggle"); if (!p || !btn) return;
+    const hide = !panel.classList.contains("rest");
+    p.style.maxHeight = p.scrollHeight + "px"; void p.offsetHeight;
+    panel.classList.toggle("rest", hide); btn.textContent = hide ? "Show" : "Hide"; btn.setAttribute("aria-expanded", String(!hide));
+  },
   toggleTalk() { autoFolded = false; requestAnimationFrame(reserveSpace); panel.classList.toggle("folded"); syncGlobeLabel(); document.body.classList.toggle("talking", !panel.classList.contains("folded")); orb.place(panel.classList.contains("folded") ? "rest" : "prompt", { activate: false }); },
   notebook() { modal(`<h2>Analyst’s notebook</h2><p>${esc(state.name) || "Name not set"} · ${state.interest ? "Connection to Tamarind Crossing declared" : "Declaration pending"}</p><p>${Object.keys(state.tags).length} sources tagged · ${state.runs.length} model tests · ${state.hallRuns.length} response tests</p><h3>Your findings</h3><p>${esc(state.why) || "Not submitted yet."}</p><h3>Response rationale</h3><p>${esc(state.rationale) || "Not submitted yet."}</p>${b("Download record", "download")}`); },
   viewReset() { world?.view("iso"); },
@@ -1033,8 +1105,16 @@ const actions = {
   factorBase(id) { state.selected = state.selected.filter((x) => x !== id); close(); save(); render(); },
   factorAlt(id) { state.selected = [...new Set([...state.selected, id])]; close(); save(); render(); },
   changes() { modal(`<h2>Conditions for the next test</h2>${C.factors.map((f) => `<p><strong>${esc(f.title)}</strong><br>${esc(state.selected.includes(f.id) ? f.alternative : f.base)}</p>`).join("")}`); },
+  guideShow() {
+    const p = panel.querySelector('.picker[data-picker="conditions"]'); if (!p) return;
+    panel.querySelector(".coach")?.classList.add("shown");
+    if (!p.classList.contains("open")) actions.pickerToggle();
+    const item = p.querySelector('.pick-item[data-arg="conditions|F4"]'); item?.classList.add("wiggle"); item?.focus({ preventScroll: true });
+  },
+  guideSkip() { state.modelGuided = true; save(); render(); },
   runModel() {
     if (busy) return;
+    state.modelGuided = true;
     const snapshot = [...state.selected];                       // snapshot selection; compute once
     const outcome = E.trajectory(snapshot);                     // pure and synchronous: the run animates this result
     simOutcome = outcome.outcome;
@@ -1078,7 +1158,7 @@ const actions = {
   downloadAudio() { if (recordingURL) download(recordingURL, "analyst-briefing.webm"); },
   whyResults() { modal(`<h2>Why it happened</h2><p>Weak source claims can distort the background. The model makes F7 (diversity) neutral. The army and the rules on power work together; no single factor is a universal explanation.</p><p>The response balances evidence, participation, confidence and tension. Over-budget packages lose confidence and tension-easing points. The briefing itself is unscored.</p><p>These are teaching rules, not predictions of real politics.</p>`); },
   reflect() { modal(`<h2>Reflection · optional</h2>${C.reflections.map((q, i) => `<label>${esc(q)}<textarea data-reflection="${i}">${esc(state.reflection[i])}</textarea></label>`).join("")}`); },
-  download() { const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" }), url = URL.createObjectURL(blob); download(url, "analyst-record.json"); setTimeout(() => URL.revokeObjectURL(url), 1000); },
+  download() { const rec = PLAYTEST ? { playtest: playtestSummary(), ...state } : state; const blob = new Blob([JSON.stringify(rec, null, 2)], { type: "application/json" }), url = URL.createObjectURL(blob); download(url, PLAYTEST ? `analyst-record-${PLAYTEST}.json` : "analyst-record.json"); setTimeout(() => URL.revokeObjectURL(url), 1000); },
   restart() { modal(`<h2>Restart simulation?</h2><p>Your saved choices and briefing text will be cleared.</p>${b("Restart", "newRun", "", "primary")}`); },
   pause() { paused = !paused; orb.paused = paused; world?.setPaused(paused); document.getAnimations().forEach((a) => (paused ? a.pause() : a.play())); document.querySelectorAll("audio,video").forEach((a) => { if (paused) a.pause(); }); close(); railTools(); },
   institution(name) {
@@ -1129,7 +1209,7 @@ document.addEventListener("change", (e) => {
   if (e.target.dataset.setting) {
     state.settings[e.target.dataset.setting] = e.target.checked; if (!state.settings.voice || !state.settings.sound) stopLine();
     orb.reduced = state.settings.reduced; world?.setReduced(state.settings.reduced); if (trays) trays.reduced = state.settings.reduced; if (reel) reel.reduced = state.settings.reduced;
-    document.body.classList.toggle("reduced", state.settings.reduced); save();
+    document.body.classList.toggle("reduced", state.settings.reduced); document.body.classList.toggle("no-captions", state.settings.captions === false); save();
   }
 });
 document.addEventListener("submit", (e) => {
@@ -1217,7 +1297,13 @@ const OUTCOME_PLACE = { Coup: "Barracks", "Personalised rule": "Government", Con
 const FACTOR_PLACE = { F1: "Government", F2: "Barracks", F3: "Government", F4: "Market", F5: "Radio", F6: "Government", F7: "Market" };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let directing = 0, touring = false, lastInput = performance.now(), simOutcome = null;
-const calm = () => world && !busy && !paused && !inspecting() && !panelOpen() && !state.settings.reduced && !panel.querySelector("form, textarea");   // never while the learner has something to write
+// The camera tours only when nothing is there to read (no line, no form), after the learner has acted on this page,
+// and never while motion is paused (WCAG 2.2.2: moving content needs a pause; fix plan Phase 1, step 5).
+let actedHere = false, motionPaused = false;
+const lineOnScreen = () => !panel.classList.contains("empty") && !panel.classList.contains("folded") && !panel.classList.contains("rest");
+for (const ev of ["pointerdown", "keydown"]) addEventListener(ev, () => { actedHere = true; }, true);
+const calm = () => world && !busy && !paused && !inspecting() && !panelOpen() && !state.settings.reduced && !panel.querySelector("form, textarea")
+  && !lineOnScreen() && actedHere && !motionPaused;
 async function spotlight(id, hold = 2600) {
   const it = pinsFor(state.page).find((p) => p.id === id), obj = it?.get();
   if (!obj || !calm()) return;
@@ -1235,7 +1321,7 @@ for (const ev of ["pointerdown", "keydown", "wheel"]) addEventListener(ev, noteI
 addEventListener("pointermove", (e) => { if (Math.abs(e.movementX) + Math.abs(e.movementY) > 2) noteInput(); }, true);
 // In the office room (the hall) the quiet-spell tour drifts between its rooms: conference table, meeting room, work area.
 async function hallTour() {
-  touring = true; const run = ++directing;
+  touring = true; const run = ++directing; announce("The camera is touring the room. Use Pause motion to stop it.");
   for (const name of ["HALL_PlanningTable", "HALL_Room_Meeting", "HALL_Room_Work"]) {
     if (!touring || run !== directing) return;
     const obj = world.node("hall", name); if (!obj) continue;
@@ -1248,7 +1334,7 @@ async function hallTour() {
 async function tour() {
   if (SCENE(state.page) === "hall") return hallTour();
   const list = pinsFor(state.page); if (!list.length) return;
-  touring = true; const run = ++directing;
+  touring = true; const run = ++directing; announce("The camera is touring the scene. Use Pause motion to stop it.");
   for (const it of list) {
     if (!touring || run !== directing) return;
     const obj = it.get(); if (!obj) continue;
@@ -1269,6 +1355,8 @@ setInterval(() => {
 const ib = (action, name, label, arg = "") =>
   `<button type="button" class="ib" data-action="${action}" data-arg="${esc(arg)}" aria-label="${esc(label)}">${icon(name)}<span class="tip" aria-hidden="true">${esc(label)}</span></button>`;
 // The learner's place in the brief: six chapters, icon-first; the current one is named, the rest reveal on hover.
+// Estimated minutes per chapter (design brief: 20 to 25 minutes in all). Replace with medians from the real playtest.
+const CH_MINUTES = [2, 7, 6, 5, 3, 1];
 const CHAPTERS = [
   { pages: ["P01", "P02"], icon: "badge", title: "Arrival", line: "Introduce yourself and declare any connection." },
   { pages: ["P03", "P04"], icon: "files", title: "The evidence", line: "Read each source. Keep it in Foundations or set it aside." },
@@ -1289,19 +1377,28 @@ function chapterCard() {
   const steps = CHAPTERS.map((s, k) => `<li class="step ${k < i ? "done" : k === i ? "now" : ""}" tabindex="0" aria-label="Chapter ${k + 1}, ${esc(s.title)}${k < i ? ", done" : k === i ? ", current" : ""}">${icon(s.icon)}<span class="tip" aria-hidden="true">${esc(s.title)}</span></li>`).join("");
   // v3.2: no chapter numbers or progress counts; the learner sees where they are, not a tally
   void n; void meta;
+  state.abMinutes ??= Math.random() < 0.5; // EXPERIMENT (fix plan Phase 2, step 5): half see minutes left; remove or keep after the real playtest
+  const left = state.abMinutes ? CH_MINUTES.slice(i).reduce((a, m) => a + m, 0) : 0;
   el.innerHTML = `<div class="ch-head" tabindex="0" role="button" aria-expanded="false"><span class="ch-icon">${icon(c.icon)}</span><span class="ch-text"><h2>${esc(c.title)}</h2></span></div>
-    <div class="ch-more"><div><p>${esc(c.line)}</p><ol class="steps">${steps}</ol></div></div>`;
+    <div class="ch-more"><div><p>${esc(c.line)}</p>${left ? `<p class="ch-left">About ${left} minutes left</p>` : ""}<ol class="steps">${steps}</ol></div></div>`;
   const head = el.querySelector(".ch-head");
   head.onclick = () => { el.classList.toggle("open"); head.setAttribute("aria-expanded", el.classList.contains("open")); };
   head.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); head.click(); } };
   if (i !== lastChapter) { if (lastChapter !== -1 && !state.settings.reduced) { el.classList.remove("swap"); void el.offsetWidth; el.classList.add("swap"); } announceRail(); }
   lastChapter = i;
 }
-/** The rail speaks up when something new arrives, then steps back to small tags so the preview is the focus. */
-let announceTimer = 0;
-function announceRail(ms = 5200) {
-  document.body.classList.add("rail-announce"); clearTimeout(announceTimer);
-  announceTimer = setTimeout(() => { document.body.classList.remove("rail-announce"); reserveSpace(); }, state.settings.reduced ? ms : ms);
+/** The rail speaks up when something new arrives and stays open until the learner's next tap or key press outside
+ *  it; then it steps back to small tags so the preview is the focus (WCAG 2.2.2: nothing folds away on a timer). */
+let railQuiet = null;
+function announceRail() {
+  document.body.classList.add("rail-announce");
+  if (railQuiet) removeEventListener("pointerdown", railQuiet, true), removeEventListener("keydown", railQuiet, true);
+  railQuiet = (e) => {
+    if (e.target.closest?.("#rail")) return;                  // reading or using the rail keeps it open
+    removeEventListener("pointerdown", railQuiet, true); removeEventListener("keydown", railQuiet, true); railQuiet = null;
+    document.body.classList.remove("rail-announce"); reserveSpace();
+  };
+  setTimeout(() => { if (railQuiet) { addEventListener("pointerdown", railQuiet, true); addEventListener("keydown", railQuiet, true); } }, 0);
   requestAnimationFrame(reserveSpace);
 }
 function railReserved() {
@@ -1342,6 +1439,26 @@ function reserveSpace() {
   guardSoon();
 }
 new ResizeObserver(() => reserveSpace()).observe(panel);
+
+// ---------------------------------------------------------------- playtest mode: when each page was reached
+function logVisit(page) {
+  if (!PLAYTEST) return;
+  state.playtest ??= { id: PLAYTEST, started: new Date().toISOString(), visits: [] };
+  state.playtest.visits.push({ page, at: new Date().toISOString() });
+}
+/** Minutes spent in each chapter, from the visit log (each visit counts until the next one, the last until now). */
+function playtestSummary() {
+  const v = state.playtest?.visits || [], mins = {}, now = Date.now();
+  v.forEach((x, i) => {
+    const ch = CHAPTERS.find((c) => c.pages.includes(x.page))?.title || "Title screen";
+    const end = i + 1 < v.length ? Date.parse(v[i + 1].at) : now;
+    mins[ch] = Math.round(((mins[ch] || 0) + (end - Date.parse(x.at)) / 60000) * 10) / 10;
+  });
+  const total = v.length ? Math.round((now - Date.parse(v[0].at)) / 6000) / 10 : 0;
+  return { learner: PLAYTEST, finished: state.page === "P14", totalMinutes: total, chapterMinutes: mins,
+    minutesLeftGroup: state.abMinutes === undefined ? "Not reached" : state.abMinutes ? "Saw it" : "Didn't see it",
+    modelTests: state.runs.length, responseTests: state.hallRuns.length };
+}
 
 // ---------------------------------------------------------------- the title screen's reel and hover previews
 // The reel shows things from the whole story, in story order; hovering a piece of the office shows it there instead.
@@ -1426,6 +1543,7 @@ function playOpener(force = false) {
 }
 
 async function boot() {
+  logVisit(state.page); save();     // playtest mode: the clock starts on arrival
   playOpener();
   try {
     world = createWorld({ canvas: $("#world"), layout, onHotspot: hotspot, onInspect, onError: ({ name }) => console.warn("asset failed", name) });
@@ -1478,6 +1596,6 @@ function devNav() {
   select.innerHTML = Array.from({ length: 15 }, (_, i) => `<option>P${String(i).padStart(2, "0")}</option>`).join("");
   select.onchange = () => { state.name ||= "Preview analyst"; state.interest = true; state.weather ||= "Calm"; go(select.value); };
   document.body.append(select);
-  window.__ab = { get state() { return state; }, world: () => world, reel: () => reel, go, actions };
+  window.__ab = { get state() { return state; }, world: () => world, reel: () => reel, go, actions, playtest: () => playtestSummary() };
 }
 boot();

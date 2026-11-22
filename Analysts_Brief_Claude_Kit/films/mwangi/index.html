@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1280, height=720" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <script src="assets/kalinda.js"></script>
+    <style>
+      @font-face { font-family: "Afacad"; src: url("assets/fonts/afacad-latin-wght-normal.woff2") format("woff2"); font-weight: 400 700; }
+      @font-face { font-family: "Manrope"; src: url("assets/fonts/Manrope-VariableFont_wght.ttf") format("truetype"); font-weight: 200 800; }
+      :root {
+        --ground: #f4f1ec; --land: #e7dcc6; --land-edge: #c8b38c; --city: #d9cbae; --road: #bba57f; --river: #8fb0c4;
+        --ink: #2a2622; --mute: #8a7f70; --hot: #e05a00; --hot-ink: #c24a00;
+        --display: "Afacad", sans-serif; --body: "Manrope", sans-serif;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1280px; height: 720px; overflow: hidden; background: var(--ground); }
+      #root { position: relative; width: 1280px; height: 720px; overflow: hidden; background: var(--ground); font-family: var(--body); }
+      .layer { position: absolute; inset: 0; }
+      #cam { transform-origin: 0 0; }
+      #map { position: absolute; }
+      #map svg { display: block; }
+      #fx, #fxTop { position: absolute; inset: 0; width: 1280px; height: 720px; overflow: visible; }
+      .prop { position: absolute; transform-origin: 50% 100%; filter: drop-shadow(0 10px 10px rgba(70, 52, 30, .28)); opacity: 0; }
+      .prop img { display: block; width: 100%; height: auto; }
+      .tag { position: absolute; transform: translate(-50%, 0); font: 700 21px/1 var(--body); color: var(--ink); letter-spacing: .01em; white-space: nowrap;
+        background: #fffdf8; padding: 6px 11px; border-radius: 999px; box-shadow: 0 2px 0 #00000014; opacity: 0; }
+      #eyebrow { position: absolute; left: 52px; top: 34px; width: 900px; height: 48px; overflow: hidden; }
+      .eb { position: absolute; left: 0; top: 0; font: 700 38px/48px var(--display); color: var(--ink); letter-spacing: .02em; white-space: nowrap; opacity: 0; }
+      .eb b { color: var(--hot-ink); font-weight: 700; }
+      #check { position: absolute; left: 836px; top: 128px; width: 404px; padding: 22px 24px 12px; border-radius: 26px; background: #fffdf8;
+        box-shadow: 0 1px 0 #ffffff inset, 0 18px 40px #4a3a2626; opacity: 0; transform-origin: 50% 60%; }
+      #check h3 { font: 700 30px/1.1 var(--display); color: var(--ink); margin-bottom: 14px; }
+      .row { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-top: 1px solid #2a26221a; font: 700 24px/1.2 var(--body); color: var(--ink); opacity: 0; }
+      .row b { color: var(--hot-ink); }
+      .box { width: 38px; height: 38px; flex: none; border-radius: 11px; box-shadow: inset 0 0 0 3px #2a262240; position: relative; }
+      .box svg { position: absolute; inset: 0; width: 38px; height: 38px; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="13.6" data-width="1280" data-height="720">
+      <div id="scene" class="clip layer" data-start="0" data-duration="13.6" data-track-index="1" data-track-kind="graphics">
+        <div id="cam" class="layer">
+          <div id="map"></div>
+          <svg id="fx" viewBox="0 0 1280 720"></svg>
+          <div id="props" class="layer"></div>
+          <svg id="fxTop" viewBox="0 0 1280 720"></svg>
+        </div>
+        <div id="check"><h3>Test a response</h3>
+          <div class="row" id="r1"><span class="box"><svg viewBox="0 0 38 38"><path id="t1" d="M9 20 L16 27 L30 11" fill="none" stroke="#e05a00" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/></svg></span>We can <b>explain</b> it</div>
+          <div class="row" id="r2"><span class="box"><svg viewBox="0 0 38 38"><path id="t2" d="M9 20 L16 27 L30 11" fill="none" stroke="#e05a00" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/></svg></span>We can <b>carry it out</b></div>
+        </div>
+        <div id="eyebrow"></div>
+      </div>
+    </div>
+
+    <script>
+      // Hon. Grace Mwangi, P09. Same Kalinda map as the P02 film (traced from kalinda.glb, top view). Beats land on the
+      // phrases of the voice line (pauses measured with silencedetect; the file is 13.19 s):
+      //   0.00 Two district boundaries have changed · 2.75 Residents fear weaker representation
+      //   6.03 officials cite new population figures · 9.51 Test a response · 10.91 we can explain · 11.99 and carry out
+      // Motion is stepped on a 12 fps grid. The districts and their old and new lines are illustrative, not survey data.
+      const W = 1280, H = 720, VB = { x: 70, y: 70, w: 860, h: 590 };
+      const k = 572 / VB.h, MW = VB.w * k, MH = VB.h * k, ML = (W - MW) / 2, MT = 112;
+      const F = (x, y) => [ML + (x - VB.x) * k, MT + (y - VB.y) * k];               // map units -> frame px
+      const P = (name) => F(...KAL.places[name]);
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const a in attrs) e.setAttribute(a, attrs[a]); parent?.append(e); return e; };
+
+      // ---- the map
+      const map = document.getElementById("map");
+      Object.assign(map.style, { left: ML + "px", top: MT + "px", width: MW + "px", height: MH + "px" });
+      const ms = el("svg", { viewBox: `${VB.x} ${VB.y} ${VB.w} ${VB.h}`, width: MW, height: MH }, map);
+      el("path", { d: KAL.KAL_Base, fill: "var(--land)", stroke: "var(--land-edge)", "stroke-width": 3, "stroke-linejoin": "round" }, ms);
+      el("path", { d: KAL.KAL_City_Ground, fill: "var(--city)" }, ms);
+      for (const r of KAL.roads) el("path", { d: r, fill: "var(--road)" }, ms);
+      el("path", { d: KAL.KAL_River, fill: "var(--river)" }, ms);
+
+      // ---- districts, drawn in map units and clipped to the coastline-like outline of Kalinda
+      const fx = document.getElementById("fx");
+      const defs = el("defs", {}, fx);
+      el("path", { d: KAL.KAL_Base }, el("clipPath", { id: "land" }, defs));
+      const G = el("g", { transform: `translate(${ML - VB.x * k} ${MT - VB.y * k}) scale(${k})` }, fx);
+      const D = el("g", { "clip-path": "url(#land)" }, G);
+      const line = (pts) => "M" + pts.map((p) => p.join(",")).join(" L");
+      const oldW = [[300, 380], [312, 470], [326, 560], [338, 680]], newW = [[372, 380], [392, 470], [410, 560], [434, 680]];
+      const oldE = [[650, 400], [664, 480], [684, 560], [702, 680]], newE = [[600, 400], [606, 480], [616, 560], [630, 680]];
+      const area = (a, b) => line([...a, ...b.slice().reverse()]) + "Z";
+      const shiftW = el("path", { d: area(oldW, newW), fill: "var(--hot)", opacity: 0 }, D);
+      const shiftE = el("path", { d: area(oldE, newE), fill: "var(--hot)", opacity: 0 }, D);
+      const dashed = (pts) => el("path", { d: line(pts), fill: "none", stroke: "var(--mute)", "stroke-width": 3.2 / k, "stroke-dasharray": `${9 / k} ${8 / k}`, "stroke-linecap": "round", opacity: 0 }, D);
+      const drawn = (pts) => el("path", { d: line(pts), fill: "none", stroke: "var(--hot)", "stroke-width": 6 / k, "stroke-linecap": "round", "stroke-linejoin": "round",
+        pathLength: 1, "stroke-dasharray": "1 1", "stroke-dashoffset": 1, opacity: 0 }, D);
+      const oldLines = [dashed(oldW), dashed(oldE)], newLines = [drawn(newW), drawn(newE)];
+      // the population count: a grid of dots across the two southern districts
+      const dots = [];
+      for (let y = 452; y <= 628; y += 22) for (let x = 250; x <= 760; x += 22) {
+        const jx = ((x * 7 + y * 13) % 9) - 4, jy = ((x * 11 + y * 5) % 9) - 4;               // a fixed, even scatter
+        dots.push(el("circle", { cx: x + jx, cy: y + jy, r: 0, fill: (x > 340 && x < 410) || (x > 610 && x < 680) ? "var(--hot)" : "var(--ink)", "fill-opacity": .55 }, D));
+      }
+
+      // ---- props
+      const propsLayer = document.getElementById("props");
+      function prop(id, src, w, [x, y], dx = 0, dy = 0) {
+        const d = document.createElement("div"); d.className = "prop"; d.id = id;
+        Object.assign(d.style, { width: w + "px", left: x + dx - w / 2 + "px", top: y + dy + "px" });
+        d.innerHTML = `<img src="assets/props/${src}.png" alt="">`; d.style.transform = "translateY(-100%)"; propsLayer.append(d); return d;
+      }
+      function tag(text, [x, y], dy = 14) {
+        const t = document.createElement("div"); t.className = "tag"; t.textContent = text;
+        Object.assign(t.style, { left: x + "px", top: y + dy + "px" }); propsLayer.append(t); return t;
+      }
+      const markerAt = F(392, 470), houseAt = F(352, 575), scaleAt = F(505, 560), gov = P("government");
+      const marker = prop("marker", "boundary_marker", 58, markerAt, 0, 6);
+      const lineT = tag("New boundary", F(460, 400), 0);
+      const oldT = tag("Old line", F(250, 400), 0);
+      const houses = prop("houses", "houses", 170, houseAt, 0, 0), resT = tag("Residents", houseAt, 10);
+      const scales = prop("scales", "scales", 116, scaleAt, 0, 0);
+      const govB = prop("govB", "government_building", 132, gov, 0, 8), govT = tag("Officials", gov, 18);
+      const clip = prop("clip", "census_clipboard", 84, gov, 140, 30), cenT = tag("New census", [gov[0] + 150, gov[1] + 30], 10);
+      const board = prop("board", "notice_board", 176, [1030, 640]), boardT = tag("Public notice", [1030, 640], 10);
+      for (const n of [board, boardT]) document.getElementById("scene").insertBefore(n, document.getElementById("eyebrow"));
+
+      // ---- titles
+      const ebWrap = document.getElementById("eyebrow");
+      const eb = (html) => { const d = document.createElement("div"); d.className = "eb"; d.innerHTML = html; ebWrap.append(d); return d; };
+      const E = [eb("Two district <b>boundaries</b> changed"), eb("<b>Weaker</b> representation?"), eb("New <b>population</b> figures"), eb("<b>Test</b> a response")];
+
+      // ---- timeline (stepped at 12 fps)
+      const FPS = 12;
+      const step = (ease, dur) => { const f = gsap.parseEase(ease), n = Math.max(1, Math.round(dur * FPS)); return (p) => f(Math.floor(p * n + 1e-6) / n); };
+      const tl = gsap.timeline({ paused: true });
+      const to = (t, v, at) => { const d = v.duration ?? .5; tl.to(t, { ...v, duration: d, ease: step(v.ease || "power2.out", d) }, at); };
+      const ft = (t, a, v, at) => { const d = v.duration ?? .5; tl.fromTo(t, a, { ...v, duration: d, ease: step(v.ease || "power2.out", d) }, at); };
+      const pop = (t, at, d = .4) => ft(t, { opacity: 0, scale: 0, y: 14 }, { opacity: 1, scale: 1, y: 0, duration: d, ease: "back.out(2.4)" }, at);
+      const popProp = (t, at, d = .5) => ft(t, { opacity: 0, scale: 0, yPercent: -92 }, { opacity: 1, scale: 1, yPercent: -100, duration: d, ease: "back.out(2.2)" }, at);
+      const title = (i, at) => { if (i) to(E[i - 1], { yPercent: -100, opacity: 0, duration: .25, ease: "power2.in" }, at); ft(E[i], { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: .35, ease: "back.out(1.8)" }, at + .04); };
+      const camAt = ([x, y], sc, sx = 640, sy = 410) => ({ scale: sc, x: sx - x * sc, y: sy - y * sc });
+      const cam = (f, sc, at, d = .6, sx, sy) => to("#cam", { ...camAt(f, sc, sx, sy), duration: d, ease: "power3.inOut" }, at);
+      tl.set("#cam", { scale: 1, x: 0, y: 0 }, 0);
+
+      // 0.00 two district boundaries have changed: the old lines, then the new ones drawn across, the land between lights up
+      ft(map, { opacity: 0, scale: .9, y: 24 }, { opacity: 1, scale: 1, y: 0, duration: .45, ease: "back.out(1.6)" }, 0);
+      title(0, .1);
+      cam(F(470, 500), 1.45, .3, .55);
+      oldLines.forEach((l, i) => ft(l, { opacity: 0 }, { opacity: 1, duration: .15 }, .55 + i * .12)); pop(oldT, .7);
+      newLines.forEach((l, i) => { ft(l, { opacity: 0 }, { opacity: 1, duration: .1 }, 1.0 + i * .3); ft(l, { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: .55 }, 1.0 + i * .3); });
+      pop(lineT, 1.35); popProp(marker, 1.6);
+      [shiftW, shiftE].forEach((a, i) => ft(a, { opacity: 0 }, { opacity: .22, duration: .3 }, 1.9 + i * .15));
+      to(oldLines, { opacity: .45, duration: .3 }, 2.3);
+
+      // 2.75 residents fear weaker representation: homes in the moved strip, the scales tip against them
+      title(1, 2.75); cam(F(420, 545), 1.75, 2.65, .55);
+      to([oldT, lineT], { opacity: 0, duration: .2 }, 2.7);
+      popProp(houses, 2.85); pop(resT, 3.1); popProp(scales, 3.4);
+      ft(scales, { rotation: 0 }, { rotation: -7, duration: .5, ease: "back.out(2)" }, 4.0);
+      to(shiftW, { opacity: .38, duration: .25 }, 4.3); to(shiftW, { opacity: .22, duration: .25 }, 4.7);
+      to(shiftW, { opacity: .38, duration: .25 }, 5.0); to(shiftW, { opacity: .22, duration: .25 }, 5.35);
+
+      // 6.03 officials cite new population figures: the camera pulls back, the census lands, and the count fills in
+      title(2, 6.03); cam(F(470, 430), 1.12, 5.95, .6);
+      to([houses, resT, scales, marker], { opacity: .35, duration: .25 }, 6.0);
+      popProp(govB, 6.2); pop(govT, 6.4); popProp(clip, 6.55); pop(cenT, 6.75);
+      dots.forEach((d, i) => ft(d, { attr: { r: 0 } }, { attr: { r: 5.2 }, duration: .17, ease: "back.out(3)" }, 7.0 + (i % 24) * .045 + Math.floor(i / 24) * .07));
+
+      // 9.51 test a response: everything settles back, a checklist card slides in beside the map
+      title(3, 9.51); cam(F(500, 370), .9, 9.4, .55, 420, 404);
+      to([houses, resT, scales, marker], { opacity: 1, duration: .25 }, 9.5);
+      to(dots, { attr: { r: 3.6 }, duration: .25 }, 9.5);
+      ft("#check", { opacity: 0, x: 60, scale: .92 }, { opacity: 1, x: 0, scale: 1, duration: .45, ease: "back.out(1.8)" }, 9.7);
+
+      // 10.91 we can explain: the notice board goes up and the first box is ticked
+      ft("#r1", { opacity: 0, x: 18 }, { opacity: 1, x: 0, duration: .3, ease: "back.out(2)" }, 10.9);
+      popProp(board, 11.0); pop(boardT, 11.25);
+      ft("#t1", { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: .3 }, 11.3);
+
+      // 11.99 and carry out: the second box is ticked, the new lines pulse once
+      ft("#r2", { opacity: 0, x: 18 }, { opacity: 1, x: 0, duration: .3, ease: "back.out(2)" }, 11.98);
+      ft("#t2", { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: .3 }, 12.3);
+      to("#check", { scale: 1.04, duration: .12 }, 12.65); to("#check", { scale: 1, duration: .18 }, 12.77);
+      tl.set({}, {}, 13.6);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

@@ -26,4 +26,10 @@ if (existsSync(opener)) {
   const dst = path.join(web, "public/opener/opener.mp4");
   if (!existsSync(dst) || statSync(dst).mtimeMs < statSync(opener).mtimeMs) cpSync(opener, dst);
 }
+// Map films for the character cards (rendered from ../films/<name> with HyperFrames). Optional: a card without its film just shows the words.
+mkdirSync(path.join(web, "public/films"), { recursive: true });
+for (const [dir, id] of [["diallo", "diallo_p02"], ["mwangi", "mwangi_p09"]]) for (const ext of ["_film.mp4", "_poster.jpg"]) {
+  const src = path.resolve(web, `../films/${dir}/renders/${id}${ext}`), dst = path.join(web, `public/films/${id}${ext}`);
+  if (existsSync(src) && (!existsSync(dst) || statSync(dst).mtimeMs < statSync(src).mtimeMs)) cpSync(src, dst);
+}
 console.log("assets ready:", readdirSync(models).join(", "));

@@ -17,6 +17,7 @@
     <aside id="titlePanel" aria-hidden="true"><canvas id="reelCanvas"></canvas></aside>
     <div id="fade" class="xf" aria-hidden="true"><div><small id="fadeKicker"></small><strong id="fadeTitle"></strong><em id="fadeSub"></em></div></div>
     <div id="pins" role="group" aria-label="Places in the scene"></div>
+    <button type="button" id="titleMotion" class="ib motion-pause" data-action="motionPause" data-icon="pause" aria-label="Pause motion" aria-pressed="false"></button>
     <nav id="viewDock" aria-label="Model view">
       <button type="button" class="ib" data-action="viewIn" data-icon="zoomIn" aria-label="Zoom in"></button>
       <button type="button" class="ib" data-action="viewOut" data-icon="zoomOut" aria-label="Zoom out"></button>
@@ -24,6 +25,8 @@
       <button type="button" class="ib" data-action="viewFront" data-icon="front" aria-label="Front view"></button>
       <button type="button" class="ib" data-action="viewTop" data-icon="top" aria-label="Top view"></button>
       <button type="button" class="ib" data-action="viewReset" data-icon="iso" aria-label="Isometric view"></button>
+      <i aria-hidden="true"></i>
+      <button type="button" class="ib motion-pause" data-action="motionPause" data-icon="pause" aria-label="Pause motion" aria-pressed="false"></button>
     </nav>
     <aside id="rail">
       <nav id="railTools" aria-label="Tools"></nav>

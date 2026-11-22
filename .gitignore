@@ -26,3 +26,14 @@ Analysts_Brief_Claude_Kit/opener/film/.thumbnails/
 /office_room.glb
 /folders.glb
 /The-Analysts-Brief.zip
+
+# map films: HyperFrames scratch, master renders, keying intermediates and generated copies
+# (the web-size film + poster in films/*/renders are kept; npm run assets copies them into web/public/films)
+Analysts_Brief_Claude_Kit/films/*/.hyperframes/
+Analysts_Brief_Claude_Kit/films/*/.thumbnails/
+Analysts_Brief_Claude_Kit/films/*/renders/*_master.mp4
+Analysts_Brief_Claude_Kit/films/props/raw/
+Analysts_Brief_Claude_Kit/films/props_raw/
+Analysts_Brief_Claude_Kit/films/sheet.png
+Analysts_Brief_Claude_Kit/films/*.mp3
+Analysts_Brief_Claude_Kit/web/public/films/

@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1280, height=720" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <script src="assets/kalinda.js"></script>
+    <style>
+      @font-face { font-family: "Afacad"; src: url("assets/fonts/afacad-latin-wght-normal.woff2") format("woff2"); font-weight: 400 700; }
+      @font-face { font-family: "Manrope"; src: url("assets/fonts/Manrope-VariableFont_wght.ttf") format("truetype"); font-weight: 200 800; }
+      :root {
+        --ground: #f4f1ec; --land: #e7dcc6; --land-edge: #c8b38c; --city: #d9cbae; --road: #bba57f; --river: #8fb0c4;
+        --ink: #2a2622; --mute: #8a7f70; --hot: #e05a00;
+        --display: "Afacad", sans-serif; --body: "Manrope", sans-serif;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1280px; height: 720px; overflow: hidden; background: var(--ground); }
+      #root { position: relative; width: 1280px; height: 720px; overflow: hidden; background: var(--ground); font-family: var(--body); }
+      .layer { position: absolute; inset: 0; }
+      #map { position: absolute; perspective: 1800px; }
+      .half { position: absolute; inset: 0; overflow: hidden; backface-visibility: hidden; }
+      .half svg { position: absolute; top: 0; display: block; }
+      #halfR { transform-origin: 0 50%; }
+      #crease { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: linear-gradient(#0000, #6b5a4033, #0000); opacity: 0; }
+      .prop { position: absolute; transform-origin: 50% 100%; filter: drop-shadow(0 10px 10px rgba(70, 52, 30, .28)); opacity: 0; }
+      .prop img { display: block; width: 100%; height: auto; }
+      .tag { position: absolute; transform: translate(-50%, 0); font: 700 21px/1 var(--body); color: var(--ink); letter-spacing: .01em; white-space: nowrap;
+        background: #fffdf8; padding: 6px 11px; border-radius: 999px; box-shadow: 0 2px 0 #00000014; opacity: 0; }
+      #eyebrow { position: absolute; left: 52px; top: 34px; height: 48px; overflow: hidden; }
+      .eb { position: absolute; left: 0; top: 0; font: 700 38px/48px var(--display); color: var(--ink); letter-spacing: .02em; white-space: nowrap; opacity: 0; }
+      .eb b { color: var(--hot); font-weight: 700; }
+      #stamp { position: absolute; padding: 6px 16px 4px; border: 5px solid #c24a00; border-radius: 8px; color: #c24a00;
+        font: 700 46px/1 var(--display); letter-spacing: .08em; transform-origin: 50% 50%; opacity: 0; background: #fffdf8cc; }
+      .bar { position: absolute; height: 16px; border-radius: 8px; transform-origin: 0 50%; opacity: 0; }
+      #cam { transform-origin: 0 0; }
+      #fxTop { position: absolute; inset: 0; width: 1280px; height: 720px; overflow: visible; }
+      #fx { position: absolute; inset: 0; width: 1280px; height: 720px; overflow: visible; }
+      #fx .dot { fill: var(--hot); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="16" data-width="1280" data-height="720">
+      <div id="scene" class="clip layer" data-start="0" data-duration="16" data-track-index="1" data-track-kind="graphics">
+        <div id="cam" class="layer">
+          <div id="map"><div id="halfL" class="half"></div><div id="halfR" class="half"></div><div id="crease"></div></div>
+          <svg id="fx" viewBox="0 0 1280 720"></svg>
+          <div id="props" class="layer"></div>
+          <svg id="fxTop" viewBox="0 0 1280 720"></svg>
+        </div>
+        <div id="eyebrow"></div>
+      </div>
+    </div>
+
+    <script>
+      // Dr Diallo, P02. Map of Kalinda traced from kalinda.glb (top view). Each beat lands on a phrase of the voice line
+      // (pauses measured with silencedetect; the 12%-faster file is 15.78 s long):
+      //   0.00 Kalinda · 0.80 faces a disputed election · 3.85 clashes at the Crossing · 5.96 rumours of an army mutiny
+      //   8.16 and a corruption scandal · 10.46 Check the evidence · 12.02 test the causes · 13.63 then recommend a response
+      // Motion is stepped on a 12 fps grid (each tween's ease is quantised), so it reads as hand-placed, not tweened.
+      const W = 1280, H = 720, VB = { x: 70, y: 70, w: 860, h: 590 };
+      const k = 572 / VB.h, MW = VB.w * k, MH = VB.h * k, ML = (W - MW) / 2, MT = 112;
+      const P = (name) => { const [x, y] = KAL.places[name]; return [ML + (x - VB.x) * k, MT + (y - VB.y) * k]; };
+      const NS = "http://www.w3.org/2000/svg";
+      const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const a in attrs) e.setAttribute(a, attrs[a]); parent?.append(e); return e; };
+
+      // ---- the map, drawn twice (left and right halves) so it can unfold and fold along its middle
+      const map = document.getElementById("map");
+      Object.assign(map.style, { left: ML + "px", top: MT + "px", width: MW + "px", height: MH + "px" });
+      function mapSvg() {
+        const s = el("svg", { viewBox: `${VB.x} ${VB.y} ${VB.w} ${VB.h}`, width: MW, height: MH });
+        el("path", { d: KAL.KAL_Base, fill: "var(--land)", stroke: "var(--land-edge)", "stroke-width": 3, "stroke-linejoin": "round" }, s);
+        el("path", { d: KAL.KAL_City_Ground, fill: "var(--city)" }, s);
+        for (const r of KAL.roads) el("path", { d: r, fill: "var(--road)" }, s);
+        el("path", { d: KAL.KAL_River, fill: "var(--river)" }, s);
+        return s;
+      }
+      const halfL = document.getElementById("halfL"), halfR = document.getElementById("halfR");
+      halfL.style.width = MW / 2 + "px"; halfL.append(mapSvg());
+      Object.assign(halfR.style, { left: MW / 2 + "px", width: MW / 2 + "px" }); const rs = mapSvg(); rs.style.left = -MW / 2 + "px"; halfR.append(rs);
+      document.getElementById("crease").style.left = MW / 2 + "px";
+
+      // ---- props (photographic cut-outs, keyed from green)
+      const propsLayer = document.getElementById("props");
+      function prop(id, src, w, [x, y], dx = 0, dy = 0) {
+        const d = document.createElement("div"); d.className = "prop"; d.id = id;
+        Object.assign(d.style, { width: w + "px", left: x + dx - w / 2 + "px", top: y + dy + "px" });
+        d.innerHTML = `<img src="assets/props/${src}.png" alt="">`; propsLayer.append(d);
+        // anchored at its base: translate up by own height once the image is laid out
+        d.style.transform = "translateY(-100%)"; return d;
+      }
+      function tag(text, [x, y], dy = 14) {
+        const t = document.createElement("div"); t.className = "tag"; t.textContent = text;
+        Object.assign(t.style, { left: x + "px", top: y + dy + "px" }); propsLayer.append(t); return t;
+      }
+      const gov = P("government"), bar = P("barracks"), mkt = P("market"), rad = P("radio"), crs = P("crossing"), v3 = P("v3"), city = P("city");
+
+      const govB = prop("govB", "government_building", 150, gov, 0, 8), ballot = prop("ballot", "ballot_box", 84, gov, 112, 10);
+      const govT = tag("The capital", gov, 18);
+      const stamp = document.createElement("div"); stamp.id = "stamp"; stamp.textContent = "DISPUTED"; propsLayer.append(stamp);
+      Object.assign(stamp.style, { left: gov[0] - 118 + "px", top: gov[1] - 112 + "px" });
+      const barA = document.createElement("div"), barB = document.createElement("div");
+      for (const [b, c, y] of [[barA, "#8a7f70", 0], [barB, "#bba57f", 22]]) { b.className = "bar"; Object.assign(b.style, { left: gov[0] - 262 + "px", top: gov[1] + 58 + y + "px", width: "150px", background: c }); propsLayer.append(b); }
+      const voteT = tag("Vote count", [gov[0] - 187, gov[1] + 14], 0);
+
+      const barrier = prop("barrier", "border_barrier", 180, crs, 70, 4), crsT = tag("The Crossing", crs, 18);
+      crsT.style.left = crs[0] + 62 + "px";
+      const gate = prop("gate", "barracks_gate", 118, bar, 0, 12), barT = tag("Barracks", bar, 20);
+      const mast = prop("mast", "radio_mast", 44, rad, 0, 6);
+      const notes = prop("notes", "banknotes", 112, gov, -110, 170), deal = prop("deal", "contract", 78, gov, 60, 200);
+      const lens = prop("lens", "magnifier", 150, [W / 2, H / 2]); lens.style.transformOrigin = "35% 35%";
+      const folder = prop("folder", "case_folder", 420, [W / 2, H / 2], 0, 190);
+
+      // ---- drawn marks: clash bursts, rumour dots, money arrows, cause lines
+      const fx = document.getElementById("fx");
+      function burst(cx, cy, r) {
+        const pts = []; for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, rr = i % 2 ? r * .45 : r; pts.push(`${cx + Math.cos(a) * rr},${cy + Math.sin(a) * rr}`); }
+        return el("polygon", { points: pts.join(" "), fill: "var(--hot)", opacity: 0, "transform-origin": `${cx} ${cy}` }, fx);
+      }
+      const bursts = [[-28, -54, 22], [26, -84, 16], [4, -30, 13]].map(([dx, dy, r]) => burst(crs[0] + 70 + dx, crs[1] + dy, r));
+      function dots(a, b, bend, gap = 15) {
+        const p = el("path", { d: `M${a[0]},${a[1]} Q${(a[0] + b[0]) / 2 + bend[0]},${(a[1] + b[1]) / 2 + bend[1]} ${b[0]},${b[1]}`, fill: "none" }, fx);
+        const L = p.getTotalLength(), out = [];
+        for (let s = 22; s < L - 18; s += gap) { const q = p.getPointAtLength(s); out.push(el("circle", { cx: q.x, cy: q.y, r: 0, class: "dot", "transform-origin": `${q.x} ${q.y}` }, fx)); }
+        p.remove(); return out;
+      }
+      const rumours = [dots([bar[0] - 30, bar[1] - 40], [rad[0] + 14, rad[1] - 40], [10, -50]), dots([bar[0] - 40, bar[1] - 10], [city[0] + 20, city[1] + 4], [0, 34]), dots([bar[0] + 10, bar[1] + 6], [mkt[0] + 28, mkt[1] - 20], [60, 10])];
+      const defs = el("defs", {}, fx);
+      const head = el("marker", { id: "head", viewBox: "0 0 10 10", refX: 6, refY: 5, markerWidth: 4, markerHeight: 4, orient: "auto-start-reverse" }, defs);
+      el("path", { d: "M0,0 L10,5 L0,10 z", fill: "var(--hot)" }, head);
+      const arrow = (a, b, bend) => el("path", { d: `M${a[0]},${a[1]} Q${(a[0] + b[0]) / 2 + bend[0]},${(a[1] + b[1]) / 2 + bend[1]} ${b[0]},${b[1]}`, fill: "none", stroke: "var(--hot)",
+        "stroke-width": 7, "stroke-linecap": "round", pathLength: 1, "stroke-dasharray": "1 1", "stroke-dashoffset": 1, "marker-end": "url(#head)", opacity: 0 }, fx);
+      const money = [arrow([mkt[0] - 20, mkt[1] - 6], [gov[0] + 96, gov[1] + 150], [-10, 60]), arrow([v3[0] + 6, v3[1] - 26], [gov[0] - 60, gov[1] + 186], [-50, 10])];
+      const hub = [city[0] + 20, city[1] + 70];
+      const causes = [[gov[0] - 40, gov[1] - 30], [crs[0] + 74, crs[1] - 50], [bar[0], bar[1] - 60], [gov[0] - 60, gov[1] + 150]]
+        .map((a) => el("path", { d: `M${a[0]},${a[1]} L${hub[0]},${hub[1]}`, stroke: "var(--ink)", "stroke-width": 3.5, "stroke-linecap": "round", fill: "none", pathLength: 1, "stroke-dasharray": "1 1", "stroke-dashoffset": 1, opacity: 0 }, fx));
+      const fxTop = document.getElementById("fxTop");
+      const hubDot = el("circle", { cx: hub[0], cy: hub[1], r: 0, fill: "var(--hot)", "transform-origin": `${hub[0]} ${hub[1]}` }, fxTop);
+      const hubQ = el("text", { x: hub[0], y: hub[1] + 12, "text-anchor": "middle", fill: "#fff", "font-family": "Afacad", "font-weight": 700, "font-size": 36, opacity: 0 }, fxTop); hubQ.textContent = "?";
+
+      // ---- the beat titles (top left), one at a time
+      const ebWrap = document.getElementById("eyebrow");
+      const eb = (html) => { const d = document.createElement("div"); d.className = "eb"; d.innerHTML = html; ebWrap.append(d); return d; };
+      const E = [eb("Kalinda"), eb("<b>Disputed</b> election"), eb("<b>Clashes</b> at the Crossing"), eb("Army <b>mutiny</b> rumours"),
+        eb("<b>Corruption</b> scandal"), eb("<b>Check</b> the evidence"), eb("<b>Test</b> the causes"), eb("<b>Recommend</b> a response")];
+      ebWrap.style.width = "900px";
+
+      // ---- timeline
+      const FPS = 12;
+      const step = (ease, dur) => { const f = gsap.parseEase(ease), n = Math.max(1, Math.round(dur * FPS)); return (p) => f(Math.floor(p * n + 1e-6) / n); };
+      const tl = gsap.timeline({ paused: true });
+      const to = (t, v, at) => { const d = v.duration ?? .5; tl.to(t, { ...v, duration: d, ease: step(v.ease || "power2.out", d) }, at); };
+      const ft = (t, a, v, at) => { const d = v.duration ?? .5; tl.fromTo(t, a, { ...v, duration: d, ease: step(v.ease || "power2.out", d) }, at); };
+      const pop = (t, at, d = .5) => ft(t, { opacity: 0, scale: 0, y: 14 }, { opacity: 1, scale: 1, y: 0, duration: d, ease: "back.out(2.4)" }, at);
+      const popProp = (t, at, d = .5) => ft(t, { opacity: 0, scale: 0, yPercent: -92 }, { opacity: 1, scale: 1, yPercent: -100, duration: d, ease: "back.out(2.2)" }, at);
+      const dim = (list, at) => to(list, { opacity: .3, duration: .25 }, at);
+      const lift = (list, at) => to(list, { opacity: 1, duration: .25 }, at);
+      const title = (i, at) => { if (i) to(E[i - 1], { yPercent: -100, opacity: 0, duration: .25, ease: "power2.in" }, at); ft(E[i], { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: .35, ease: "back.out(1.8)" }, at + .04); };
+
+
+      // camera: push in on each trouble spot, pull back to see the whole country
+      const camAt = ([x, y], sc) => ({ scale: sc, x: 640 - x * sc, y: 410 - y * sc });
+      const cam = (f, sc, at, d = .6) => to("#cam", { ...camAt(f, sc), duration: d, ease: "power3.inOut" }, at);
+      tl.set("#cam", { scale: 1, x: 0, y: 0 }, 0);
+
+      // 0.00 Kalinda: the map unfolds (right half swings open on the crease; a small dip first)
+      ft(map, { opacity: 0, scale: .86, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: .5, ease: "back.out(1.6)" }, 0);
+      ft(halfR, { rotationY: -178 }, { rotationY: 0, duration: .9, ease: "back.out(1.3)" }, .12);
+      ft("#crease", { opacity: 0 }, { opacity: 1, duration: .2 }, .2); to("#crease", { opacity: .35, duration: .4 }, 1.0);
+      title(0, .1);
+
+      // 0.80 disputed election: the capital, the ballot box, two tallies swapping the lead, then the stamp
+      cam([gov[0] + 10, gov[1] + 10], 1.6, .7, .55);
+      title(1, .8); popProp(govB, .85); pop(govT, 1.0, .4); popProp(ballot, 1.2);
+      ft([barA, barB], { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: (i) => [.62, .55][i], duration: .4 }, 1.4);
+      pop(voteT, 1.35, .35);
+      to(barA, { scaleX: .5, duration: .3 }, 1.9); to(barB, { scaleX: .64, duration: .3 }, 1.9);
+      to(barA, { scaleX: .6, duration: .3 }, 2.4); to(barB, { scaleX: .56, duration: .3 }, 2.4);
+      ft(stamp, { opacity: 0, scale: 1.9, rotation: -2 }, { opacity: 1, scale: 1, rotation: -9, duration: .3, ease: "power4.in" }, 2.65);
+      to("#map", { x: 3, y: 2, duration: .08 }, 2.95); to("#map", { x: 0, y: 0, duration: .12 }, 3.03);
+
+      // 3.85 clashes at the Crossing: the checkpoint, then three bursts in turn
+      const g1 = [govB, ballot, govT, stamp, barA, barB, voteT];
+      cam([crs[0] + 80, crs[1] - 20], 1.6, 3.75, .55);
+      title(2, 3.85); dim(g1, 3.85); popProp(barrier, 3.9); pop(crsT, 4.1, .4);
+      bursts.forEach((b, i) => ft(b, { opacity: 0, scale: 0, rotation: -20 }, { opacity: 1, scale: 1, rotation: 0, duration: .3, ease: "back.out(3)" }, 4.35 + i * .28));
+      bursts.forEach((b, i) => to(b, { scale: 1.15, duration: .2 }, 5.2 + i * .1));
+
+      // 5.96 rumours of an army mutiny: the barracks gate, the mast, and whispers running out as dotted lines
+      const g2 = [barrier, crsT, ...bursts];
+      cam([(bar[0] + rad[0]) / 2, bar[1] + 10], 1.45, 5.86, .55);
+      title(3, 5.96); dim(g2, 5.96); popProp(gate, 6.0); pop(barT, 6.2, .4); popProp(mast, 6.45);
+      rumours.forEach((line, j) => line.forEach((d, i) => ft(d, { attr: { r: 0 } }, { attr: { r: 4.4 }, duration: .17, ease: "back.out(3)" }, 6.7 + j * .32 + i * .055)));
+
+      // 8.16 and a corruption scandal: cash and a sealed contract, money lines drawn into the capital
+      const g3 = [gate, barT, mast, ...rumours.flat()];
+      cam([gov[0] + 20, gov[1] + 150], 1.6, 8.06, .55);
+      title(4, 8.16); dim(g3, 8.16); lift([govB, govT], 8.16); popProp(notes, 8.2); popProp(deal, 8.45);
+      money.forEach((a, i) => { ft(a, { opacity: 0 }, { opacity: 1, duration: .1 }, 8.75 + i * .35); ft(a, { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: .6 }, 8.75 + i * .35); });
+
+      // 10.46 check the evidence: a magnifier sweeps the four trouble spots; each lights up as it passes
+      const g4 = [notes, deal, ...money];
+      cam([W / 2, 380], 1, 10.36, .5);
+      title(5, 10.46); dim(g4, 10.46);
+      const lp = (x, y) => ({ left: x - 52 + "px", top: y + 40 + "px" });
+      ft(lens, { opacity: 0, scale: .4, yPercent: -100, rotation: 20, ...lp(gov[0] - 260, gov[1] - 60) }, { opacity: 1, scale: 1, yPercent: -100, rotation: 0, ...lp(gov[0], gov[1] - 50), duration: .4, ease: "back.out(1.6)" }, 10.5);
+      lift(g1, 10.75);
+      to(lens, { ...lp(crs[0] + 70, crs[1] - 40), duration: .3, ease: "power2.inOut" }, 10.95); lift(g2, 11.15);
+      to(lens, { ...lp(bar[0], bar[1] - 40), duration: .35, ease: "power2.inOut" }, 11.3); lift(g3, 11.55);
+      to(lens, { ...lp(gov[0] - 40, gov[1] + 140), duration: .3, ease: "power2.inOut" }, 11.65); lift(g4, 11.85);
+      to(lens, { opacity: 0, scale: .4, duration: .25, ease: "power2.in" }, 12.0);
+
+      // 12.02 test the causes: every trouble spot is tied back to one question in the middle
+      title(6, 12.02);
+      causes.forEach((c, i) => { ft(c, { opacity: 0 }, { opacity: 1, duration: .1 }, 12.1 + i * .16); ft(c, { attr: { "stroke-dashoffset": 1 } }, { attr: { "stroke-dashoffset": 0 }, duration: .4 }, 12.1 + i * .16); });
+      ft(hubDot, { attr: { r: 0 } }, { attr: { r: 26 }, duration: .35, ease: "back.out(3)" }, 12.75); ft(hubQ, { opacity: 0 }, { opacity: 1, duration: .1 }, 12.9);
+      to(hubDot, { attr: { r: 31 }, duration: .2 }, 13.2); to(hubDot, { attr: { r: 26 }, duration: .2 }, 13.4);
+
+      // 13.63 then recommend a response: everything packs away, the map folds shut and drops into the case file
+      title(7, 13.63);
+      const all = [...g1, ...g2, ...g3, ...g4, ...causes, hubDot, hubQ];
+      to(all, { opacity: 0, duration: .25, ease: "power2.in" }, 13.66);
+      to(halfR, { rotationY: -178, duration: .45, ease: "power2.in" }, 13.9);
+      to(map, { scale: .3, x: -MW * .25 * .3 + 0, y: 120, opacity: 0, duration: .45, ease: "back.in(1.6)" }, 14.45);
+      ft(folder, { opacity: 0, scale: .5, yPercent: -80 }, { opacity: 1, scale: 1, yPercent: -100, duration: .5, ease: "back.out(2)" }, 14.2);
+      to(folder, { scale: 1.06, duration: .12 }, 14.9); to(folder, { scale: 1, duration: .18 }, 15.02);
+      tl.set({}, {}, 16);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

@@ -793,7 +793,9 @@ body.composer-aside:not(.globe-inline):not(.voice-mode) #agent{left:var(--ccx);t
 
 
 /* ================================================================ P01 welcome bubble: the conversation comes first */
-body.welcome-mode #voiceUI .vrow,body.welcome-mode #voiceUI .vt,body.welcome-mode #voiceUI .vq{display:none}   /* the globe says the question */
+body.welcome-mode #voiceUI .vrow,body.welcome-mode #voiceUI .vt{display:none}
+body.no-captions #voiceUI .vq{display:none}   /* subtitles are on by default; the Captions setting turns them off */
+#voiceUI .vq{max-width:min(40ch,calc(100vw - 48px));text-wrap:balance;font-size:max(18px,1.15rem)}   /* a subtitle: at most ~40 characters a line, 18 px or larger, on its glass background */
 #voiceUI .vin{position:fixed;left:50%;top:calc(100% + 150px);translate:-50% 0;width:min(420px,calc(100vw - 32px));display:grid;
   grid-template-columns:1fr 44px 44px;gap:6px;align-items:center;padding:6px 6px 6px 18px;border-radius:999px;pointer-events:auto;
   background:var(--glass,#fffffcd9);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);
@@ -867,3 +869,62 @@ body[data-page=P00] .hero .row{justify-content:center}
   body[data-page=P00] #frame{left:var(--gap);top:calc(52dvh + var(--gap) * 2)}
   body[data-page=P00] #rail>#stage[data-layout=hero]{left:50%;top:calc(var(--gap) + 28px);bottom:auto;translate:-50% 0;width:calc(100vw - 72px)}
 }
+
+/* the line's Hide / Show control beside the speaker (replaces the timed fold) */
+#composer .say-toggle{margin-left:auto;min-height:32px;padding:0 12px;border:0;border-radius:999px;background:var(--chip,#1d23210d);color:var(--ink-2);
+  font:600 12px/1 Manrope,system-ui,sans-serif;cursor:pointer}
+#composer .say-toggle:hover{background:var(--chip-hover,#1d232117);color:var(--ink)}
+#composer .say-toggle:focus-visible{outline:1px solid #ff7a1a99;outline-offset:2px}
+#composer p.who .say-toggle{float:right;margin-top:-6px}
+
+/* tap-to-define glossary: the word looks like a word with a dotted underline, never like a button */
+button.gloss,:is(#composer,#stage,#rail,#railPanel,dialog,.card,.row) button.gloss{all:unset!important;display:inline!important;font:inherit!important;color:inherit!important;cursor:help!important;
+  text-decoration:underline dotted 1.5px!important;text-underline-offset:3px!important;text-decoration-color:color-mix(in srgb,currentColor 55%,transparent)!important;border-radius:3px!important}
+:is(#composer,#stage,#rail,#railPanel,dialog,.card,.row) button.gloss:hover,button.gloss:hover{text-decoration-color:#ff7a1a!important}
+button.gloss:focus-visible{outline:1px solid #ff7a1a99!important;outline-offset:2px!important}
+#glossPop{position:fixed;z-index:120;padding:12px 14px;border-radius:14px;font:500 14px/1.45 Manrope,system-ui,sans-serif;color:var(--ink);
+  background:var(--glass-solid,#fffffcf5);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:inset 0 0 0 1px var(--hair),0 14px 34px -12px #0004}
+#glossPop strong{font-weight:700}
+.pick-item .pick-note{display:block;color:var(--ink-2);font-style:italic}
+.card .meaning{margin:6px 0 10px;font:500 14px/1.45 Manrope,system-ui,sans-serif;color:var(--ink-2)}
+
+/* Pause motion: in the view dock, and on the title screen in the stage's corner */
+#titleMotion{display:none;position:fixed;z-index:6;right:calc(var(--gap) + 16px);bottom:calc(var(--gap) + 16px);width:44px;height:44px;border-radius:50%;
+  background:#fffffcc7;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:inset 0 0 0 1px var(--hair),0 6px 18px #2830291f;color:var(--ink)}
+body[data-page=P00] #titleMotion{display:grid;place-items:center}
+#titleMotion svg{width:18px;height:18px}
+
+/* ================================================================ Phase 2: guidance and pacing */
+/* the guided first model run: a coach note above the question, skippable */
+#composer .coach{margin:0 0 12px;padding:12px 14px;border-radius:16px;background:var(--chip,#ffffff14);box-shadow:inset 0 0 0 1px var(--hair)}
+#composer .coach p{margin:0 0 8px;font:500 15px/1.45 Manrope,system-ui,sans-serif}
+#composer .coach .row{margin:0;gap:8px}
+#composer .coach.shown .row{display:none}
+/* a small "wiggle" cue on the suggested condition (PhET), once, and not under reduced motion */
+@keyframes coachWiggle{0%,100%{translate:0}20%{translate:-3px}40%{translate:3px}60%{translate:-2px}80%{translate:2px}}
+.pick-item.wiggle{box-shadow:inset 0 0 0 1px #ff7a1a99;animation:coachWiggle 600ms var(--out) 2}
+body.reduced .pick-item.wiggle{animation:none}
+/* the result compared with what happened, on the card by default */
+.card .compare-line{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:4px 0 12px;font:500 13px/1.4 Manrope,system-ui,sans-serif}
+.card .compare-line span{color:var(--ink-3)}
+.card .compare-line b{font-weight:600;color:var(--ink)}
+/* minutes left (experiment, half of learners) */
+#chapter .ch-left{margin:-2px 0 8px;font:600 12px/1.3 Manrope,system-ui,sans-serif;color:var(--ink-2)}
+
+/* ---- map films inside a character's card (P02 Dr Diallo, then P09 Hon. Mwangi) */
+#composer{transition:clip-path 460ms var(--ios),opacity 180ms var(--out),visibility 0s,width 460ms var(--ios),max-height 460ms var(--ios)}
+#composer.film-open{width:min(760px,calc(var(--fw) - 32px));max-height:86dvh}
+#composer figure.film{position:relative;margin:0;border-radius:18px;overflow:hidden;background:#f4f1ec;aspect-ratio:16/9;
+  max-height:0;opacity:0;margin-bottom:0;box-shadow:inset 0 0 0 1px var(--hair,#1d23211a);
+  transition:max-height 460ms var(--ios),opacity 220ms var(--out),margin 460ms var(--ios)}
+#composer.film-open figure.film{max-height:440px;opacity:1;margin:2px 0 14px}
+#composer figure.film video{display:block;width:100%;height:100%;object-fit:cover}
+#composer figure.film .film-btn{position:absolute;right:10px;bottom:10px;width:40px;height:40px;min-height:0;padding:0;display:grid;place-items:center;
+  border-radius:50%;background:#ffffffcc;-webkit-backdrop-filter:blur(10px) saturate(1.4);backdrop-filter:blur(10px) saturate(1.4);
+  box-shadow:0 1px 0 #ffffff inset,0 4px 14px #2a26221f;opacity:0;transition:opacity 160ms}
+#composer figure.film:hover .film-btn,#composer figure.film .film-btn:focus-visible,#composer figure.film.paused .film-btn{opacity:1}
+#composer figure.film .film-btn svg{width:18px;height:18px}
+@media (hover:none){#composer figure.film .film-btn{opacity:1}}
+#composer .film-replay{display:inline-flex;align-items:center;gap:6px}
+#composer .film-replay svg{width:14px;height:14px}
+#composer p.who .film-replay{float:right;margin-top:-6px;margin-right:6px}
